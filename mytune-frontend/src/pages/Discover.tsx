@@ -58,88 +58,80 @@ export default function Discover() {
     controls.start({ scale: 1, y: 0, transition: { type: 'spring' } });
     setLikeOpacity(0);
     setSkipOpacity(0);
-    // Loop for demo
     setCurrentIndex((prev) => (prev + 1) % tracks.length);
   };
 
   if (!currentTrack) return null;
 
   return (
-    <div className="flex-grow flex flex-col items-center justify-center relative w-full h-full pt-10" style={{ touchAction: 'none' }}>
+    <div className="flex-grow relative w-full h-[calc(100vh-70px)] md:h-full bg-black overflow-hidden" style={{ touchAction: 'none' }}>
       
-      {/* Swipe Container */}
-      <div className="relative w-full max-w-sm aspect-[4/5] perspective-1000 flex items-center justify-center mb-10 z-10">
+      {/* Background Card for next item */}
+      <div className="absolute inset-0 w-full h-full bg-black transform scale-95 translate-y-4 opacity-50 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 bg-cover bg-center opacity-30" style={{ backgroundImage: currentTrack.bg }}></div>
+      </div>
+      
+      {/* Active Swipe Card - Full Screen Immersive */}
+      <motion.div
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        onDrag={handleDrag}
+        onDragEnd={handleDragEnd}
+        animate={controls}
+        className="absolute inset-0 w-full h-full md:rounded-3xl shadow-2xl cursor-grab z-20 md:max-w-md md:mx-auto md:h-[90%] md:top-[5%]"
+        style={{ background: '#000' }}
+      >
+        {/* Album Cover Background (Full bleed) */}
+        <div className="absolute inset-0 bg-cover bg-center pointer-events-none opacity-80" style={{ backgroundImage: currentTrack.image }}></div>
         
-        {/* Background Card */}
-        <div className="absolute inset-0 w-full h-full rounded-[24px] bg-zinc-900 shadow-sm transform scale-95 translate-y-4 opacity-70 overflow-hidden pointer-events-none transition-all duration-300">
-          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: currentTrack.bg }}></div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+        {/* Gradient overlays to make text pop - Red & Tangerine tint at bottom */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent pointer-events-none"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-[#ff5540]/30 to-transparent pointer-events-none opacity-60"></div>
+        
+        {/* Content area at the bottom */}
+        <div className="absolute bottom-24 left-0 right-0 p-6 flex flex-col gap-3 pointer-events-none">
+          <div className="flex items-center gap-2 mb-2">
+            {currentTrack.tags.map(tag => (
+              <span key={tag} className="bg-[#ff5540]/80 backdrop-blur-md text-white font-bold px-3 py-1 rounded-full uppercase tracking-widest text-[10px]">
+                {tag}
+              </span>
+            ))}
+          </div>
+          <h2 className="text-4xl md:text-5xl font-black text-white drop-shadow-xl leading-tight">
+            {currentTrack.title}
+          </h2>
+          <p className="text-xl text-white/90 font-semibold drop-shadow-md">
+            {currentTrack.artist}
+          </p>
+        </div>
+
+        {/* Like Stamp */}
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-transform" style={{ opacity: likeOpacity, transform: `translate(-50%, -50%) scale(${0.5 + likeOpacity * 0.5}) rotate(15deg)` }}>
+          <div className="bg-[#ff9900]/90 backdrop-blur-xl border-4 border-[#ff9900] px-8 py-4 rounded-2xl flex items-center justify-center shadow-[0_0_40px_rgba(255,153,0,0.8)]">
+            <span className="text-black font-black text-5xl uppercase tracking-widest">LIKE</span>
+          </div>
         </div>
         
-        {/* Active Card */}
-        <motion.div
-          drag="x"
-          dragConstraints={{ left: 0, right: 0 }}
-          onDrag={handleDrag}
-          onDragEnd={handleDragEnd}
-          animate={controls}
-          className="absolute inset-0 w-full h-full rounded-[24px] shadow-[0_10px_40px_rgba(255,153,0,0.1)] overflow-hidden cursor-grab flex flex-col justify-end z-20"
-          style={{ 
-            background: 'rgba(255, 255, 255, 0.05)',
-            backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(255, 255, 255, 0.1)'
-          }}
-        >
-          <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 scale-105 pointer-events-none" style={{ backgroundImage: currentTrack.image }}></div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent pointer-events-none"></div>
-          
-          <div className="relative z-10 p-6 flex flex-col gap-3 pointer-events-none">
-            <div className="flex items-center gap-2 mb-1">
-              {currentTrack.tags.map(tag => (
-                <span key={tag} className="bg-black/60 backdrop-blur-md border border-[#FF9900]/40 text-[#FF9900] font-label-bold text-label-bold px-3 py-1.5 rounded-full uppercase tracking-wider text-[10px]">
-                  {tag}
-                </span>
-              ))}
-            </div>
-            <h2 className="font-headline-lg-mobile text-headline-lg-mobile text-[#FFFBF5] drop-shadow-lg leading-tight">
-              {currentTrack.title}
-            </h2>
-            <p className="font-body-lg text-body-lg text-[#FFFBF5]/80 font-medium">
-              {currentTrack.artist}
-            </p>
+        {/* Nope Stamp */}
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-transform" style={{ opacity: skipOpacity, transform: `translate(-50%, -50%) scale(${0.5 + skipOpacity * 0.5}) rotate(-15deg)` }}>
+          <div className="bg-[#ff0000]/90 backdrop-blur-xl border-4 border-[#ff0000] px-8 py-4 rounded-2xl flex items-center justify-center shadow-[0_0_40px_rgba(255,0,0,0.8)]">
+            <span className="text-white font-black text-5xl uppercase tracking-widest">NOPE</span>
           </div>
+        </div>
 
-          {/* Like Stamp */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-transform" style={{ opacity: likeOpacity, transform: `translate(-50%, -50%) scale(${0.5 + likeOpacity * 0.5})` }}>
-            <div className="bg-[#FF9900]/20 backdrop-blur-xl border-2 border-[#FF9900] w-32 h-32 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,153,0,0.5)]">
-              <span className="material-symbols-outlined text-[#FF9900] text-6xl drop-shadow-md" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
-            </div>
-          </div>
-          
-          {/* Nope Stamp */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-transform" style={{ opacity: skipOpacity, transform: `translate(-50%, -50%) scale(${0.5 + skipOpacity * 0.5})` }}>
-            <div className="bg-[#FF0000]/20 backdrop-blur-xl border-2 border-[#FF0000] w-32 h-32 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,0,0,0.4)]">
-              <span className="material-symbols-outlined text-[#FF0000] text-6xl drop-shadow-md" style={{ fontVariationSettings: "'FILL' 0" }}>close</span>
-            </div>
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Controls */}
-      <div className="flex flex-col items-center gap-8 w-full max-w-sm z-10 pb-8">
-        <p className="font-label-bold text-label-bold text-[#FFFBF5]/60 uppercase tracking-[0.2em] text-[10px]">Swipe Right to Like, Left to Skip</p>
-        <div className="flex justify-center items-center gap-6 w-full px-4">
-          <button onClick={() => nextTrack()} className="w-16 h-16 rounded-full bg-zinc-900 shadow-sm border border-zinc-800 flex items-center justify-center text-[#FF0000] hover:bg-zinc-800 active:scale-90 transition-all duration-200 z-30">
-            <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 0" }}>close</span>
+        {/* Floating Action Buttons */}
+        <div className="absolute bottom-6 right-6 flex flex-col gap-4 z-30 pointer-events-auto">
+          <button onClick={() => nextTrack()} className="w-12 h-12 rounded-full bg-black/60 backdrop-blur border border-white/20 flex items-center justify-center text-white active:scale-90 transition-transform shadow-lg">
+            <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
           </button>
-          <button className="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-[#FF9900] active:scale-90 transition-all duration-200 shadow-sm z-30">
-            <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
+          <button className="w-12 h-12 rounded-full bg-black/60 backdrop-blur border border-white/20 flex items-center justify-center text-white active:scale-90 transition-transform shadow-lg">
+            <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>chat_bubble</span>
           </button>
-          <button onClick={() => nextTrack()} className="w-20 h-20 rounded-full bg-[#FF9900] text-black shadow-[0_8px_30px_rgba(255,153,0,0.5)] flex items-center justify-center hover:opacity-95 active:scale-90 transition-all duration-200 z-30">
-            <span className="material-symbols-outlined text-black text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
+          <button className="w-12 h-12 rounded-full bg-black/60 backdrop-blur border border-white/20 flex items-center justify-center text-white active:scale-90 transition-transform shadow-lg">
+            <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>share</span>
           </button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

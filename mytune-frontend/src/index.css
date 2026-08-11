@@ -52,14 +52,26 @@
 
 /* Brand gradient utility */
 .brand-gradient {
-  background: linear-gradient(135deg, #FF9900 0%, #FF5520 50%, #FF2020 100%);
+  background: linear-gradient(135deg, #FF7000 0%, #FF3020 55%, #FF0000 100%);
 }
 .brand-gradient-text {
-  background: linear-gradient(135deg, #FF9900 0%, #FF5520 50%, #FF2020 100%);
+  background: linear-gradient(135deg, #FF7000 0%, #FF3020 55%, #FF0000 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+/* Radial gradient background for ambient effects */
+.bg-gradient-radial {
+  background: radial-gradient(ellipse at center, var(--tw-gradient-stops));
+}
+
+/* Hide scrollbars but allow scrolling */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar { display: none; }
 
 /* Smooth page transitions */
 @keyframes fadeIn {

@@ -11,10 +11,9 @@ export default function Logo({ className = "w-10 h-10", showText = false }: { cl
       <defs>
         {/* Equal tangerine + red gradient as requested */}
         <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%"   stopColor="#FF9900" />
-          <stop offset="35%"  stopColor="#FF6020" />
-          <stop offset="65%"  stopColor="#FF3520" />
-          <stop offset="100%" stopColor="#FF1515" />
+          <stop offset="0%"   stopColor="#FF7000" />
+          <stop offset="40%"  stopColor="#FF3020" />
+          <stop offset="100%" stopColor="#FF0000" />
         </linearGradient>
       </defs>
 

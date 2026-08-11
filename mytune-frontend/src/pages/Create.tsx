@@ -1,5 +1,5 @@
 /* Brand gradient — equal tangerine + red */
-const BRAND_GRAD = 'linear-gradient(135deg, #FF9900 0%, #FF5520 50%, #FF2020 100%)';
+const BRAND_GRAD = 'linear-gradient(135deg, #FF7000 0%, #FF3020 55%, #FF0000 100%)';
 
 export default function Create() {
   return (

@@ -28,7 +28,7 @@ export default function Search() {
             search
           </span>
           <input
-            className="w-full bg-[#1A1A1A] border border-[#1A1A1A] rounded-full py-4 pl-12 pr-4 text-base text-white placeholder-white/40 transition-all duration-200 focus:border-[#FF6820] focus:outline-none focus:ring-2 focus:ring-[#FF6820]/30"
+            className="w-full bg-[#181818] border border-transparent rounded-full py-3.5 pl-12 pr-4 text-base text-white placeholder-white/35 transition-all duration-200 focus:border-[#FF3020] focus:outline-none focus:ring-2 focus:ring-[#FF3020]/25"
             placeholder="Artists, songs, or podcasts"
             type="text"
             value={query}
@@ -50,7 +50,7 @@ export default function Search() {
               {/* Gradient overlay — equal tangerine + red */}
               <div
                 className="absolute inset-0 opacity-75 group-hover:opacity-90 transition-opacity duration-300"
-                style={{ background: 'linear-gradient(135deg, rgba(255,153,0,0.7) 0%, rgba(255,85,32,0.7) 50%, rgba(255,21,21,0.7) 100%)' }}
+                style={{ background: 'linear-gradient(135deg, rgba(255,112,0,0.75) 0%, rgba(255,48,32,0.75) 50%, rgba(255,0,0,0.75) 100%)' }}
               />
               <span className="relative z-10 text-lg font-bold text-white drop-shadow-lg">
                 {category.name}

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import Discover from './pages/Discover';
 import Search from './pages/Search';
@@ -7,7 +7,7 @@ import Profile from './pages/Profile';
 
 function App() {
   return (
-    <BrowserRouter basename="/mytune/">
+    <Router>
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Navigate to="/discover" replace />} />
@@ -17,7 +17,7 @@ function App() {
           <Route path="profile" element={<Profile />} />
         </Route>
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
 }
 

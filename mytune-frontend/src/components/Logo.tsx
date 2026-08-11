@@ -3,7 +3,7 @@
 export default function Logo({ className = "w-10 h-10", showText = false }: { className?: string; showText?: boolean }) {
   return (
     <svg
-      viewBox="0 0 200 70"
+      viewBox="0 0 240 70"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}

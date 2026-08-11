@@ -24,7 +24,7 @@ export default function Layout() {
       {!isDiscover && (
         <header className="flex-shrink-0 bg-[#0a0a0a]/95 backdrop-blur-md border-b border-white/8 z-50">
           <div className="flex justify-between items-center w-full px-4 h-14 max-w-7xl mx-auto">
-            <Logo className="w-28 h-9" showText={true} />
+            <Logo className="w-32 h-9" showText={true} />
 
             {/* Desktop nav */}
             <nav className="hidden md:flex items-center gap-7">

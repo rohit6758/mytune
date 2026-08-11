@@ -89,7 +89,7 @@ export default function Discover() {
       {/* ── Top bar (Logo + Notifications) ─────────────── */}
       <div className="absolute top-0 left-0 right-0 flex justify-between items-center px-5 pt-4 z-30 pointer-events-none">
         {/* Logo SVG inline (scaled-down) */}
-        <svg viewBox="0 0 100 36" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-20 h-8">
+        <svg viewBox="0 0 120 36" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-24 h-8">
           <defs>
             <linearGradient id="dLogo" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%"   stopColor="#FF7000" />

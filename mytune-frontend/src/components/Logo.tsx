@@ -1,5 +1,5 @@
 // Logo SVG matching the provided MyTune brand image:
-// M-shaped soundwave with bars on both sides, orange-to-red gradient
+// M-shaped soundwave with bars on both sides, equal tangerine-to-red gradient
 export default function Logo({ className = "w-10 h-10", showText = false }: { className?: string; showText?: boolean }) {
   return (
     <svg
@@ -9,10 +9,12 @@ export default function Logo({ className = "w-10 h-10", showText = false }: { cl
       className={className}
     >
       <defs>
+        {/* Equal tangerine + red gradient as requested */}
         <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#FF9900" />
-          <stop offset="55%" stopColor="#FF5540" />
-          <stop offset="100%" stopColor="#FF2020" />
+          <stop offset="0%"   stopColor="#FF9900" />
+          <stop offset="35%"  stopColor="#FF6020" />
+          <stop offset="65%"  stopColor="#FF3520" />
+          <stop offset="100%" stopColor="#FF1515" />
         </linearGradient>
       </defs>
 
@@ -22,7 +24,7 @@ export default function Logo({ className = "w-10 h-10", showText = false }: { cl
       {/* Left tall bar */}
       <rect x="16" y="10" width="7" height="50" rx="3.5" fill="url(#logoGrad)" />
 
-      {/* M shape — left leg going up */}
+      {/* M shape — soundwave waveform */}
       <path
         d="M28 52 L28 18 Q28 14 32 14 Q36 14 36 18 L36 38 Q36 44 40 44 Q44 44 44 38 L44 24 Q44 18 48 18 L52 18 Q56 18 56 24 L56 38 Q56 44 60 44 Q64 44 64 38 L64 18 Q64 14 68 14 Q72 14 72 18 L72 52"
         stroke="url(#logoGrad)"

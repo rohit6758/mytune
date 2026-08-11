@@ -32,6 +32,9 @@ const MOCK_TRACKS = [
   },
 ];
 
+/* Brand gradient: equal tangerine + red */
+const BRAND_GRAD = 'linear-gradient(135deg, #FF9900 0%, #FF5520 50%, #FF2020 100%)';
+
 export default function Discover() {
   const [tracks] = useState(MOCK_TRACKS);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -90,19 +93,18 @@ export default function Discover() {
   if (!currentTrack) return null;
 
   return (
-    // Strict full-viewport, no-scroll container
     <div
-      className="relative w-screen bg-black overflow-hidden"
+      className="relative w-full bg-black overflow-hidden"
       style={{ height: 'calc(100dvh - 65px)', touchAction: 'pan-y' }}
     >
-      {/* Blurred background to fill any gaps */}
+      {/* Blurred ambient background */}
       <div
-        className="absolute inset-0 bg-cover bg-center scale-110 blur-lg opacity-30"
+        className="absolute inset-0 bg-cover bg-center scale-110 blur-2xl opacity-25"
         style={{ backgroundImage: `url(${currentTrack.bgImage})` }}
       />
-      <div className="absolute inset-0 bg-black/60" />
+      <div className="absolute inset-0 bg-black/55" />
 
-      {/* Swipe Card — full-bleed, centered */}
+      {/* Swipe Card — full-bleed */}
       <motion.div
         key={currentTrack.id}
         drag="x"
@@ -114,7 +116,7 @@ export default function Discover() {
         className="absolute inset-0 w-full h-full cursor-grab active:cursor-grabbing overflow-hidden"
         style={{ touchAction: 'pan-y' }}
       >
-        {/* Album art background — full bleed */}
+        {/* Album art */}
         <img
           src={currentTrack.bgImage}
           alt={currentTrack.title}
@@ -122,7 +124,7 @@ export default function Discover() {
           draggable={false}
         />
 
-        {/* Dark gradient overlays */}
+        {/* Gradient overlays */}
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent pointer-events-none" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-transparent pointer-events-none h-1/3" />
 
@@ -131,8 +133,8 @@ export default function Discover() {
           className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-30"
           style={{ opacity: likeOpacity, transform: `translate(-50%, -50%) scale(${0.6 + likeOpacity * 0.4}) rotate(-12deg)` }}
         >
-          <div className="border-4 border-[#ff9900] rounded-2xl px-6 py-3">
-            <span className="text-[#ff9900] font-black text-3xl tracking-[0.3em] uppercase">LIKE</span>
+          <div className="border-4 border-[#FF9900] rounded-2xl px-6 py-3">
+            <span className="text-[#FF9900] font-black text-3xl tracking-[0.3em] uppercase">LIKE</span>
           </div>
         </div>
 
@@ -141,8 +143,8 @@ export default function Discover() {
           className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-30"
           style={{ opacity: skipOpacity, transform: `translate(-50%, -50%) scale(${0.6 + skipOpacity * 0.4}) rotate(12deg)` }}
         >
-          <div className="border-4 border-[#ff2020] rounded-2xl px-6 py-3">
-            <span className="text-[#ff2020] font-black text-3xl tracking-[0.3em] uppercase">NOPE</span>
+          <div className="border-4 border-[#FF1515] rounded-2xl px-6 py-3">
+            <span className="text-[#FF1515] font-black text-3xl tracking-[0.3em] uppercase">NOPE</span>
           </div>
         </div>
 
@@ -151,14 +153,15 @@ export default function Discover() {
           <svg viewBox="0 0 100 36" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-20 h-9">
             <defs>
               <linearGradient id="navLogo" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#FF9900" />
-                <stop offset="100%" stopColor="#FF2020" />
+                <stop offset="0%"   stopColor="#FF9900" />
+                <stop offset="50%"  stopColor="#FF5520" />
+                <stop offset="100%" stopColor="#FF1515" />
               </linearGradient>
             </defs>
-            <rect x="2" y="10" width="4" height="16" rx="2" fill="url(#navLogo)" />
-            <rect x="9" y="4" width="4" height="28" rx="2" fill="url(#navLogo)" />
+            <rect x="2"  y="10" width="4" height="16" rx="2" fill="url(#navLogo)" />
+            <rect x="9"  y="4"  width="4" height="28" rx="2" fill="url(#navLogo)" />
             <path d="M16 30 L16 8 Q16 5 19 5 Q22 5 22 8 L22 20 Q22 24 25 24 Q28 24 28 20 L28 11 Q28 8 31 8 Q34 8 34 11 L34 20 Q34 24 37 24 Q40 24 40 20 L40 8 Q40 5 43 5 Q46 5 46 8 L46 30" stroke="url(#navLogo)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-            <rect x="50" y="4" width="4" height="28" rx="2" fill="url(#navLogo)" />
+            <rect x="50" y="4"  width="4" height="28" rx="2" fill="url(#navLogo)" />
             <rect x="57" y="10" width="4" height="16" rx="2" fill="url(#navLogo)" />
             <text x="66" y="25" fontFamily="Montserrat, sans-serif" fontWeight="700" fontSize="15" fill="white" opacity="0.95">mytune</text>
           </svg>
@@ -174,14 +177,14 @@ export default function Discover() {
             <div className="w-11 h-11 rounded-full border-2 border-white bg-zinc-700 overflow-hidden">
               <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoH5DXWGF9BHtLDzmnUXFQSTELuorBSj58CfLiplu4NpcdjvR_-Y57F6tQ6tuZpf6qc1dapffuzCHlt-6Npq5irb2GUMq5rpjzdxRHhufJbJ1DxwYlNaXU3aMdsH4x0oGqb1Gnhq4fg_n_694pnPoc9F5duHvESTs9CGtSEdp4GyMvcW04kvP50E-uVgWwgPxiTNv2Pe7fov4tRuFgxWdqUN0OfdfOpp9kfsbGsDBVU5AIqnLPq7qzLQ" alt="" className="w-full h-full object-cover" />
             </div>
-            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-5 h-5 rounded-full bg-gradient-to-br from-[#ff9900] to-[#ff2020] flex items-center justify-center border border-black">
-              <span className="material-symbols-outlined text-white text-xs" style={{ fontVariationSettings: "'FILL' 1", fontSize: '12px' }}>add</span>
+            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-5 h-5 rounded-full flex items-center justify-center border border-black" style={{ background: BRAND_GRAD }}>
+              <span className="material-symbols-outlined text-white" style={{ fontVariationSettings: "'FILL' 1", fontSize: '12px' }}>add</span>
             </div>
           </div>
 
           {/* Like */}
           <button onClick={handleLike} className="flex flex-col items-center gap-1">
-            <div className={`w-11 h-11 rounded-full flex items-center justify-center transition-all ${liked ? 'bg-[#ff2020]' : 'bg-black/40 backdrop-blur-sm border border-white/20'}`}>
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center transition-all ${liked ? 'bg-[#FF2020]' : 'bg-black/40 backdrop-blur-sm border border-white/20'}`}>
               <span className="material-symbols-outlined text-white text-xl" style={{ fontVariationSettings: liked ? "'FILL' 1" : "'FILL' 0" }}>favorite</span>
             </div>
             <span className="text-white text-[11px] font-semibold">{currentTrack.likes}</span>
@@ -209,7 +212,7 @@ export default function Discover() {
           {/* Tags */}
           <div className="flex items-center gap-2 flex-wrap">
             {currentTrack.tags.map(tag => (
-              <span key={tag} className="bg-[#ff5540]/80 text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full">
+              <span key={tag} className="bg-[#FF5520]/80 text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full">
                 {tag}
               </span>
             ))}
@@ -227,20 +230,30 @@ export default function Discover() {
 
           {/* Progress bar */}
           <div className="w-full h-1 bg-white/20 rounded-full mt-1 overflow-hidden pointer-events-auto">
-            <div className="h-full bg-gradient-to-r from-[#ff9900] to-[#ff2020] rounded-full w-2/5 animate-pulse" />
+            <div className="h-full rounded-full w-2/5 animate-pulse" style={{ background: BRAND_GRAD }} />
           </div>
 
           {/* Playback controls */}
           <div className="flex items-center gap-3 mt-1 pointer-events-auto">
-            <button onClick={handleSkip} className="w-9 h-9 rounded-full bg-black/50 backdrop-blur border border-white/20 flex items-center justify-center active:scale-90 transition-transform">
+            <button
+              onClick={handleSkip}
+              className="w-9 h-9 rounded-full bg-black/50 backdrop-blur border border-white/20 flex items-center justify-center active:scale-90 transition-transform"
+            >
               <span className="material-symbols-outlined text-white text-base" style={{ fontVariationSettings: "'FILL' 0" }}>close</span>
             </button>
-            <button onClick={() => setIsPlaying(p => !p)} className="w-12 h-12 rounded-full bg-gradient-to-br from-[#ff9900] to-[#ff2020] flex items-center justify-center shadow-lg shadow-[#ff5540]/40 active:scale-90 transition-transform">
+            <button
+              onClick={() => setIsPlaying(p => !p)}
+              className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg shadow-[#FF5520]/40 active:scale-90 transition-transform"
+              style={{ background: BRAND_GRAD }}
+            >
               <span className="material-symbols-outlined text-white text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>
                 {isPlaying ? 'pause' : 'play_arrow'}
               </span>
             </button>
-            <button onClick={() => nextTrack()} className="w-9 h-9 rounded-full bg-black/50 backdrop-blur border border-white/20 flex items-center justify-center active:scale-90 transition-transform">
+            <button
+              onClick={() => nextTrack()}
+              className="w-9 h-9 rounded-full bg-black/50 backdrop-blur border border-white/20 flex items-center justify-center active:scale-90 transition-transform"
+            >
               <span className="material-symbols-outlined text-white text-base" style={{ fontVariationSettings: "'FILL' 0" }}>skip_next</span>
             </button>
             <span className="text-white/60 text-xs ml-auto font-mono">0:18 / 0:30</span>

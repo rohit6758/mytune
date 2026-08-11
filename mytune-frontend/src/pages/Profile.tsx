@@ -1,123 +1,157 @@
+/* Brand gradient string — equal tangerine + red */
+const BRAND_GRAD = 'linear-gradient(135deg, #FF9900 0%, #FF5520 50%, #FF2020 100%)';
+
 export default function Profile() {
   return (
     <div className="inner-scroll h-full overflow-y-auto pb-4">
-      {/* Profile Header */}
-      <section className="relative flex flex-col items-center text-center pt-12 pb-8 px-margin-mobile" style={{ background: 'radial-gradient(circle at 50% 0%, rgba(255, 153, 0, 0.15) 0%, rgba(0,0,0,0) 70%)' }}>
-        <div className="relative mb-6">
-          <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl animate-pulse"></div>
-          <img 
-            alt="Alex Mercer" 
-            className="relative z-10 w-32 h-32 md:w-48 md:h-48 rounded-full border-2 border-primary/50 object-cover shadow-2xl" 
+
+      {/* ── Profile Header ─────────────────────────────────── */}
+      <section
+        className="relative flex flex-col items-center text-center pt-10 pb-8 px-4"
+        style={{ background: 'radial-gradient(circle at 50% 0%, rgba(255,104,32,0.18) 0%, rgba(0,0,0,0) 70%)' }}
+      >
+        {/* Avatar */}
+        <div className="relative mb-5">
+          <div className="absolute inset-0 rounded-full blur-xl opacity-40 animate-pulse" style={{ background: BRAND_GRAD }} />
+          <img
+            alt="Alex Mercer"
+            className="relative z-10 w-28 h-28 sm:w-36 sm:h-36 md:w-44 md:h-44 rounded-full border-2 object-cover shadow-2xl"
+            style={{ borderColor: 'rgba(255,104,32,0.5)' }}
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoH5DXWGF9BHtLDzmnUXFQSTELuorBSj58CfLiplu4NpcdjvR_-Y57F6tQ6tuZpf6qc1dapffuzCHlt-6Npq5irb2GUMq5rpjzdxRHhufJbJ1DxwYlNaXU3aMdsH4x0oGqb1Gnhq4fg_n_694pnPoc9F5duHvESTs9CGtSEdp4GyMvcW04kvP50E-uVgWwgPxiTNv2Pe7fov4tRuFgxWdqUN0OfdfOpp9kfsbGsDBVU5AIqnLPq7qzLQ"
           />
-          <div className="absolute bottom-2 right-2 z-20 bg-secondary-container rounded-full p-2 border-2 border-black flex items-center justify-center shadow-lg">
-            <span className="material-symbols-outlined text-white text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span>
+          <div
+            className="absolute bottom-1 right-1 z-20 rounded-full p-1.5 border-2 border-black flex items-center justify-center shadow-lg"
+            style={{ background: BRAND_GRAD }}
+          >
+            <span className="material-symbols-outlined text-white text-xs" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span>
           </div>
         </div>
-        
-        <div className="space-y-1 mb-8 z-10">
-          <h1 className="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-background tracking-tight">
-            ALEX MERCER
-          </h1>
-          <p className="font-body-lg text-body-lg text-on-surface-variant font-medium">
-            Electronic & Synthesizer Enthusiast
-          </p>
+
+        {/* Name & bio */}
+        <div className="space-y-1 mb-7 z-10">
+          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">ALEX MERCER</h1>
+          <p className="text-sm font-medium text-white/60">Electronic &amp; Synthesizer Enthusiast</p>
         </div>
-        
-        <div className="rounded-2xl w-full max-w-md mx-auto p-6 mb-8 z-10" style={{ background: 'rgba(42, 42, 42, 0.6)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+
+        {/* Stats bar */}
+        <div
+          className="rounded-2xl w-full max-w-sm mx-auto p-5 mb-7 z-10"
+          style={{ background: 'rgba(38, 38, 38, 0.7)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.06)' }}
+        >
           <div className="flex justify-around items-center">
-            <div className="flex flex-col items-center group cursor-pointer">
-              <span className="font-headline-md text-headline-md text-primary drop-shadow-md">12.4K</span>
-              <span className="font-label-sm text-label-sm text-on-surface-variant uppercase mt-1 tracking-widest group-hover:text-primary transition-colors">Followers</span>
+            <div className="flex flex-col items-center gap-0.5 cursor-pointer group">
+              <span className="text-xl font-black" style={{ background: BRAND_GRAD, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>12.4K</span>
+              <span className="text-[11px] font-bold uppercase tracking-widest text-white/50 group-hover:text-white/80 transition-colors">Followers</span>
             </div>
-            <div className="w-px h-10 bg-surface-container-highest"></div>
-            <div className="flex flex-col items-center group cursor-pointer">
-              <span className="font-headline-md text-headline-md text-on-background drop-shadow-md">482</span>
-              <span className="font-label-sm text-label-sm text-on-surface-variant uppercase mt-1 tracking-widest group-hover:text-on-background transition-colors">Following</span>
+            <div className="w-px h-8 bg-white/10" />
+            <div className="flex flex-col items-center gap-0.5 cursor-pointer group">
+              <span className="text-xl font-black text-white">482</span>
+              <span className="text-[11px] font-bold uppercase tracking-widest text-white/50 group-hover:text-white/80 transition-colors">Following</span>
             </div>
-            <div className="w-px h-10 bg-surface-container-highest"></div>
-            <div className="flex flex-col items-center group cursor-pointer">
-              <span className="font-headline-md text-headline-md text-on-background drop-shadow-md">34</span>
-              <span className="font-label-sm text-label-sm text-on-surface-variant uppercase mt-1 tracking-widest group-hover:text-on-background transition-colors">Playlists</span>
+            <div className="w-px h-8 bg-white/10" />
+            <div className="flex flex-col items-center gap-0.5 cursor-pointer group">
+              <span className="text-xl font-black text-white">34</span>
+              <span className="text-[11px] font-bold uppercase tracking-widest text-white/50 group-hover:text-white/80 transition-colors">Playlists</span>
             </div>
           </div>
         </div>
-        
-        <button className="z-10 bg-primary-container text-on-primary-container font-label-bold text-label-bold uppercase px-8 py-4 rounded-full shadow-[0_0_20px_rgba(255,153,0,0.3)] hover:shadow-[0_0_30px_rgba(255,153,0,0.5)] hover:-translate-y-1 transition-all duration-300 flex items-center space-x-2">
-          <span className="material-symbols-outlined text-lg">edit</span>
-          <span>Edit Profile</span>
+
+        {/* Edit Profile button */}
+        <button
+          className="z-10 font-bold text-sm uppercase tracking-widest px-8 py-3.5 rounded-full flex items-center gap-2 transition-all duration-300 hover:-translate-y-0.5 active:scale-95"
+          style={{
+            background: BRAND_GRAD,
+            boxShadow: '0 0 20px rgba(255,104,32,0.35)',
+          }}
+        >
+          <span className="material-symbols-outlined text-white text-base" style={{ fontVariationSettings: "'FILL' 0" }}>edit</span>
+          <span className="text-white">Edit Profile</span>
         </button>
       </section>
 
-      <div className="px-margin-mobile md:px-margin-desktop max-w-7xl mx-auto space-y-12">
-        {/* Recently Liked Tracks */}
-        <section className="space-y-6">
-          <div className="flex justify-between items-end border-b border-surface-container pb-4">
-            <h2 className="font-headline-md text-headline-md text-on-background uppercase tracking-tight">Recent Activity</h2>
-            <button className="font-label-bold text-label-bold text-primary hover:text-primary-fixed uppercase tracking-wider transition-colors">View All</button>
+      {/* ── Body sections ──────────────────────────────────── */}
+      <div className="px-4 md:px-8 max-w-3xl mx-auto space-y-10 pb-4">
+
+        {/* Recent Activity */}
+        <section className="space-y-4">
+          <div className="flex justify-between items-center border-b border-white/10 pb-3">
+            <h2 className="text-base font-black uppercase tracking-widest text-white">Recent Activity</h2>
+            <button className="text-xs font-bold uppercase tracking-widest text-[#FF6820] hover:text-[#FF9900] transition-colors">View All</button>
           </div>
-          <div className="grid gap-4">
-            {/* Track 1 */}
-            <div className="rounded-xl p-3 flex items-center justify-between hover:bg-surface-container-highest transition-all duration-300 group hover:-translate-y-1" style={{ background: 'rgba(42, 42, 42, 0.6)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
-              <div className="flex items-center space-x-4">
-                <img alt="Album Art" className="w-14 h-14 rounded-md object-cover shadow-md" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0l9NtgPMJu8SHnoavyjhKlREsoc_EZ1cdJBHeYFPj3_iTlym48rhscVK8laNhPnjpCXlkqpKyhqSNICCHJeHLE9D7-mSjewCy12ztJNQkH6oOeB6nCB0JZteQouG6EgsNSp4J_EzUBR2ESY4UxxeN5Tgz2mnvxkoAJmj4kLha5FQ7WSYUm5-vPAwHGK2yCJly1z5drMiSK-7SCaqfPZpQxaVD3tj_ctB9gCY6SbnZ_Ww8Q9foGUgCwQ" />
+
+          {/* Track rows */}
+          {[
+            {
+              title: 'Neon Circuitry', artist: 'BYTE SHIFT', liked: true,
+              img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC0l9NtgPMJu8SHnoavyjhKlREsoc_EZ1cdJBHeYFPj3_iTlym48rhscVK8laNhPnjpCXlkqpKyhqSNICCHJeHLE9D7-mSjewCy12ztJNQkH6oOeB6nCB0JZteQouG6EgsNSp4J_EzUBR2ESY4UxxeN5Tgz2mnvxkoAJmj4kLha5FQ7WSYUm5-vPAwHGK2yCJly1z5drMiSK-7SCaqfPZpQxaVD3tj_ctB9gCY6SbnZ_Ww8Q9foGUgCwQ'
+            },
+            {
+              title: 'Velocity Drive', artist: 'KROME', liked: false,
+              img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB6dQ9YAieREAQboRSsvMAGzzmIa-1IqPGBi77F0rObhWmxO-md6xSsT41uLogpjRJf84mHaxq8iNUhiqykAAVbPLzNx9cE1PROyn1Sh1WwF3Z-DiHL48eOnOw2g1Vp2LVn7m0S9jdc-4rKLyC58vMJRF2YuSvXDAsaEXBOS0rO1hsywtz0hcaP54xijA79wPOsP-xAHBgAdh7V2uma5U4QNsYV4zVwMw3EYgyyRYyomcd7w2S5S2yJFA'
+            },
+          ].map(track => (
+            <div
+              key={track.title}
+              className="rounded-xl p-3 flex items-center justify-between group hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
+              style={{ background: 'rgba(38, 38, 38, 0.6)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.05)' }}
+            >
+              <div className="flex items-center gap-4">
+                <img alt="Album Art" className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg object-cover shadow-md flex-shrink-0" src={track.img} />
                 <div>
-                  <p className="font-body-md text-body-md text-on-background font-bold group-hover:text-primary transition-colors">Neon Circuitry</p>
-                  <p className="font-label-sm text-label-sm text-on-surface-variant uppercase mt-1 tracking-wider">Byte Shift</p>
+                  <p className="font-bold text-sm text-white group-hover:text-[#FF8030] transition-colors">{track.title}</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-white/50 mt-0.5">{track.artist}</p>
                 </div>
               </div>
-              <button className="text-secondary-container p-2 hover:bg-secondary-container/10 rounded-full transition-all duration-300">
-                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
+              <button className="p-2 rounded-full hover:bg-white/5 transition-colors">
+                <span className="material-symbols-outlined text-[#FF3C20] text-xl" style={{ fontVariationSettings: track.liked ? "'FILL' 1" : "'FILL' 0" }}>
+                  favorite
+                </span>
               </button>
             </div>
-            {/* Track 2 */}
-            <div className="rounded-xl p-3 flex items-center justify-between hover:bg-surface-container-highest transition-all duration-300 group hover:-translate-y-1" style={{ background: 'rgba(42, 42, 42, 0.6)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
-              <div className="flex items-center space-x-4">
-                <img alt="Album Art" className="w-14 h-14 rounded-md object-cover shadow-md" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6dQ9YAieREAQboRSsvMAGzzmIa-1IqPGBi77F0rObhWmxO-md6xSsT41uLogpjRJf84mHaxq8iNUhiqykAAVbPLzNx9cE1PROyn1Sh1WwF3Z-DiHL48eOnOw2g1Vp2LVn7m0S9jdc-4rKLyC58vMJRF2YuSvXDAsaEXBOS0rO1hsywtz0hcaP54xijA79wPOsP-xAHBgAdh7V2uma5U4QNsYV4zVwMw3EYgyyRYyomcd7w2S5S2yJFA" />
-                <div>
-                  <p className="font-body-md text-body-md text-on-background font-bold group-hover:text-primary transition-colors">Velocity Drive</p>
-                  <p className="font-label-sm text-label-sm text-on-surface-variant uppercase mt-1 tracking-wider">Krome</p>
-                </div>
-              </div>
-              <button className="text-secondary-container p-2 hover:bg-secondary-container/10 rounded-full transition-all duration-300">
-                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>favorite</span>
-              </button>
-            </div>
-          </div>
+          ))}
         </section>
 
         {/* Public Playlists */}
-        <section className="space-y-6">
-          <h2 className="font-headline-md text-headline-md text-on-background uppercase tracking-tight border-b border-surface-container pb-4">Public Playlists</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <section className="space-y-4">
+          <h2 className="text-base font-black uppercase tracking-widest text-white border-b border-white/10 pb-3">Public Playlists</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
             {/* Playlist 1 */}
-            <div className="rounded-2xl overflow-hidden cursor-pointer group flex items-end h-56 relative shadow-lg">
-              <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBtfro2hwOapTOatiqSlwHnkblitbp8Jc-t9LrSQJq_7nLD3RSugNPpeZfVMU1HpoVwMZYF73y0cROOei4A2Fonx7TvmahFgt2kwLtnZhO8dCWkl_ePCkT4IcJp01lj3qftH3dF243vCxVeZ3EkG4KubEuxac2RXdYMzixig-sJxhgQaZBGK1AVUYjMrUbOWLm83TSHRoFRRXnKGzC78uJXsZQeLy_hnfXS-JkkyOLnf8C9g4ctIytOeQ')" }}></div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-90"></div>
-              <div className="absolute top-0 left-0 w-1 h-full bg-primary shadow-[0_0_15px_rgba(255,153,0,0.6)]"></div>
-              <div className="relative z-10 w-full p-6">
-                <div className="flex justify-between items-center mb-3">
-                  <span className="bg-black/50 backdrop-blur-sm text-primary font-label-bold text-xs uppercase px-3 py-1.5 rounded-full tracking-wider border border-primary/30">Workout</span>
-                  <span className="material-symbols-outlined text-white opacity-0 transform translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 group-hover:text-primary transition-all duration-300 text-4xl">play_circle</span>
+            <div className="rounded-2xl overflow-hidden cursor-pointer group flex items-end h-48 sm:h-56 relative shadow-lg">
+              <div
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBtfro2hwOapTOatiqSlwHnkblitbp8Jc-t9LrSQJq_7nLD3RSugNPpeZfVMU1HpoVwMZYF73y0cROOei4A2Fonx7TvmahFgt2kwLtnZhO8dCWkl_ePCkT4IcJp01lj3qftH3dF243vCxVeZ3EkG4KubEuxac2RXdYMzixig-sJxhgQaZBGK1AVUYjMrUbOWLm83TSHRoFRRXnKGzC78uJXsZQeLy_hnfXS-JkkyOLnf8C9g4ctIytOeQ')" }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-90" />
+              <div className="absolute top-0 left-0 w-1 h-full" style={{ background: BRAND_GRAD }} />
+              <div className="relative z-10 w-full p-4">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="bg-black/50 backdrop-blur-sm text-[#FF8030] text-[11px] font-bold uppercase px-2.5 py-1 rounded-full tracking-wider border border-[#FF8030]/30">Workout</span>
+                  <span className="material-symbols-outlined text-white opacity-0 group-hover:opacity-100 transition-all duration-300 text-3xl group-hover:text-[#FF8030]">play_circle</span>
                 </div>
-                <h3 className="font-headline-md text-headline-md text-on-background uppercase drop-shadow-md">Maximum Overdrive</h3>
-                <p className="font-label-sm text-label-sm text-on-surface-variant uppercase mt-2 tracking-wider">42 Tracks • 2h 15m</p>
+                <h3 className="text-base font-black text-white uppercase">Maximum Overdrive</h3>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-white/50 mt-1">42 Tracks · 2h 15m</p>
               </div>
             </div>
+
             {/* Playlist 2 */}
-            <div className="rounded-2xl overflow-hidden cursor-pointer group flex items-end h-56 relative shadow-lg">
-              <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuB6GDJr-cam4k1a0uJVmjJqNb78_5d3erWl2ggAG4vA_zeK3JrCkDbK0Xae69Ke-vcUN_HEs1m6JyLdScjMIjzg7VB2Ms1nl2N1_mqWZw4tWa1ZxHh6JsQpyRSX1droaLWfwCqsGN5rCQe2jEddFaIY0uYf_NqcHiz7RF6xXwo7DEzrqOfT9ukM32b2ztubihRkUVbiMA2BB6muxdOCbB6VPmRRAoY3b0uLyWH8-KaEHwbqAHaKoeWsrw')" }}></div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-90"></div>
-              <div className="absolute top-0 left-0 w-1 h-full bg-secondary-container shadow-[0_0_15px_rgba(255,85,64,0.6)]"></div>
-              <div className="relative z-10 w-full p-6">
-                <div className="flex justify-between items-center mb-3">
-                  <span className="bg-black/50 backdrop-blur-sm text-secondary-container font-label-bold text-xs uppercase px-3 py-1.5 rounded-full tracking-wider border border-secondary-container/30">Focus</span>
-                  <span className="material-symbols-outlined text-white opacity-0 transform translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 group-hover:text-secondary-container transition-all duration-300 text-4xl">play_circle</span>
+            <div className="rounded-2xl overflow-hidden cursor-pointer group flex items-end h-48 sm:h-56 relative shadow-lg">
+              <div
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuB6GDJr-cam4k1a0uJVmjJqNb78_5d3erWl2ggAG4vA_zeK3JrCkDbK0Xae69Ke-vcUN_HEs1m6JyLdScjMIjzg7VB2Ms1nl2N1_mqWZw4tWa1ZxHh6JsQpyRSX1droaLWfwCqsGN5rCQe2jEddFaIY0uYf_NqcHiz7RF6xXwo7DEzrqOfT9ukM32b2ztubihRkUVbiMA2BB6muxdOCbB6VPmRRAoY3b0uLyWH8-KaEHwbqAHaKoeWsrw')" }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-90" />
+              <div className="absolute top-0 left-0 w-1 h-full bg-[#FF3C20]" style={{ boxShadow: '0 0 15px rgba(255,60,32,0.6)' }} />
+              <div className="relative z-10 w-full p-4">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="bg-black/50 backdrop-blur-sm text-[#FF3C20] text-[11px] font-bold uppercase px-2.5 py-1 rounded-full tracking-wider border border-[#FF3C20]/30">Focus</span>
+                  <span className="material-symbols-outlined text-white opacity-0 group-hover:opacity-100 transition-all duration-300 text-3xl group-hover:text-[#FF3C20]">play_circle</span>
                 </div>
-                <h3 className="font-headline-md text-headline-md text-on-background uppercase drop-shadow-md">Deep Code State</h3>
-                <p className="font-label-sm text-label-sm text-on-surface-variant uppercase mt-2 tracking-wider">18 Tracks • 1h 40m</p>
+                <h3 className="text-base font-black text-white uppercase">Deep Code State</h3>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-white/50 mt-1">18 Tracks · 1h 40m</p>
               </div>
             </div>
+
           </div>
         </section>
       </div>

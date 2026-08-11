@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,7 +11,6 @@
     box-sizing: border-box;
   }
   html, body, #root {
-    /* Lock the app to viewport — no browser-level scrolling */
     width: 100%;
     height: 100%;
     max-height: 100dvh;
@@ -27,7 +29,43 @@
   user-select: none;
 }
 
-/* Custom scrollbar for inner scrollable areas (like Search, Profile) */
+/* Polyfill classes for old font-* custom font family usage */
+.font-headline-lg-mobile,
+.font-headline-lg,
+.font-headline-md,
+.font-body-lg,
+.font-body-md,
+.font-label-bold,
+.font-label-sm,
+.font-display-lg {
+  font-family: 'Montserrat', sans-serif;
+}
+
+/* Custom scrollbar for inner scrollable areas */
+.inner-scroll {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
 .inner-scroll::-webkit-scrollbar { width: 4px; }
 .inner-scroll::-webkit-scrollbar-track { background: transparent; }
 .inner-scroll::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 99px; }
+
+/* Brand gradient utility */
+.brand-gradient {
+  background: linear-gradient(135deg, #FF9900 0%, #FF5520 50%, #FF2020 100%);
+}
+.brand-gradient-text {
+  background: linear-gradient(135deg, #FF9900 0%, #FF5520 50%, #FF2020 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Smooth page transitions */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page-enter {
+  animation: fadeIn 0.2s ease-out forwards;
+}

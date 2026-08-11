@@ -27,7 +27,7 @@ const MOCK_TRACKS = [
 ];
 
 export default function Discover() {
-  const [tracks, setTracks] = useState(MOCK_TRACKS);
+  const [tracks] = useState(MOCK_TRACKS);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0); // 0 to 30 seconds

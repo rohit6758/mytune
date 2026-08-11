@@ -1,185 +1,145 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { motion, useAnimation } from 'framer-motion';
-import { Heart, X, Play, Pause, Share2, ListPlus } from 'lucide-react';
+import type { PanInfo } from 'framer-motion';
 
 const MOCK_TRACKS = [
   {
     id: 1,
     title: 'Midnight City Flows',
     artist: 'The Neon Synthetics',
-    tags: ['ELECTRONIC POP', 'CHILL'],
-    color: 'from-purple-900 to-indigo-900',
-  },
-  {
-    id: 2,
-    title: 'Velocity Drive',
-    artist: 'KROME',
-    tags: ['SYNTHWAVE', 'UPBEAT'],
-    color: 'from-red-900 to-orange-900',
-  },
-  {
-    id: 3,
-    title: 'Deep Code State',
-    artist: 'Alex Mercer',
-    tags: ['FOCUS', 'AMBIENT'],
-    color: 'from-blue-900 to-cyan-900',
+    tags: ['Electronic Pop', 'Chill'],
+    image: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuD7oSNvUX4pO6L9PHAtlaax3oRUPhu2BIH09LXaw--8N2qYSD4NqMJweU9UqsR8qd3Ig4q5ufgyAwJR0_SHqsAiSdHoPy3j1P9jJs0gD48BSt-mQm8rTjupFxK5tGVJ6arByk50bfPoyr8xE6KcX50OB8IFGyRmja2fzA7voabuzbm9HuoK6CzjJ1B2prSOUoEod1dCHhvhuo5XM0GpiXF0lEPX7Yd_evq3y1u4y34A0vApQDGMetZxFg')",
+    bg: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDdvLNAiXk0OW6ZI2RXD4f0Gup6xW0Z5OrPOxplcI7wEZEl4Y-Md0fmpbkjNpX5t-_0lDVAKknp0cuRbUbyL-v9JFYzL_C5KvXBxxu5PH2h9w8o7qNFZsOiemxM-7GrKlmn3GbJrodWd_DzhmsMdK6zk-xGR0bp-pF_ZF14YPYTEC7_pqODYLVgbacQNzI2ry6DA0-vyzt22N4Lwvb-cDbmgqn3K7BZsCIN8Bx6_4Ctm6OBi3wBhPtpAA')"
   }
 ];
 
 export default function Discover() {
   const [tracks] = useState(MOCK_TRACKS);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0); // 0 to 30 seconds
   
-  const controls = useAnimation();
-  const progressInterval = useRef<number | null>(null);
+  const [likeOpacity, setLikeOpacity] = useState(0);
+  const [skipOpacity, setSkipOpacity] = useState(0);
 
+  const controls = useAnimation();
   const currentTrack = tracks[currentIndex];
 
-  // 30-Second Constraint Logic
-  useEffect(() => {
-    if (isPlaying) {
-      progressInterval.current = window.setInterval(() => {
-        setProgress((prev) => {
-          if (prev >= 30) {
-            // Stop playing when hitting 30 seconds constraint
-            setIsPlaying(false);
-            if (progressInterval.current) clearInterval(progressInterval.current);
-            return 30;
-          }
-          return prev + 0.1;
-        });
-      }, 100);
+  const handleDrag = (_event: any, info: PanInfo) => {
+    const x = info.offset.x;
+    const threshold = 100;
+    
+    if (x > 0) {
+      setLikeOpacity(Math.min(x / threshold, 1));
+      setSkipOpacity(0);
     } else {
-      if (progressInterval.current) clearInterval(progressInterval.current);
+      setSkipOpacity(Math.min(Math.abs(x) / threshold, 1));
+      setLikeOpacity(0);
     }
+  };
 
-    return () => {
-      if (progressInterval.current) clearInterval(progressInterval.current);
-    };
-  }, [isPlaying]);
-
-  const handleDragEnd = async (_event: any, info: any) => {
-    const swipeThreshold = 100;
-    if (info.offset.x > swipeThreshold) {
-      // Swiped Right (Like)
+  const handleDragEnd = async (_event: any, info: PanInfo) => {
+    const threshold = 100;
+    const x = info.offset.x;
+    
+    if (x > threshold) {
       await controls.start({ x: 500, opacity: 0, transition: { duration: 0.3 } });
-      handleNextTrack();
-    } else if (info.offset.x < -swipeThreshold) {
-      // Swiped Left (Skip)
+      nextTrack();
+    } else if (x < -threshold) {
       await controls.start({ x: -500, opacity: 0, transition: { duration: 0.3 } });
-      handleNextTrack();
+      nextTrack();
     } else {
-      // Return to center
       controls.start({ x: 0, opacity: 1 });
+      setLikeOpacity(0);
+      setSkipOpacity(0);
     }
   };
 
-  const handleNextTrack = () => {
-    setIsPlaying(false);
-    setProgress(0);
+  const nextTrack = () => {
+    controls.set({ x: 0, opacity: 1, scale: 0.9, y: 20 });
+    controls.start({ scale: 1, y: 0, transition: { type: 'spring' } });
+    setLikeOpacity(0);
+    setSkipOpacity(0);
+    // Loop for demo
     setCurrentIndex((prev) => (prev + 1) % tracks.length);
-    controls.set({ x: 0, opacity: 1 });
-    // In a real app, we'd fetch more tracks here if we're near the end.
   };
 
-  const togglePlay = () => {
-    if (progress >= 30) {
-      setProgress(0); // restart if it hit the limit
-    }
-    setIsPlaying(!isPlaying);
-  };
-
-  if (!currentTrack) return <div className="flex-1 flex items-center justify-center text-textMuted">No more tracks</div>;
+  if (!currentTrack) return null;
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div className="flex-grow flex flex-col items-center justify-center relative w-full h-full pt-10" style={{ touchAction: 'none' }}>
       
-      {/* Swipeable Card Area */}
-      <div className="flex-1 w-full max-w-md max-h-[70vh] relative flex items-center justify-center">
+      {/* Swipe Container */}
+      <div className="relative w-full max-w-sm aspect-[4/5] perspective-1000 flex items-center justify-center mb-10 z-10">
+        
+        {/* Background Card */}
+        <div className="absolute inset-0 w-full h-full rounded-[24px] bg-zinc-900 shadow-sm transform scale-95 translate-y-4 opacity-70 overflow-hidden pointer-events-none transition-all duration-300">
+          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: currentTrack.bg }}></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+        </div>
+        
+        {/* Active Card */}
         <motion.div
-          key={currentTrack.id}
           drag="x"
           dragConstraints={{ left: 0, right: 0 }}
+          onDrag={handleDrag}
           onDragEnd={handleDragEnd}
           animate={controls}
-          className="w-full h-full aspect-[4/5] rounded-3xl overflow-hidden relative shadow-2xl cursor-grab active:cursor-grabbing bg-surface"
+          className="absolute inset-0 w-full h-full rounded-[24px] shadow-[0_10px_40px_rgba(255,153,0,0.1)] overflow-hidden cursor-grab flex flex-col justify-end z-20"
+          style={{ 
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }}
         >
-          {/* Mock Album Art / Visualizer */}
-          <div className={`absolute inset-0 bg-gradient-to-br ${currentTrack.color} opacity-80 mix-blend-screen`}></div>
-          <div className="absolute inset-0 flex items-center justify-center">
-             <div className="w-48 h-48 rounded-full border-4 border-white/10 flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.1)]">
-                <div className="w-32 h-32 rounded-full border border-white/20 animate-pulse bg-white/5"></div>
-             </div>
-          </div>
-
-          <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/40 to-transparent pointer-events-none"></div>
-
-          {/* Track Info overlay */}
-          <div className="absolute bottom-0 left-0 right-0 p-6 flex flex-col z-10">
-            <div className="flex gap-2 mb-3">
+          <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 scale-105 pointer-events-none" style={{ backgroundImage: currentTrack.image }}></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent pointer-events-none"></div>
+          
+          <div className="relative z-10 p-6 flex flex-col gap-3 pointer-events-none">
+            <div className="flex items-center gap-2 mb-1">
               {currentTrack.tags.map(tag => (
-                <span key={tag} className="text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-full border border-primary/40 text-primary">
+                <span key={tag} className="bg-black/60 backdrop-blur-md border border-[#FF9900]/40 text-[#FF9900] font-label-bold text-label-bold px-3 py-1.5 rounded-full uppercase tracking-wider text-[10px]">
                   {tag}
                 </span>
               ))}
             </div>
-            <h2 className="text-3xl font-display font-black tracking-tight text-white leading-tight drop-shadow-md">
+            <h2 className="font-headline-lg-mobile text-headline-lg-mobile text-[#FFFBF5] drop-shadow-lg leading-tight">
               {currentTrack.title}
             </h2>
-            <p className="text-textMuted font-medium mt-1">{currentTrack.artist}</p>
-            
-            {/* Small action row in card */}
-            <div className="flex items-center gap-4 mt-6 text-textMuted">
-              <button className="hover:text-white transition-colors"><Heart size={20} /></button>
-              <button className="hover:text-white transition-colors"><Share2 size={20} /></button>
-              <button className="hover:text-white transition-colors"><ListPlus size={20} /></button>
+            <p className="font-body-lg text-body-lg text-[#FFFBF5]/80 font-medium">
+              {currentTrack.artist}
+            </p>
+          </div>
+
+          {/* Like Stamp */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-transform" style={{ opacity: likeOpacity, transform: `translate(-50%, -50%) scale(${0.5 + likeOpacity * 0.5})` }}>
+            <div className="bg-[#FF9900]/20 backdrop-blur-xl border-2 border-[#FF9900] w-32 h-32 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,153,0,0.5)]">
+              <span className="material-symbols-outlined text-[#FF9900] text-6xl drop-shadow-md" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
+            </div>
+          </div>
+          
+          {/* Nope Stamp */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-transform" style={{ opacity: skipOpacity, transform: `translate(-50%, -50%) scale(${0.5 + skipOpacity * 0.5})` }}>
+            <div className="bg-[#FF0000]/20 backdrop-blur-xl border-2 border-[#FF0000] w-32 h-32 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,0,0,0.4)]">
+              <span className="material-symbols-outlined text-[#FF0000] text-6xl drop-shadow-md" style={{ fontVariationSettings: "'FILL' 0" }}>close</span>
             </div>
           </div>
         </motion.div>
       </div>
 
-      {/* Swipe Instructions */}
-      <p className="text-xs tracking-[0.2em] font-bold text-textMuted mt-6 mb-4 uppercase">
-        Swipe Right to Like, Left to Skip
-      </p>
-
-      {/* Controls & Progress */}
-      <div className="w-full max-w-md flex flex-col items-center gap-6 z-10 pb-4">
-        {/* Progress Bar (0 to 30s) */}
-        <div className="w-full max-w-[280px] h-1 bg-surfaceHover rounded-full overflow-hidden">
-           <div 
-             className="h-full bg-primary transition-all duration-100 ease-linear"
-             style={{ width: `${(progress / 30) * 100}%` }}
-           ></div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex items-center justify-center gap-8 w-full">
-          <button 
-            onClick={() => handleNextTrack()} 
-            className="w-14 h-14 rounded-full bg-surface hover:bg-surfaceHover border border-surfaceHover flex items-center justify-center text-red-500 transition-colors shadow-lg"
-          >
-            <X size={24} />
+      {/* Controls */}
+      <div className="flex flex-col items-center gap-8 w-full max-w-sm z-10 pb-8">
+        <p className="font-label-bold text-label-bold text-[#FFFBF5]/60 uppercase tracking-[0.2em] text-[10px]">Swipe Right to Like, Left to Skip</p>
+        <div className="flex justify-center items-center gap-6 w-full px-4">
+          <button onClick={() => nextTrack()} className="w-16 h-16 rounded-full bg-zinc-900 shadow-sm border border-zinc-800 flex items-center justify-center text-[#FF0000] hover:bg-zinc-800 active:scale-90 transition-all duration-200 z-30">
+            <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 0" }}>close</span>
           </button>
-          
-          <button 
-            onClick={togglePlay}
-            className="w-20 h-20 rounded-full bg-surface flex items-center justify-center text-primary border border-surfaceHover hover:border-primary/50 transition-all shadow-lg hover:shadow-[0_0_20px_rgba(255,107,0,0.2)]"
-          >
-            {isPlaying ? <Pause size={32} /> : <Play size={32} className="ml-1" />}
+          <button className="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-[#FF9900] active:scale-90 transition-all duration-200 shadow-sm z-30">
+            <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
           </button>
-          
-          <button 
-            onClick={() => handleNextTrack()} // Mocking like as next for now
-            className="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-background transition-all shadow-lg shadow-primary/30 hover:scale-105"
-          >
-            <Heart size={32} />
+          <button onClick={() => nextTrack()} className="w-20 h-20 rounded-full bg-[#FF9900] text-black shadow-[0_8px_30px_rgba(255,153,0,0.5)] flex items-center justify-center hover:opacity-95 active:scale-90 transition-all duration-200 z-30">
+            <span className="material-symbols-outlined text-black text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
           </button>
         </div>
       </div>
-
     </div>
   );
 }

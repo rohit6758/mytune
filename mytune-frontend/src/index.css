@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply bg-background text-textMain font-sans antialiased overflow-hidden;
+    @apply bg-background text-on-background font-sans antialiased;
   }
 }
 
@@ -16,7 +16,7 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-surfaceHover rounded-full;
+  @apply bg-surface-container-high rounded-full;
 }
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-primary;

@@ -1,6 +1,6 @@
 export default function Create() {
   return (
-    <div className="px-margin-mobile pt-lg flex flex-col gap-2xl pb-10">
+    <div className="inner-scroll h-full overflow-y-auto px-4 pt-5 pb-6 flex flex-col gap-6">
       {/* Hero Section */}
       <section className="flex flex-col items-center justify-center text-center pt-md pb-lg">
         <h2 className="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-transparent bg-clip-text bg-gradient-to-br from-white to-on-surface-variant mb-md">

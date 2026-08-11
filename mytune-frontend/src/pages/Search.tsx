@@ -11,7 +11,7 @@ const CATEGORIES = [
 
 export default function Search() {
   return (
-    <div className="px-margin-mobile md:px-margin-desktop pt-md pb-xl md:pb-md w-full max-w-7xl mx-auto flex-grow">
+    <div className="inner-scroll h-full overflow-y-auto px-4 pt-4 pb-4 w-full max-w-2xl mx-auto flex flex-col gap-5">
       
       {/* Search Bar */}
       <div className="mb-xl sticky top-4 md:top-24 z-40">

@@ -1,26 +1,58 @@
-export default function Logo({ className = "w-10 h-10" }: { className?: string }) {
+// Logo SVG matching the provided MyTune brand image:
+// M-shaped soundwave with bars on both sides, orange-to-red gradient
+export default function Logo({ className = "w-10 h-10", showText = false }: { className?: string; showText?: boolean }) {
   return (
-    <svg 
-      viewBox="0 0 100 100" 
-      fill="none" 
+    <svg
+      viewBox="0 0 200 70"
+      fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
     >
       <defs>
         <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#ff9900" /> {/* primary-container */}
-          <stop offset="100%" stopColor="#ff5540" /> {/* secondary-container */}
+          <stop offset="0%" stopColor="#FF9900" />
+          <stop offset="55%" stopColor="#FF5540" />
+          <stop offset="100%" stopColor="#FF2020" />
         </linearGradient>
       </defs>
-      
-      {/* Waveform 'M' Shape based on user description */}
-      <path 
-        d="M 10 50 L 10 60 C 10 65 15 65 15 60 L 15 45 C 15 40 20 40 20 45 L 20 65 C 20 70 25 70 25 65 L 25 40 C 25 35 30 35 30 40 L 30 55 C 30 65 40 65 45 55 L 50 40 L 55 55 C 60 65 70 65 70 55 L 70 40 C 70 35 75 35 75 40 L 75 65 C 75 70 80 70 80 65 L 80 45 C 80 40 85 40 85 45 L 85 60 C 85 65 90 65 90 60 L 90 50" 
-        stroke="url(#logoGrad)" 
-        strokeWidth="6" 
-        strokeLinecap="round" 
+
+      {/* Left short bar */}
+      <rect x="4" y="22" width="7" height="26" rx="3.5" fill="url(#logoGrad)" />
+
+      {/* Left tall bar */}
+      <rect x="16" y="10" width="7" height="50" rx="3.5" fill="url(#logoGrad)" />
+
+      {/* M shape — left leg going up */}
+      <path
+        d="M28 52 L28 18 Q28 14 32 14 Q36 14 36 18 L36 38 Q36 44 40 44 Q44 44 44 38 L44 24 Q44 18 48 18 L52 18 Q56 18 56 24 L56 38 Q56 44 60 44 Q64 44 64 38 L64 18 Q64 14 68 14 Q72 14 72 18 L72 52"
+        stroke="url(#logoGrad)"
+        strokeWidth="7"
+        strokeLinecap="round"
         strokeLinejoin="round"
+        fill="none"
       />
+
+      {/* Right tall bar */}
+      <rect x="79" y="10" width="7" height="50" rx="3.5" fill="url(#logoGrad)" />
+
+      {/* Right short bar */}
+      <rect x="91" y="22" width="7" height="26" rx="3.5" fill="url(#logoGrad)" />
+
+      {/* "mytune" text — shown when showText=true */}
+      {showText && (
+        <text
+          x="108"
+          y="44"
+          fontFamily="Montserrat, sans-serif"
+          fontWeight="700"
+          fontSize="28"
+          fill="white"
+          opacity="0.9"
+          letterSpacing="-0.5"
+        >
+          mytune
+        </text>
+      )}
     </svg>
   );
 }

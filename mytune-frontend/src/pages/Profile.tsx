@@ -1,6 +1,6 @@
 export default function Profile() {
   return (
-    <div className="pb-8">
+    <div className="inner-scroll h-full overflow-y-auto pb-4">
       {/* Profile Header */}
       <section className="relative flex flex-col items-center text-center pt-12 pb-8 px-margin-mobile" style={{ background: 'radial-gradient(circle at 50% 0%, rgba(255, 153, 0, 0.15) 0%, rgba(0,0,0,0) 70%)' }}>
         <div className="relative mb-6">

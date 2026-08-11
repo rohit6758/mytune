@@ -3,21 +3,31 @@
 @tailwind utilities;
 
 @layer base {
-  body {
-    @apply bg-background text-on-background font-sans antialiased;
+  * {
+    -webkit-tap-highlight-color: transparent;
+    box-sizing: border-box;
+  }
+  html, body, #root {
+    /* Lock the app to viewport — no browser-level scrolling */
+    width: 100%;
+    height: 100%;
+    max-height: 100dvh;
+    overflow: hidden;
+    background: #000000;
+    color: #e5e2e1;
+    font-family: 'Montserrat', 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
-/* Custom scrollbar for some scrollable areas */
-::-webkit-scrollbar {
-  width: 6px;
+/* Material Symbols — filled by default */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 1;
+  user-select: none;
 }
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  @apply bg-surface-container-high rounded-full;
-}
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-primary;
-}
+
+/* Custom scrollbar for inner scrollable areas (like Search, Profile) */
+.inner-scroll::-webkit-scrollbar { width: 4px; }
+.inner-scroll::-webkit-scrollbar-track { background: transparent; }
+.inner-scroll::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 99px; }

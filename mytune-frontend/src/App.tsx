@@ -7,7 +7,7 @@ import Profile from './pages/Profile';
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/mytune/">
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Navigate to="/discover" replace />} />

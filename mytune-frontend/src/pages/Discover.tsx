@@ -60,7 +60,7 @@ export default function Discover() {
     };
   }, [isPlaying]);
 
-  const handleDragEnd = async (event: any, info: any) => {
+  const handleDragEnd = async (_event: any, info: any) => {
     const swipeThreshold = 100;
     if (info.offset.x > swipeThreshold) {
       // Swiped Right (Like)

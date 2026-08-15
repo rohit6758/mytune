@@ -22,19 +22,70 @@ export default function Create() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not logged in');
       
+      let finalAudioUrl = importUrl;
+
+      // 1. If it's an Instagram link, extract via Cobalt API
+      if (importUrl.includes('instagram.com/reel') || importUrl.includes('instagram.com/p')) {
+        console.log('Extracting Instagram audio...');
+        const cobaltRes = await fetch('https://co.wuk.sh/api/json', {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            url: importUrl,
+            isAudioOnly: true,
+            aFormat: 'mp3'
+          })
+        });
+
+        if (!cobaltRes.ok) throw new Error('Failed to extract audio from Instagram');
+        
+        const cobaltData = await cobaltRes.json();
+        const temporaryCdnUrl = cobaltData.url;
+
+        // 2. Fetch the temporary audio stream as a Blob via CORS proxy
+        console.log('Downloading audio to device...');
+        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(temporaryCdnUrl)}`;
+        const audioBlobRes = await fetch(proxyUrl);
+        if (!audioBlobRes.ok) throw new Error('Failed to download audio stream');
+        
+        const audioBlob = await audioBlobRes.blob();
+
+        // 3. Upload the Blob permanently to Supabase Storage
+        console.log('Saving to Supabase...');
+        const fileName = `insta-${Date.now()}.mp3`;
+        const { error: uploadError } = await supabase.storage
+          .from('audio')
+          .upload(fileName, audioBlob, { contentType: 'audio/mpeg' });
+
+        if (uploadError) {
+          if (uploadError.message.toLowerCase().includes('bucket')) {
+            throw new Error('Supabase Storage bucket "audio" not found. Please run the SQL setup script.');
+          }
+          throw uploadError;
+        }
+
+        // 4. Get the permanent URL
+        const { data: publicData } = supabase.storage.from('audio').getPublicUrl(fileName);
+        finalAudioUrl = publicData.publicUrl;
+      }
+      
+      // Save track to Library
       const newTrack = {
         user_id: user.id,
         track_id: `custom-${Date.now()}`,
         title: importTitle,
         artist: importArtist,
-        cover_url: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80',
-        preview_url: importUrl
+        cover_url: 'https://images.unsplash.com/photo-1614680376593-902f74cf0d41?w=500&q=80',
+        preview_url: finalAudioUrl
       };
       
       const { error } = await supabase.from('library').insert(newTrack);
       if (error) throw error;
       
-      alert('Track imported to your library successfully!');
+      alert('Track extracted and imported to your library successfully!');
       setShowImportModal(false);
       setImportUrl('');
       setImportTitle('');
@@ -133,13 +184,16 @@ export default function Create() {
       {showImportModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-[#1A1625] border border-white/10 p-6 rounded-3xl w-full max-w-md shadow-2xl flex flex-col gap-4">
-            <h3 className="text-2xl font-black text-white">Import Track</h3>
-            <p className="text-sm text-white/60">Paste a direct MP3 or audio stream URL to add it to your library.</p>
+            <h3 className="text-2xl font-black text-white flex items-center gap-2">
+              <span className="material-symbols-outlined text-[#C5E384]">smart_toy</span> 
+              Insta Extractor
+            </h3>
+            <p className="text-sm text-white/60 leading-relaxed">Paste an Instagram Reel URL. We'll strip the video, extract the pure audio, and save it to your library forever.</p>
             
             <input 
               value={importUrl} onChange={e => setImportUrl(e.target.value)}
-              placeholder="Audio URL (e.g., https://example.com/song.mp3)"
-              className="w-full bg-[#110D17] border border-white/10 rounded-xl p-3 text-white placeholder-white/30"
+              placeholder="Instagram Reel Link (or any MP3 URL)"
+              className="w-full bg-[#110D17] border border-[#C5E384]/30 rounded-xl p-3 text-white placeholder-white/30 focus:outline-none focus:border-[#C5E384] transition-colors"
             />
             <input 
               value={importTitle} onChange={e => setImportTitle(e.target.value)}

@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import clsx from 'clsx';
 import Logo from './Logo';
+import GlobalPlayer from './GlobalPlayer';
 
 const NAV_ITEMS = [
   { name: 'Discover', path: '/discover', icon: 'explore'       },
@@ -137,6 +138,8 @@ export default function Layout() {
             </NavLink>
           ))}
         </nav>
+        
+        <GlobalPlayer />
       </div>
     </div>
   );

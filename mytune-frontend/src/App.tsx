@@ -11,24 +11,47 @@ import Create from './pages/Create';
 import Library from './pages/Library';
 import Profile from './pages/Profile';
 
+import { PlayerProvider } from './context/PlayerContext';
+import Onboarding from './pages/Onboarding';
+
 function App() {
   const [session, setSession] = useState<Session | null>(null);
+  const [hasProfile, setHasProfile] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      setLoading(false);
+      if (session) checkProfile(session.user.id);
+      else setLoading(false);
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      if (session) checkProfile(session.user.id);
+      else {
+        setHasProfile(null);
+        setLoading(false);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const checkProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase.from('profiles').select('id').eq('id', userId).single();
+      if (error && error.code !== 'PGRST116') throw error; // PGRST116 is 'not found'
+      setHasProfile(!!data);
+    } catch (err) {
+      console.error('Error checking profile:', err);
+      setHasProfile(false);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (!isSupabaseConfigured) {
     return (
@@ -52,19 +75,25 @@ function App() {
     return <Auth />;
   }
 
+  if (hasProfile === false) {
+    return <Onboarding session={session} onComplete={() => setHasProfile(true)} />;
+  }
+
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Navigate to="/discover" replace />} />
-          <Route path="discover" element={<Discover />} />
-          <Route path="search"   element={<Search />} />
-          <Route path="create"   element={<Create />} />
-          <Route path="library"  element={<Library />} />
-          <Route path="profile"  element={<Profile session={session} />} />
-        </Route>
-      </Routes>
-    </Router>
+    <PlayerProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Navigate to="/discover" replace />} />
+            <Route path="discover" element={<Discover />} />
+            <Route path="search"   element={<Search />} />
+            <Route path="create"   element={<Create />} />
+            <Route path="library"  element={<Library />} />
+            <Route path="profile"  element={<Profile session={session} />} />
+          </Route>
+        </Routes>
+      </Router>
+    </PlayerProvider>
   );
 }
 

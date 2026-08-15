@@ -1,0 +1,103 @@
+import React from 'react';
+import { usePlayer } from '../context/PlayerContext';
+
+export default function GlobalPlayer() {
+  const { currentTrack, isPlaying, progress, duration, pause, resume, next, prev, seek } = usePlayer();
+
+  if (!currentTrack) return null;
+
+  const progressPercent = duration > 0 ? (progress / duration) * 100 : 0;
+
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newTime = (parseFloat(e.target.value) / 100) * duration;
+    seek(newTime);
+  };
+
+  const formatTime = (time: number) => {
+    if (isNaN(time)) return '0:00';
+    const m = Math.floor(time / 60);
+    const s = Math.floor(time % 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  };
+
+  return (
+    <div className="fixed bottom-[72px] md:bottom-0 left-0 md:left-64 right-0 bg-[#1A1625]/95 backdrop-blur-xl border-t border-white/10 p-2 md:p-4 z-50 flex flex-col md:flex-row items-center justify-between gap-2 md:gap-4 transition-all duration-300">
+      
+      {/* Track Info */}
+      <div className="flex items-center gap-3 w-full md:w-1/3 min-w-0 px-2 md:px-0">
+        <img 
+          src={currentTrack.cover_url} 
+          alt={currentTrack.title} 
+          className="w-10 h-10 md:w-14 md:h-14 rounded-lg object-cover shadow-md"
+        />
+        <div className="flex flex-col min-w-0">
+          <span className="text-white font-bold text-sm truncate">{currentTrack.title}</span>
+          <span className="text-white/60 text-xs truncate">{currentTrack.artist}</span>
+        </div>
+        
+        {/* Mobile Controls right side */}
+        <div className="ml-auto flex md:hidden items-center gap-2">
+          <button 
+            onClick={isPlaying ? pause : resume} 
+            className="w-10 h-10 bg-white text-black rounded-full flex items-center justify-center shadow-lg"
+          >
+            <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+              {isPlaying ? 'pause' : 'play_arrow'}
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {/* Desktop Controls */}
+      <div className="hidden md:flex flex-col items-center justify-center w-full md:w-1/3 gap-1">
+        <div className="flex items-center gap-4 md:gap-6">
+          <button onClick={prev} className="text-white/70 hover:text-white transition-colors">
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>skip_previous</span>
+          </button>
+          
+          <button 
+            onClick={isPlaying ? pause : resume} 
+            className="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg"
+          >
+            <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+              {isPlaying ? 'pause' : 'play_arrow'}
+            </span>
+          </button>
+          
+          <button onClick={next} className="text-white/70 hover:text-white transition-colors">
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>skip_next</span>
+          </button>
+        </div>
+
+        {/* Progress Bar (Desktop only) */}
+        <div className="hidden md:flex items-center gap-2 w-full max-w-md">
+          <span className="text-[10px] text-white/50 w-8 text-right">{formatTime(progress)}</span>
+          <input 
+            type="range" 
+            min="0" 
+            max="100" 
+            value={progressPercent}
+            onChange={handleSeek}
+            className="w-full h-1 bg-white/20 rounded-full appearance-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full cursor-pointer hover:[&::-webkit-slider-thumb]:bg-[#D0FF00]"
+          />
+          <span className="text-[10px] text-white/50 w-8">{formatTime(duration)}</span>
+        </div>
+      </div>
+
+      {/* Right Actions (Desktop) */}
+      <div className="hidden md:flex w-1/3 justify-end px-4">
+        <button className="text-white/50 hover:text-white">
+          <span className="material-symbols-outlined">volume_up</span>
+        </button>
+      </div>
+      
+      {/* Mobile Progress Bar (Absolute positioned at top of player) */}
+      <div className="absolute top-0 left-0 w-full h-0.5 bg-white/10 md:hidden">
+        <div 
+          className="h-full bg-[#D0FF00] transition-all duration-100 ease-linear"
+          style={{ width: `${progressPercent}%` }}
+        />
+      </div>
+    </div>
+  );
+}

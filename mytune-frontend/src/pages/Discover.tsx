@@ -3,7 +3,7 @@ import { motion, useAnimation } from 'framer-motion';
 import type { PanInfo } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 
-const BRAND_GRAD = 'linear-gradient(135deg, #FF7000 0%, #FF3020 55%, #FF0000 100%)';
+const BRAND_GRAD = 'linear-gradient(135deg, #A855F7 0%, #8B16FF 50%, #5E00D4 100%)';
 
 const DISCOVER_TERMS = ['pop', 'billboard', 'viral', 'top hits', 'hip hop', 'dance'];
 
@@ -136,15 +136,15 @@ export default function Discover() {
 
   if (loading) {
     return (
-      <div className="relative w-full h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-[#FF3020] border-t-transparent rounded-full animate-spin"></div>
+      <div className="relative w-full h-screen bg-[#110D17] flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-[#D0FF00] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   if (!currentTrack) {
     return (
-      <div className="relative w-full h-screen bg-[#0a0a0a] flex items-center justify-center text-white/50">
+      <div className="relative w-full h-screen bg-[#110D17] flex items-center justify-center text-white/50">
         No tracks available.
       </div>
     );
@@ -152,7 +152,7 @@ export default function Discover() {
 
   return (
     <div
-      className="relative w-full bg-[#0a0a0a] overflow-hidden flex flex-col items-center justify-center"
+      className="relative w-full bg-[#110D17] overflow-hidden flex flex-col items-center justify-center"
       style={{ height: 'calc(100dvh - 62px)' }}
     >
       <audio 
@@ -180,9 +180,9 @@ export default function Discover() {
         <svg viewBox="0 0 120 36" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-24 h-8">
           <defs>
             <linearGradient id="dLogo" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%"   stopColor="#FF7000" />
-              <stop offset="55%"  stopColor="#FF3020" />
-              <stop offset="100%" stopColor="#FF0000" />
+              <stop offset="0%"   stopColor="#A855F7" />
+              <stop offset="50%"  stopColor="#8B16FF" />
+              <stop offset="100%" stopColor="#5E00D4" />
             </linearGradient>
           </defs>
           <rect x="2"  y="10" width="4" height="16" rx="2" fill="url(#dLogo)" />
@@ -247,13 +247,13 @@ export default function Discover() {
             <div
               className="px-6 py-3 rounded-2xl"
               style={{
-                border: '3px solid #FF9000',
-                background: 'rgba(255,144,0,0.15)',
+                border: '3px solid #D0FF00',
+                background: 'rgba(208,255,0,0.15)',
                 backdropFilter: 'blur(4px)',
                 transform: `rotate(-12deg) scale(${0.7 + likeOpacity * 0.3})`,
               }}
             >
-              <span className="text-[#FF9000] font-black text-2xl tracking-[0.25em]">LIKE ♥</span>
+              <span className="text-[#D0FF00] font-black text-2xl tracking-[0.25em]">LIKE ♥</span>
             </div>
           </div>
 
@@ -265,13 +265,13 @@ export default function Discover() {
             <div
               className="px-6 py-3 rounded-2xl"
               style={{
-                border: '3px solid #FF1010',
-                background: 'rgba(255,16,16,0.15)',
+                border: '3px solid #FFFFFF',
+                background: 'rgba(255,255,255,0.15)',
                 backdropFilter: 'blur(4px)',
                 transform: `rotate(12deg) scale(${0.7 + skipOpacity * 0.3})`,
               }}
             >
-              <span className="text-[#FF1010] font-black text-2xl tracking-[0.25em]">NOPE ✕</span>
+              <span className="text-[#FFFFFF] font-black text-2xl tracking-[0.25em]">NOPE ✕</span>
             </div>
           </div>
 
@@ -281,7 +281,7 @@ export default function Discover() {
               <span
                 key={tag}
                 className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full text-white"
-                style={{ background: 'rgba(255,48,32,0.75)', backdropFilter: 'blur(6px)' }}
+                style={{ background: 'rgba(139,22,255,0.75)', backdropFilter: 'blur(6px)' }}
               >
                 {tag}
               </span>
@@ -326,7 +326,7 @@ export default function Discover() {
             <button
               onClick={() => setIsPlaying(p => !p)}
               className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform"
-              style={{ background: BRAND_GRAD, boxShadow: '0 8px 24px rgba(255,48,32,0.45)' }}
+              style={{ background: BRAND_GRAD, boxShadow: '0 8px 24px rgba(139,22,255,0.45)' }}
             >
               <span className="material-symbols-outlined text-white text-[28px]" style={{ fontVariationSettings: "'FILL' 1" }}>
                 {isPlaying ? 'pause' : 'play_arrow'}

@@ -10,19 +10,19 @@ const NAV_ITEMS = [
   { name: 'Profile',  path: '/profile',  icon: 'person'        },
 ];
 
-/* More-red brand gradient */
-const BRAND_GRAD = 'linear-gradient(135deg, #FF7000 0%, #FF3020 55%, #FF0000 100%)';
+/* Ultraviolet brand gradient */
+const BRAND_GRAD = 'linear-gradient(135deg, #A855F7 0%, #8B16FF 50%, #5E00D4 100%)';
 
 export default function Layout() {
   const location = useLocation();
   const isDiscover = location.pathname === '/discover' || location.pathname === '/';
 
   return (
-    <div className="w-full bg-[#0a0a0a] text-white overflow-hidden flex flex-col" style={{ height: '100dvh' }}>
+    <div className="w-full bg-[#110D17] text-white overflow-hidden flex flex-col" style={{ height: '100dvh' }}>
 
       {/* ── Top Header (non-Discover pages) ────────────────── */}
       {!isDiscover && (
-        <header className="flex-shrink-0 bg-[#0a0a0a]/95 backdrop-blur-md border-b border-white/8 z-50">
+        <header className="flex-shrink-0 bg-[#110D17]/95 backdrop-blur-md border-b border-white/8 z-50">
           <div className="flex justify-between items-center w-full px-4 h-14 max-w-7xl mx-auto">
             <Logo className="w-32 h-9" showText={true} />
 
@@ -35,7 +35,7 @@ export default function Layout() {
                   className={({ isActive }) => clsx(
                     'text-xs font-bold uppercase tracking-widest transition-all duration-200',
                     isActive
-                      ? 'text-[#FF4020]'
+                      ? 'text-[#D0FF00]'
                       : 'text-white/45 hover:text-white/80'
                   )}
                 >
@@ -48,7 +48,7 @@ export default function Layout() {
             <button className="hover:scale-95 transition-transform">
               <img
                 alt="Profile"
-                className="w-8 h-8 rounded-full border border-[#FF4020]/40 object-cover"
+                className="w-8 h-8 rounded-full border border-[#8B16FF]/40 object-cover"
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfj3tQSx3IVr5o2QnbJrKGzCJauZeVk0JuIodxhvhoriIUYMD5nvxBqGOPEX17ogOrbuFggejn5PgjCAn2Dyk2IwKYoH7sEa4sDsyiigbFkrpWJW5cUGWPAnSJFmfxGJzFYjXRzj8nULuwLLSbuVxvinb5V965KiKtcI2jcoO5hRUDP9yzbSEa_8_MexIatHG_VpggvPQWYaJVbh4Db6XjCNdrl4CfKHy07EWv94yzWE6pXSwQ0rwWcQ"
               />
             </button>
@@ -63,7 +63,7 @@ export default function Layout() {
 
       {/* ── Bottom Navigation — Spotify-style ──────────────── */}
       <nav
-        className="flex-shrink-0 w-full flex justify-around items-center bg-[#0a0a0a]/98 backdrop-blur-xl border-t border-white/8 z-50"
+        className="flex-shrink-0 w-full flex justify-around items-center bg-[#110D17]/98 backdrop-blur-xl border-t border-white/8 z-50"
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 6px)', paddingTop: '6px', height: '62px' }}
       >
         {NAV_ITEMS.map(item => (
@@ -82,24 +82,23 @@ export default function Layout() {
                   style={{
                     fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0",
                     fontSize: '24px',
-                    /* Active icons get a subtle red glow */
-                    filter: isActive ? 'drop-shadow(0 0 5px rgba(255,64,32,0.55))' : 'none',
-                    color: isActive ? '#FF4020' : undefined,
+                    /* Active icons get a subtle neon green glow */
+                    filter: isActive ? 'drop-shadow(0 0 5px rgba(208, 255, 0, 0.4))' : 'none',
+                    color: isActive ? '#D0FF00' : undefined,
                   }}
                 >
                   {item.icon}
                 </span>
                 <span
                   className="text-[10px] font-semibold tracking-wide transition-colors duration-200"
-                  style={{ color: isActive ? '#FF4020' : undefined }}
+                  style={{ color: isActive ? '#D0FF00' : undefined }}
                 >
                   {item.name}
                 </span>
                 {/* Active indicator dot */}
                 {isActive && (
                   <span
-                    className="absolute bottom-1 w-1 h-1 rounded-full"
-                    style={{ background: BRAND_GRAD }}
+                    className="absolute bottom-1 w-1 h-1 rounded-full bg-[#D0FF00]"
                   />
                 )}
               </>

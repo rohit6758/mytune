@@ -33,14 +33,14 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-[100dvh] w-full bg-[#0a0a0a] flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-[100dvh] w-full bg-[#110D17] flex flex-col items-center justify-center p-6 relative overflow-hidden">
       {/* Background glow effect */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[50vh] bg-[#FF3020]/20 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[50vh] bg-[#8B16FF]/20 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="w-full max-w-sm z-10 flex flex-col items-center">
         <Logo className="w-40 h-12 mb-8" showText={true} />
 
-        <div className="w-full bg-[#141414]/80 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl">
+        <div className="w-full bg-[#1A1625]/80 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl">
           <h2 className="text-2xl font-black text-white mb-6 text-center">
             {isLogin ? 'Welcome Back' : 'Create Account'}
           </h2>
@@ -55,7 +55,7 @@ export default function Auth() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-[#FF3020] transition-colors"
+                className="w-full bg-[#110D17] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-[#8B16FF] transition-colors"
                 placeholder="Enter your email"
                 required
               />
@@ -67,7 +67,7 @@ export default function Auth() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-[#FF3020] transition-colors"
+                className="w-full bg-[#110D17] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-[#8B16FF] transition-colors"
                 placeholder="Enter your password"
                 required
               />
@@ -76,7 +76,7 @@ export default function Auth() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 brand-gradient text-white font-bold text-lg py-3.5 rounded-full shadow-[0_4px_14px_0_rgba(255,48,32,0.39)] hover:shadow-[0_6px_20px_rgba(255,48,32,0.23)] hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:pointer-events-none"
+              className="w-full mt-2 bg-[#D0FF00] text-[#110D17] font-extrabold text-lg py-3.5 rounded-full shadow-[0_4px_14px_0_rgba(208,255,0,0.2)] hover:shadow-[0_6px_20px_rgba(208,255,0,0.3)] hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:pointer-events-none"
             >
               {loading ? 'Processing...' : isLogin ? 'Sign In' : 'Sign Up'}
             </button>

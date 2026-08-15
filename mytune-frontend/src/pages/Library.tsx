@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 
-const BRAND_GRAD = 'linear-gradient(135deg, #FF7000 0%, #FF3020 55%, #FF0000 100%)';
+const BRAND_GRAD = 'linear-gradient(135deg, #A855F7 0%, #8B16FF 50%, #5E00D4 100%)';
 
 export default function Library() {
   const [tracks, setTracks] = useState<any[]>([]);
@@ -67,7 +67,7 @@ export default function Library() {
   if (loading) {
     return (
       <div className="h-full flex items-center justify-center pt-20">
-        <div className="w-10 h-10 border-4 border-[#FF3020] border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-10 h-10 border-4 border-[#D0FF00] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -77,7 +77,7 @@ export default function Library() {
       <audio ref={audioRef} onEnded={() => setPlayingTrackId(null)} />
       
       {/* Header */}
-      <div className="flex items-center justify-between sticky top-0 bg-[#0a0a0a] pt-2 pb-4 z-40">
+      <div className="flex items-center justify-between sticky top-0 bg-[#110D17] pt-2 pb-4 z-40">
         <h1 className="text-3xl font-black text-white tracking-tight">Your Library</h1>
         <button className="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 transition-colors">
           <span className="material-symbols-outlined text-white" style={{ fontVariationSettings: "'FILL' 0" }}>search</span>
@@ -105,12 +105,12 @@ export default function Library() {
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[15px] font-bold text-white truncate group-hover:text-[#FF3020] transition-colors">{track.title}</p>
+                  <p className="text-[15px] font-bold text-white truncate group-hover:text-[#D0FF00] transition-colors">{track.title}</p>
                   <p className="text-xs text-white/50 truncate mt-0.5">{track.artist}</p>
                 </div>
                 <button 
                   onClick={(e) => removeTrack(track.track_id, e)}
-                  className="p-2 opacity-0 group-hover:opacity-100 transition-opacity hover:text-[#FF3020]"
+                  className="p-2 opacity-0 group-hover:opacity-100 transition-opacity hover:text-[#D0FF00]"
                 >
                   <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
                 </button>

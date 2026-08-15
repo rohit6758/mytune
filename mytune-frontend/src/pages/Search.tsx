@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 
 const GENRES = ['Pop', 'Hip Hop', 'Rock', 'Electronic', 'R&B', 'Alternative'];
-const BRAND_GRAD = 'linear-gradient(135deg, #FF7000 0%, #FF3020 55%, #FF0000 100%)';
+const BRAND_GRAD = 'linear-gradient(135deg, #A855F7 0%, #8B16FF 50%, #5E00D4 100%)';
 
 export default function Search() {
   const [query, setQuery] = useState('');
@@ -137,13 +137,13 @@ export default function Search() {
       <audio ref={audioRef} onEnded={() => setPlayingTrackId(null)} />
 
       {/* Search Bar */}
-      <div className="sticky top-0 pt-2 pb-2 bg-[#0a0a0a] z-40">
+      <div className="sticky top-0 pt-2 pb-2 bg-[#110D17] z-40">
         <div className="relative w-full">
           <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-white/50 text-xl" style={{ fontVariationSettings: "'FILL' 0" }}>
             search
           </span>
           <input
-            className="w-full bg-[#181818] border border-transparent rounded-full py-3.5 pl-12 pr-4 text-base text-white placeholder-white/35 transition-all duration-200 focus:border-[#FF3020] focus:outline-none focus:ring-2 focus:ring-[#FF3020]/25"
+            className="w-full bg-[#181818] border border-transparent rounded-full py-3.5 pl-12 pr-4 text-base text-white placeholder-white/35 transition-all duration-200 focus:border-[#D0FF00] focus:outline-none focus:ring-2 focus:ring-[#D0FF00]/25"
             placeholder="Artists, songs, or podcasts"
             type="text"
             value={query}
@@ -158,7 +158,7 @@ export default function Search() {
           <h2 className="text-xl font-extrabold mb-4 text-white">Top Results</h2>
           {isSearching ? (
             <div className="flex justify-center py-10">
-              <div className="w-8 h-8 border-4 border-[#FF3020] border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-8 h-8 border-4 border-[#D0FF00] border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : searchResults.length > 0 ? (
             <div className="flex flex-col gap-2">
@@ -175,12 +175,12 @@ export default function Search() {
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-white truncate group-hover:text-[#FF3020] transition-colors">{track.title}</p>
+                      <p className="text-sm font-bold text-white truncate group-hover:text-[#D0FF00] transition-colors">{track.title}</p>
                       <p className="text-xs text-white/50 truncate">{track.artist}</p>
                     </div>
                     <button 
                        onClick={(e) => saveToLibrary(track, e)}
-                       className="p-2 opacity-0 group-hover:opacity-100 transition-opacity hover:text-[#FF3020]"
+                       className="p-2 opacity-0 group-hover:opacity-100 transition-opacity hover:text-[#D0FF00]"
                     >
                       <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 0" }}>favorite</span>
                     </button>

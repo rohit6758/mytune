@@ -9,11 +9,11 @@ export default function Logo({ className = "w-10 h-10", showText = false }: { cl
       className={className}
     >
       <defs>
-        {/* Equal tangerine + red gradient as requested */}
+        {/* Ultraviolet Sonic gradient */}
         <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%"   stopColor="#FF7000" />
-          <stop offset="40%"  stopColor="#FF3020" />
-          <stop offset="100%" stopColor="#FF0000" />
+          <stop offset="0%"   stopColor="#A855F7" />
+          <stop offset="50%"  stopColor="#8B16FF" />
+          <stop offset="100%" stopColor="#5E00D4" />
         </linearGradient>
       </defs>
 

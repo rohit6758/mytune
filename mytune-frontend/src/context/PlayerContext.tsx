@@ -14,14 +14,18 @@ interface PlayerContextType {
   isPlaying: boolean;
   progress: number;
   duration: number;
+  repeatMode: 'off' | 'all' | 'one';
+  isShuffle: boolean;
   playTrack: (track: Track) => void;
   playQueue: (tracks: Track[], startIndex?: number) => void;
   addToQueue: (track: Track) => void;
   pause: () => void;
   resume: () => void;
-  next: () => void;
+  next: (forceSkip?: boolean) => void;
   prev: () => void;
   seek: (time: number) => void;
+  toggleRepeatMode: () => void;
+  toggleShuffle: () => void;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -29,10 +33,14 @@ const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
 export function PlayerProvider({ children }: { children: ReactNode }) {
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
   const [queue, setQueue] = useState<Track[]>([]);
+  const [originalQueue, setOriginalQueue] = useState<Track[]>([]);
   const [queueIndex, setQueueIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
+  
+  const [repeatMode, setRepeatMode] = useState<'off' | 'all' | 'one'>('off');
+  const [isShuffle, setIsShuffle] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -46,9 +54,6 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     const handlePause = () => setIsPlaying(false);
     const handleTimeUpdate = () => setProgress(audio.currentTime);
     const handleLoadedMetadata = () => setDuration(audio.duration);
-    const handleEnded = () => {
-      // Need a ref for queue/queueIndex since closure captures stale state
-    };
 
     audio.addEventListener('play', handlePlay);
     audio.addEventListener('pause', handlePause);
@@ -67,10 +72,10 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!audioRef.current) return;
     const audio = audioRef.current;
-    const handleEnded = () => next();
+    const handleEnded = () => next(false);
     audio.addEventListener('ended', handleEnded);
     return () => audio.removeEventListener('ended', handleEnded);
-  }, [queue, queueIndex]);
+  }, [queue, queueIndex, repeatMode, isShuffle]);
 
   // Update MediaSession API when track changes
   useEffect(() => {
@@ -86,11 +91,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       navigator.mediaSession.setActionHandler('play', resume);
       navigator.mediaSession.setActionHandler('pause', pause);
       navigator.mediaSession.setActionHandler('previoustrack', prev);
-      navigator.mediaSession.setActionHandler('nexttrack', next);
+      navigator.mediaSession.setActionHandler('nexttrack', () => next(true));
     }
-  }, [currentTrack, queue, queueIndex]); // Dependencies include queue for next/prev
+  }, [currentTrack, queue, queueIndex, repeatMode, isShuffle]);
 
   const playTrack = (track: Track) => {
+    setOriginalQueue([track]);
     setQueue([track]);
     setQueueIndex(0);
     setCurrentTrack(track);
@@ -99,17 +105,56 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   const playQueue = (tracks: Track[], startIndex = 0) => {
     if (tracks.length === 0) return;
-    setQueue(tracks);
-    setQueueIndex(startIndex);
-    setCurrentTrack(tracks[startIndex]);
-    loadAndPlay(tracks[startIndex]);
+    setOriginalQueue(tracks);
+    
+    if (isShuffle) {
+      const current = tracks[startIndex];
+      const remaining = tracks.filter((_, i) => i !== startIndex);
+      const shuffled = remaining.sort(() => Math.random() - 0.5);
+      const newQueue = [current, ...shuffled];
+      setQueue(newQueue);
+      setQueueIndex(0);
+      setCurrentTrack(current);
+      loadAndPlay(current);
+    } else {
+      setQueue(tracks);
+      setQueueIndex(startIndex);
+      setCurrentTrack(tracks[startIndex]);
+      loadAndPlay(tracks[startIndex]);
+    }
   };
 
   const addToQueue = (track: Track) => {
+    setOriginalQueue(prev => [...prev, track]);
     setQueue(prev => [...prev, track]);
     if (!currentTrack) {
       playTrack(track);
     }
+  };
+
+  const toggleRepeatMode = () => {
+    setRepeatMode(prev => prev === 'off' ? 'all' : prev === 'all' ? 'one' : 'off');
+  };
+
+  const toggleShuffle = () => {
+    setIsShuffle(prev => {
+      const nextShuffle = !prev;
+      if (nextShuffle) {
+        // Shuffle queue
+        const remaining = originalQueue.filter(t => t.id !== currentTrack?.id);
+        const shuffled = remaining.sort(() => Math.random() - 0.5);
+        if (currentTrack) {
+          setQueue([currentTrack, ...shuffled]);
+          setQueueIndex(0);
+        }
+      } else {
+        // Restore original queue
+        setQueue(originalQueue);
+        const index = originalQueue.findIndex(t => t.id === currentTrack?.id);
+        setQueueIndex(Math.max(0, index));
+      }
+      return nextShuffle;
+    });
   };
 
   const loadAndPlay = (track: Track) => {
@@ -127,12 +172,24 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     if (audioRef.current && currentTrack) audioRef.current.play().catch(console.error);
   };
 
-  const next = () => {
+  const next = (forceSkip = true) => {
+    // If not forced (meaning it ended naturally) and repeat is 'one'
+    if (!forceSkip && repeatMode === 'one') {
+      seek(0);
+      resume();
+      return;
+    }
+
     if (queueIndex < queue.length - 1) {
       const nextIndex = queueIndex + 1;
       setQueueIndex(nextIndex);
       setCurrentTrack(queue[nextIndex]);
       loadAndPlay(queue[nextIndex]);
+    } else if (repeatMode === 'all') {
+      // Loop back to start
+      setQueueIndex(0);
+      setCurrentTrack(queue[0]);
+      loadAndPlay(queue[0]);
     } else {
       // Reached end of queue
       pause();
@@ -150,6 +207,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       setQueueIndex(prevIndex);
       setCurrentTrack(queue[prevIndex]);
       loadAndPlay(queue[prevIndex]);
+    } else if (repeatMode === 'all') {
+      // Go to last track if loop all is on
+      const lastIndex = queue.length - 1;
+      setQueueIndex(lastIndex);
+      setCurrentTrack(queue[lastIndex]);
+      loadAndPlay(queue[lastIndex]);
     }
   };
 
@@ -162,8 +225,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   return (
     <PlayerContext.Provider value={{
-      currentTrack, queue, isPlaying, progress, duration,
-      playTrack, playQueue, addToQueue, pause, resume, next, prev, seek
+      currentTrack, queue, isPlaying, progress, duration, repeatMode, isShuffle,
+      playTrack, playQueue, addToQueue, pause, resume, next, prev, seek, toggleRepeatMode, toggleShuffle
     }}>
       {children}
     </PlayerContext.Provider>

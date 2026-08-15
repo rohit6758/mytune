@@ -1,8 +1,14 @@
 import React from 'react';
 import { usePlayer } from '../context/PlayerContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function GlobalPlayer() {
-  const { currentTrack, isPlaying, progress, duration, pause, resume, next, prev, seek } = usePlayer();
+  const { 
+    currentTrack, isPlaying, progress, duration, pause, resume, next, prev, seek,
+    isShuffle, toggleShuffle, repeatMode, toggleRepeatMode 
+  } = usePlayer();
+  
+  const navigate = useNavigate();
 
   if (!currentTrack) return null;
 
@@ -20,11 +26,22 @@ export default function GlobalPlayer() {
     return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
+  const handlePlayerClick = (e: React.MouseEvent) => {
+    // Don't navigate if they clicked a button or range input
+    if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('input')) {
+      return;
+    }
+    navigate('/discover');
+  };
+
   return (
-    <div className="fixed bottom-[72px] md:bottom-0 left-0 md:left-64 right-0 bg-[#1A1625]/95 backdrop-blur-xl border-t border-white/10 p-2 md:p-4 z-50 flex flex-col md:flex-row items-center justify-between gap-2 md:gap-4 transition-all duration-300">
+    <div 
+      onClick={handlePlayerClick}
+      className="fixed bottom-[72px] md:bottom-0 left-0 md:left-64 right-0 bg-[#1A1625]/95 backdrop-blur-xl border-t border-white/10 p-2 md:p-4 z-50 flex flex-col md:flex-row items-center justify-between gap-2 md:gap-4 transition-all duration-300 cursor-pointer"
+    >
       
       {/* Track Info */}
-      <div className="flex items-center gap-3 w-full md:w-1/3 min-w-0 px-2 md:px-0">
+      <div className="flex items-center gap-3 w-full md:w-1/4 lg:w-1/3 min-w-0 px-2 md:px-0">
         <img 
           src={currentTrack.cover_url} 
           alt={currentTrack.title} 
@@ -49,8 +66,16 @@ export default function GlobalPlayer() {
       </div>
 
       {/* Desktop Controls */}
-      <div className="hidden md:flex flex-col items-center justify-center w-full md:w-1/3 gap-1">
+      <div className="hidden md:flex flex-col items-center justify-center w-full md:w-2/4 lg:w-1/3 gap-1">
         <div className="flex items-center gap-4 md:gap-6">
+          
+          <button 
+            onClick={toggleShuffle} 
+            className={`transition-colors ${isShuffle ? 'text-[#D0FF00]' : 'text-white/50 hover:text-white'}`}
+          >
+            <span className="material-symbols-outlined text-xl">shuffle</span>
+          </button>
+
           <button onClick={prev} className="text-white/70 hover:text-white transition-colors">
             <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>skip_previous</span>
           </button>
@@ -64,8 +89,17 @@ export default function GlobalPlayer() {
             </span>
           </button>
           
-          <button onClick={next} className="text-white/70 hover:text-white transition-colors">
+          <button onClick={() => next(true)} className="text-white/70 hover:text-white transition-colors">
             <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>skip_next</span>
+          </button>
+
+          <button 
+            onClick={toggleRepeatMode} 
+            className={`transition-colors relative ${repeatMode !== 'off' ? 'text-[#D0FF00]' : 'text-white/50 hover:text-white'}`}
+          >
+            <span className="material-symbols-outlined text-xl">
+              {repeatMode === 'one' ? 'repeat_one' : 'repeat'}
+            </span>
           </button>
         </div>
 
@@ -85,9 +119,12 @@ export default function GlobalPlayer() {
       </div>
 
       {/* Right Actions (Desktop) */}
-      <div className="hidden md:flex w-1/3 justify-end px-4">
+      <div className="hidden md:flex w-1/4 lg:w-1/3 justify-end px-4 gap-4 items-center">
         <button className="text-white/50 hover:text-white">
-          <span className="material-symbols-outlined">volume_up</span>
+          <span className="material-symbols-outlined text-xl">queue_music</span>
+        </button>
+        <button className="text-white/50 hover:text-white">
+          <span className="material-symbols-outlined text-xl">volume_up</span>
         </button>
       </div>
       

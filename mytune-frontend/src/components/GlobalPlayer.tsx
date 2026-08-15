@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { usePlayer } from '../context/PlayerContext';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
 
 export default function GlobalPlayer() {
   const { 
@@ -9,6 +10,42 @@ export default function GlobalPlayer() {
   } = usePlayer();
   
   const navigate = useNavigate();
+  
+  const [showPlaylistMenu, setShowPlaylistMenu] = useState(false);
+  const [userPlaylists, setUserPlaylists] = useState<any[]>([]);
+
+  const loadPlaylists = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data } = await supabase.from('playlists').select('*').eq('user_id', user.id);
+    if (data) setUserPlaylists(data);
+  };
+
+  const handlePlaylistClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!showPlaylistMenu) loadPlaylists();
+    setShowPlaylistMenu(!showPlaylistMenu);
+  };
+
+  const addToPlaylist = async (playlistId: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || !currentTrack) return;
+    try {
+      await supabase.from('playlist_tracks').insert({
+        playlist_id: playlistId,
+        user_id: user.id,
+        track_id: currentTrack.id,
+        title: currentTrack.title,
+        artist: currentTrack.artist,
+        cover_url: currentTrack.cover_url,
+        preview_url: currentTrack.preview_url
+      });
+      alert('Added to playlist!');
+    } catch (err) {
+      console.error(err);
+    }
+    setShowPlaylistMenu(false);
+  };
 
   if (!currentTrack) return null;
 
@@ -119,7 +156,33 @@ export default function GlobalPlayer() {
       </div>
 
       {/* Right Actions (Desktop) */}
-      <div className="hidden md:flex w-1/4 lg:w-1/3 justify-end px-4 gap-4 items-center">
+      <div className="hidden md:flex w-1/4 lg:w-1/3 justify-end px-4 gap-4 items-center relative">
+        <button onClick={handlePlaylistClick} className="text-white/50 hover:text-white transition-colors relative">
+          <span className="material-symbols-outlined text-xl">playlist_add</span>
+        </button>
+        
+        {/* Playlist Popover */}
+        {showPlaylistMenu && (
+          <div className="absolute bottom-12 right-10 w-48 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-[100] flex flex-col p-2">
+            <h4 className="text-xs font-bold text-white/50 px-2 pt-1 pb-2 uppercase tracking-wider">Add to Playlist</h4>
+            {userPlaylists.length === 0 ? (
+              <p className="text-xs text-white/40 px-2 pb-2">No playlists found.</p>
+            ) : (
+              <div className="max-h-40 overflow-y-auto no-scrollbar flex flex-col gap-1">
+                {userPlaylists.map(pl => (
+                  <button 
+                    key={pl.id} 
+                    onClick={(e) => { e.stopPropagation(); addToPlaylist(pl.id); }}
+                    className="text-left px-2 py-1.5 text-sm text-white hover:bg-white/10 rounded-md truncate"
+                  >
+                    {pl.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         <button className="text-white/50 hover:text-white">
           <span className="material-symbols-outlined text-xl">queue_music</span>
         </button>

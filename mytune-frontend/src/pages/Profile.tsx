@@ -139,7 +139,7 @@ export default function Profile({ session }: { session?: Session | null }) {
         </div>
 
         {/* Profile Avatar */}
-        <div className="relative z-10 w-32 h-32 rounded-full p-[3px] mb-4 shadow-2xl" style={{ background: BRAND_GRAD }}>
+        <div className="relative z-10 w-32 h-32 flex-shrink-0 aspect-square rounded-full p-[3px] mb-4 shadow-2xl" style={{ background: BRAND_GRAD }}>
           <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-[#16141a] bg-[#1a1a1a] flex items-center justify-center group">
             {profile?.avatar_url ? (
                <img src={profile.avatar_url} className="w-full h-full object-cover" alt="avatar" />

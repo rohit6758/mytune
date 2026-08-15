@@ -1,7 +1,51 @@
+import { useState } from 'react';
+import { supabase } from '../lib/supabase';
+import { usePlayer } from '../context/PlayerContext';
+
 /* Brand gradient — Ultraviolet Sonic */
 const BRAND_GRAD = 'linear-gradient(135deg, #FFF9EB 0%, #FFF9EB 50%, #FFF9EB 100%)';
 
 export default function Create() {
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importUrl, setImportUrl] = useState('');
+  const [importTitle, setImportTitle] = useState('');
+  const [importArtist, setImportArtist] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
+  
+  const { playTrack } = usePlayer();
+
+  const handleImport = async () => {
+    if (!importUrl || !importTitle || !importArtist) return;
+    setIsImporting(true);
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not logged in');
+      
+      const newTrack = {
+        user_id: user.id,
+        track_id: `custom-${Date.now()}`,
+        title: importTitle,
+        artist: importArtist,
+        cover_url: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80',
+        preview_url: importUrl
+      };
+      
+      const { error } = await supabase.from('library').insert(newTrack);
+      if (error) throw error;
+      
+      alert('Track imported to your library successfully!');
+      setShowImportModal(false);
+      setImportUrl('');
+      setImportTitle('');
+      setImportArtist('');
+    } catch (err: any) {
+      alert('Error importing track: ' + err.message);
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
   return (
     <div className="inner-scroll h-full overflow-y-auto px-4 pt-5 pb-6 flex flex-col gap-6">
 
@@ -62,7 +106,10 @@ export default function Create() {
         </button>
 
         {/* Add Music Card */}
-        <button className="group relative flex flex-col items-start p-6 bg-[#1A1625] rounded-3xl hover:bg-[#252031] transition-all duration-500 shadow-xl overflow-hidden border border-white/5 hover:border-white/20 text-left sm:col-span-2 lg:col-span-1">
+        <button 
+          onClick={() => setShowImportModal(true)}
+          className="group relative flex flex-col items-start p-6 bg-[#1A1625] rounded-3xl hover:bg-[#252031] transition-all duration-500 shadow-xl overflow-hidden border border-white/5 hover:border-white/20 text-left sm:col-span-2 lg:col-span-1"
+        >
           <div className="absolute -right-10 -top-10 w-44 h-44 rounded-full blur-3xl opacity-5 group-hover:opacity-10 transition-opacity duration-500 bg-white" />
           {/* Icon */}
           <div className="relative z-10 p-4 rounded-2xl bg-[#110D17] border border-white/5 mb-5">
@@ -81,6 +128,40 @@ export default function Create() {
         </button>
 
       </section>
+
+      {/* Import Modal */}
+      {showImportModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#1A1625] border border-white/10 p-6 rounded-3xl w-full max-w-md shadow-2xl flex flex-col gap-4">
+            <h3 className="text-2xl font-black text-white">Import Track</h3>
+            <p className="text-sm text-white/60">Paste a direct MP3 or audio stream URL to add it to your library.</p>
+            
+            <input 
+              value={importUrl} onChange={e => setImportUrl(e.target.value)}
+              placeholder="Audio URL (e.g., https://example.com/song.mp3)"
+              className="w-full bg-[#110D17] border border-white/10 rounded-xl p-3 text-white placeholder-white/30"
+            />
+            <input 
+              value={importTitle} onChange={e => setImportTitle(e.target.value)}
+              placeholder="Track Title"
+              className="w-full bg-[#110D17] border border-white/10 rounded-xl p-3 text-white placeholder-white/30"
+            />
+            <input 
+              value={importArtist} onChange={e => setImportArtist(e.target.value)}
+              placeholder="Artist Name"
+              className="w-full bg-[#110D17] border border-white/10 rounded-xl p-3 text-white placeholder-white/30"
+            />
+            
+            <div className="flex gap-3 mt-2">
+              <button onClick={() => setShowImportModal(false)} className="flex-1 py-3 rounded-xl bg-white/10 text-white font-bold hover:bg-white/20">Cancel</button>
+              <button onClick={handleImport} disabled={isImporting} className="flex-1 py-3 rounded-xl bg-[#FFF9EB] text-black font-bold hover:bg-[#e6e0d4]">
+                {isImporting ? 'Importing...' : 'Save Track'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

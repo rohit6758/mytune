@@ -1,48 +1,80 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 import type { PanInfo } from 'framer-motion';
-
-const MOCK_TRACKS = [
-  {
-    id: 1,
-    title: 'Midnight City Flows',
-    artist: 'The Neon Synthetics',
-    artistHandle: '@neon_synthetics',
-    tags: ['Electronic Pop', 'Chill'],
-    bgImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuD7oSNvUX4pO6L9PHAtlaax3oRUPhu2BIH09LXaw--8N2qYSD4NqMJweU9UqsR8qd3Ig4q5ufgyAwJR0_SHqsAiSdHoPy3j1P9jJs0gD48BSt-mQm8rTjupFxK5tGVJ6arByk50bfPoyr8xE6KcX50OB8IFGyRmja2fzA7voabuzbm9HuoK6CzjJ1B2prSOUoEod1dCHhvhuo5XM0GpiXF0lEPX7Yd_evq3y1u4y34A0vApQDGMetZxFg",
-    likes: '24.6K', comments: '1.2K',
-  },
-  {
-    id: 2,
-    title: 'Neon Circuitry',
-    artist: 'Byte Shift',
-    artistHandle: '@byte_shift',
-    tags: ['Synthwave', 'Dark'],
-    bgImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuBtfro2hwOapTOatiqSlwHnkblitbp8Jc-t9LrSQJq_7nLD3RSugNPpeZfVMU1HpoVwMZYF73y0cROOei4A2Fonx7TvmahFgt2kwLtnZhO8dCWkl_ePCkT4IcJp01lj3qftH3dF243vCxVeZ3EkG4KubEuxac2RXdYMzixig-sJxhgQaZBGK1AVUYjMrUbOWLm83TSHRoFRRXnKGzC78uJXsZQeLy_hnfXS-JkkyOLnf8C9g4ctIytOeQ",
-    likes: '18.3K', comments: '903',
-  },
-  {
-    id: 3,
-    title: 'Velocity Drive',
-    artist: 'Krome',
-    artistHandle: '@krome_official',
-    tags: ['Hip-Hop', 'Energy'],
-    bgImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuB6GDJr-cam4k1a0uJVmjJqNb78_5d3erWl2ggAG4vA_zeK3JrCkDbK0Xae69Ke-vcUN_HEs1m6JyLdScjMIjzg7VB2Ms1nl2N1_mqWZw4tWa1ZxHh6JsQpyRSX1droaLWfwCqsGN5rCQe2jEddFaIY0uYf_NqcHiz7RF6xXwo7DEzrqOfT9ukM32b2ztubihRkUVbiMA2BB6muxdOCbB6VPmRRAoY3b0uLyWH8-KaEHwbqAHaKoeWsrw",
-    likes: '31.1K', comments: '2.4K',
-  },
-];
 
 const BRAND_GRAD = 'linear-gradient(135deg, #FF7000 0%, #FF3020 55%, #FF0000 100%)';
 
 export default function Discover() {
-  const [tracks]       = useState(MOCK_TRACKS);
+  const [tracks, setTracks]             = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [likeOpacity,  setLikeOpacity]  = useState(0);
   const [skipOpacity,  setSkipOpacity]  = useState(0);
   const [isPlaying,    setIsPlaying]    = useState(true);
   const [liked,        setLiked]        = useState(false);
+  const [loading,      setLoading]      = useState(true);
+  
+  const [progress, setProgress] = useState(0);
+  const [currentTime, setCurrentTime] = useState('0:00');
+  
   const controls = useAnimation();
-  const currentTrack   = tracks[currentIndex];
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Fetch from Deezer API via cors proxy
+  useEffect(() => {
+    const fetchTracks = async () => {
+      try {
+        const deezerUrl = 'https://api.deezer.com/chart/0/tracks';
+        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(deezerUrl)}`;
+        const res = await fetch(proxyUrl);
+        const data = await res.json();
+        
+        if (data && data.data && data.data.length > 0) {
+          const mapped = data.data.map((t: any) => ({
+            id: t.id,
+            title: t.title,
+            artist: t.artist.name,
+            artistHandle: '@' + t.artist.name.toLowerCase().replace(/\s+/g, '_'),
+            tags: ['Trending'],
+            bgImage: t.album.cover_xl || t.album.cover_big || t.album.cover_medium,
+            previewUrl: t.preview,
+            likes: Math.floor(Math.random() * 50) + 'K', 
+            comments: Math.floor(Math.random() * 5) + 'K'
+          })).filter((t: any) => t.previewUrl); // Ensure it has a preview
+          
+          setTracks(mapped);
+        }
+      } catch (err) {
+        console.error("Failed to fetch tracks", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTracks();
+  }, []);
+
+  const currentTrack = tracks[currentIndex];
+
+  // Handle Audio playback
+  useEffect(() => {
+    if (!audioRef.current || !currentTrack) return;
+    
+    if (isPlaying) {
+      audioRef.current.play().catch(e => console.log('Autoplay prevented:', e));
+    } else {
+      audioRef.current.pause();
+    }
+  }, [isPlaying, currentIndex, currentTrack]);
+
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      const current = audioRef.current.currentTime;
+      const duration = audioRef.current.duration || 30;
+      setProgress((current / duration) * 100);
+      
+      const secs = Math.floor(current);
+      setCurrentTime(`0:${secs < 10 ? '0' : ''}${secs}`);
+    }
+  };
 
   const handleDrag = (_e: any, info: PanInfo) => {
     const x = info.offset.x;
@@ -63,18 +95,42 @@ export default function Discover() {
     controls.set({ x: 0, opacity: 0, rotate: 0 });
     controls.start({ opacity: 1, transition: { duration: 0.22 } });
     setCurrentIndex(prev => (prev + 1) % tracks.length);
+    setProgress(0);
+    setCurrentTime('0:00');
   };
 
   const handleLike  = () => { setLiked(true); controls.start({ scale: [1, 1.035, 1], transition: { duration: 0.18 } }); };
   const handleSkip  = () => controls.start({ x: '-130vw', opacity: 0, rotate: -18, transition: { duration: 0.3 } }).then(nextTrack);
 
-  if (!currentTrack) return null;
+  if (loading) {
+    return (
+      <div className="relative w-full h-screen bg-[#0a0a0a] flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-[#FF3020] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!currentTrack) {
+    return (
+      <div className="relative w-full h-screen bg-[#0a0a0a] flex items-center justify-center text-white/50">
+        No tracks available.
+      </div>
+    );
+  }
 
   return (
     <div
       className="relative w-full bg-[#0a0a0a] overflow-hidden flex flex-col items-center justify-center"
       style={{ height: 'calc(100dvh - 62px)' }}
     >
+      <audio 
+        ref={audioRef} 
+        src={currentTrack.previewUrl} 
+        onTimeUpdate={handleTimeUpdate}
+        onEnded={handleSkip}
+        loop={false}
+      />
+
       {/* ── Ambient blurred background ───────────────────── */}
       <div
         className="absolute inset-0 bg-cover bg-center scale-110"
@@ -189,7 +245,7 @@ export default function Discover() {
 
           {/* Tags top-left */}
           <div className="absolute top-3 left-3 flex gap-1.5 flex-wrap z-10">
-            {currentTrack.tags.map(tag => (
+            {currentTrack.tags.map((tag: string) => (
               <span
                 key={tag}
                 className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full text-white"
@@ -221,9 +277,9 @@ export default function Discover() {
 
           {/* Progress bar */}
           <div className="flex items-center gap-2">
-            <span className="text-[11px] text-white/40 font-mono w-8">0:18</span>
+            <span className="text-[11px] text-white/40 font-mono w-8">{currentTime}</span>
             <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.12)' }}>
-              <div className="h-full rounded-full w-[60%]" style={{ background: BRAND_GRAD }} />
+              <div className="h-full rounded-full" style={{ background: BRAND_GRAD, width: `${progress}%` }} />
             </div>
             <span className="text-[11px] text-white/40 font-mono w-8 text-right">0:30</span>
           </div>

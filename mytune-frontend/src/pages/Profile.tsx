@@ -9,6 +9,7 @@ interface ProfileData {
   full_name: string;
   bio: string;
   favorite_singer: string;
+  avatar_url?: string;
 }
 
 export default function Profile({ session }: { session?: Session | null }) {
@@ -20,9 +21,10 @@ export default function Profile({ session }: { session?: Session | null }) {
   // Edit state
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<ProfileData>({
-    username: '', full_name: '', bio: '', favorite_singer: ''
+    username: '', full_name: '', bio: '', favorite_singer: '', avatar_url: ''
   });
   const [saveLoading, setSaveLoading] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -39,7 +41,8 @@ export default function Profile({ session }: { session?: Session | null }) {
           username: meta.username || '',
           full_name: meta.full_name || '',
           bio: meta.bio || '',
-          favorite_singer: meta.favorite_singer || ''
+          favorite_singer: meta.favorite_singer || '',
+          avatar_url: meta.avatar_url || ''
         };
         setProfile(profileData);
         setEditForm(profileData);
@@ -78,6 +81,51 @@ export default function Profile({ session }: { session?: Session | null }) {
     }
   };
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    
+    setUploadingAvatar(true);
+    try {
+      // 1. Upload to Supabase Storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user?.id}-${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) {
+         if (uploadError.message.toLowerCase().includes('bucket') || uploadError.message.toLowerCase().includes('not found')) {
+            alert("Storage bucket not found! Please go to your Supabase Dashboard -> Storage, and create a public bucket named 'avatars'.");
+         } else {
+            throw uploadError;
+         }
+         return;
+      }
+
+      // 2. Get Public URL
+      const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+      const publicUrl = data.publicUrl;
+
+      // 3. Update User Metadata
+      const newEditForm = { ...editForm, avatar_url: publicUrl };
+      setEditForm(newEditForm);
+      setProfile(newEditForm);
+
+      await supabase.auth.updateUser({
+        data: { avatar_url: publicUrl }
+      });
+
+    } catch (err: any) {
+      console.error(err);
+      alert('Error uploading avatar: ' + err.message);
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
   if (loading) {
     return <div className="h-full flex items-center justify-center"><div className="w-8 h-8 border-4 border-[#D0FF00] border-t-transparent rounded-full animate-spin"></div></div>;
   }
@@ -85,20 +133,37 @@ export default function Profile({ session }: { session?: Session | null }) {
   return (
     <div className="inner-scroll h-full overflow-y-auto w-full max-w-3xl mx-auto flex flex-col bg-[#110D17]">
       {/* Header section */}
-      <div className="relative w-full pb-6 border-b border-white/10 pt-16 flex flex-col items-center px-4">
+      <div className="relative w-full pb-6 pt-16 flex flex-col items-center px-4">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
            <div className="absolute top-[-50%] left-[-10%] w-[120%] h-[150%] bg-[#8B16FF]/20 blur-[80px] rounded-full" />
         </div>
 
         {/* Profile Avatar */}
         <div className="relative z-10 w-32 h-32 rounded-full p-[3px] mb-4 shadow-2xl" style={{ background: BRAND_GRAD }}>
-          <div className="w-full h-full rounded-full overflow-hidden border-4 border-[#110D17] bg-[#1a1a1a] flex items-center justify-center">
-             <span className="material-symbols-outlined text-white/30 text-5xl">person</span>
+          <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-[#110D17] bg-[#1a1a1a] flex items-center justify-center group">
+            {profile?.avatar_url ? (
+               <img src={profile.avatar_url} className="w-full h-full object-cover" alt="avatar" />
+            ) : (
+               <span className="material-symbols-outlined text-white/30 text-5xl">person</span>
+            )}
+            
+            {/* Hover overlay for upload */}
+            <label className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+              {uploadingAvatar ? (
+                <div className="w-6 h-6 border-2 border-[#D0FF00] border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined text-white text-2xl">photo_camera</span>
+                  <span className="text-[10px] text-white font-bold mt-1 uppercase tracking-wider">Change</span>
+                  <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={uploadingAvatar} />
+                </>
+              )}
+            </label>
           </div>
         </div>
 
         {/* Name and Stats */}
-        <div className="relative z-10 flex flex-col items-center text-center w-full max-w-md">
+        <div className="relative z-10 flex flex-col items-center text-center w-full max-w-md pb-32">
           {isEditing ? (
             <div className="w-full flex flex-col gap-3 mb-6 bg-[#1A1625] p-6 rounded-2xl border border-white/10 text-left">
               <div>
@@ -174,29 +239,6 @@ export default function Profile({ session }: { session?: Session | null }) {
             </>
           )}
         </div>
-      </div>
-
-      {/* Profile Sections */}
-      <div className="p-6 flex flex-col gap-8 pb-32">
-        <section>
-          <h2 className="text-xl font-extrabold text-white mb-4">Settings</h2>
-          <div className="flex flex-col gap-2">
-            {[
-              { icon: 'settings', label: 'Account Settings' },
-              { icon: 'notifications', label: 'Notifications' },
-              { icon: 'privacy_tip', label: 'Privacy & Security' },
-              { icon: 'help', label: 'Help & Support' }
-            ].map(item => (
-              <button key={item.label} className="flex items-center justify-between p-4 bg-[#1A1625] rounded-2xl hover:bg-white/5 transition-colors border border-white/5 group">
-                <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-white/50 group-hover:text-[#D0FF00] transition-colors" style={{ fontVariationSettings: "'FILL' 0" }}>{item.icon}</span>
-                  <span className="text-white font-medium">{item.label}</span>
-                </div>
-                <span className="material-symbols-outlined text-white/30" style={{ fontVariationSettings: "'FILL' 0" }}>chevron_right</span>
-              </button>
-            ))}
-          </div>
-        </section>
       </div>
     </div>
   );

@@ -4,7 +4,7 @@ import { usePlayer, Track } from '../context/PlayerContext';
 import AddToPlaylistModal from '../components/AddToPlaylistModal';
 import { useNavigate } from 'react-router-dom';
 
-const GENRES = ['Telugu', 'Hindi', 'Bollywood', 'Pop', 'Hip Hop', 'Rock'];
+const GENRES = ['Pop', 'Hip Hop', 'Rock', 'Electronic', 'R&B', 'Alternative'];
 const BRAND_GRAD = 'linear-gradient(135deg, #A855F7 0%, #8B16FF 50%, #5E00D4 100%)';
 
 export default function Search() {
@@ -22,22 +22,17 @@ export default function Search() {
   useEffect(() => {
     GENRES.forEach(async (genre) => {
       try {
-        const queryTerm = genre.toLowerCase() === 'telugu' ? 'telugu hit songs' : genre.toLowerCase() === 'hindi' ? 'hindi hit songs' : genre;
-        const res = await fetch(`https://saavn.sumit.co/api/search/songs?query=${encodeURIComponent(queryTerm)}`);
+        const res = await fetch(`https://discoveryprovider.audius.co/v1/tracks/search?query=${encodeURIComponent(genre)}`);
         const json = await res.json();
-        const data = json.data?.results;
+        const data = json.data;
         
-        const mapped = (data || []).map((t: any) => {
-           const imageArr = t.image || [];
-           const dlArr = t.downloadUrl || [];
-           return {
-             id: String(t.id),
-             title: t.name?.replace(/&quot;/g, '"') || 'Unknown',
-             artist: t.artists?.primary?.[0]?.name || 'Unknown Artist',
-             cover_url: imageArr.find((i: any) => i.quality === '500x500')?.url || imageArr[imageArr.length - 1]?.url || 'https://via.placeholder.com/500',
-             preview_url: dlArr.find((d: any) => d.quality === '320kbps')?.url || dlArr[dlArr.length - 1]?.url || '',
-           };
-        }).filter((t: Track) => t.preview_url);
+        const mapped = (data || []).map((t: any) => ({
+            id: String(t.id),
+            title: t.title,
+            artist: t.user?.name || 'Unknown',
+            cover_url: t.artwork?.['480x480'] || t.user?.profile_picture?.['480x480'] || 'https://via.placeholder.com/480',
+            preview_url: `https://discoveryprovider.audius.co/v1/tracks/${t.id}/stream`,
+        }));
 
         setGenreTracks(prev => ({ ...prev, [genre]: mapped }));
       } catch (e) {
@@ -57,21 +52,17 @@ export default function Search() {
     const timeoutId = setTimeout(async () => {
       setIsSearching(true);
       try {
-        const res = await fetch(`https://saavn.sumit.co/api/search/songs?query=${encodeURIComponent(query)}`);
+        const res = await fetch(`https://discoveryprovider.audius.co/v1/tracks/search?query=${encodeURIComponent(query)}`);
         const json = await res.json();
-        const data = json.data?.results;
+        const data = json.data;
         
-        const mapped = (data || []).map((t: any) => {
-           const imageArr = t.image || [];
-           const dlArr = t.downloadUrl || [];
-           return {
-             id: String(t.id),
-             title: t.name?.replace(/&quot;/g, '"') || 'Unknown',
-             artist: t.artists?.primary?.[0]?.name || 'Unknown Artist',
-             cover_url: imageArr.find((i: any) => i.quality === '500x500')?.url || imageArr[imageArr.length - 1]?.url || 'https://via.placeholder.com/500',
-             preview_url: dlArr.find((d: any) => d.quality === '320kbps')?.url || dlArr[dlArr.length - 1]?.url || '',
-           };
-        }).filter((t: Track) => t.preview_url);
+        const mapped = (data || []).map((t: any) => ({
+            id: String(t.id),
+            title: t.title,
+            artist: t.user?.name || 'Unknown',
+            cover_url: t.artwork?.['480x480'] || t.user?.profile_picture?.['480x480'] || 'https://via.placeholder.com/480',
+            preview_url: `https://discoveryprovider.audius.co/v1/tracks/${t.id}/stream`,
+        }));
 
         setSearchResults(mapped);
       } catch (e) {

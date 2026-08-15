@@ -1,8 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 import type { PanInfo } from 'framer-motion';
+import { supabase } from '../lib/supabase';
 
 const BRAND_GRAD = 'linear-gradient(135deg, #FF7000 0%, #FF3020 55%, #FF0000 100%)';
+
+const DISCOVER_TERMS = ['pop', 'billboard', 'viral', 'top hits', 'hip hop', 'dance'];
 
 export default function Discover() {
   const [tracks, setTracks]             = useState<any[]>([]);
@@ -19,32 +22,34 @@ export default function Discover() {
   const controls = useAnimation();
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Fetch from Deezer API via cors proxy
+  // Fetch from iTunes API (Native CORS support, high reliability)
   useEffect(() => {
     const fetchTracks = async () => {
       try {
-        const deezerUrl = 'https://api.deezer.com/chart/0/tracks';
-        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(deezerUrl)}`;
-        const res = await fetch(proxyUrl);
+        const randomTerm = DISCOVER_TERMS[Math.floor(Math.random() * DISCOVER_TERMS.length)];
+        const itunesUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(randomTerm)}&limit=25&media=music`;
+        const res = await fetch(itunesUrl);
         const data = await res.json();
         
-        if (data && data.data && data.data.length > 0) {
-          const mapped = data.data.map((t: any) => ({
-            id: t.id,
-            title: t.title,
-            artist: t.artist.name,
-            artistHandle: '@' + t.artist.name.toLowerCase().replace(/\s+/g, '_'),
-            tags: ['Trending'],
-            bgImage: t.album.cover_xl || t.album.cover_big || t.album.cover_medium,
-            previewUrl: t.preview,
+        if (data && data.results && data.results.length > 0) {
+          const mapped = data.results.map((t: any) => ({
+            id: t.trackId,
+            title: t.trackName,
+            artist: t.artistName,
+            artistHandle: '@' + t.artistName.toLowerCase().replace(/[^a-z0-9]/g, '_'),
+            tags: ['Trending', t.primaryGenreName].filter(Boolean),
+            bgImage: t.artworkUrl100 ? t.artworkUrl100.replace('100x100bb', '600x600bb') : '',
+            previewUrl: t.previewUrl,
             likes: Math.floor(Math.random() * 50) + 'K', 
             comments: Math.floor(Math.random() * 5) + 'K'
-          })).filter((t: any) => t.previewUrl); // Ensure it has a preview
+          })).filter((t: any) => t.previewUrl && t.bgImage); // Ensure preview and image exist
           
-          setTracks(mapped);
+          // Shuffle tracks array for more randomness
+          const shuffled = mapped.sort(() => 0.5 - Math.random());
+          setTracks(shuffled);
         }
       } catch (err) {
-        console.error("Failed to fetch tracks", err);
+        console.error("Failed to fetch tracks from iTunes", err);
       } finally {
         setLoading(false);
       }
@@ -76,6 +81,25 @@ export default function Discover() {
     }
   };
 
+  const saveToLibrary = async (track: any) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    try {
+      await supabase.from('library').insert({
+        user_id: user.id,
+        track_id: String(track.id),
+        title: track.title,
+        artist: track.artist,
+        cover_url: track.bgImage,
+        preview_url: track.previewUrl
+      });
+      console.log('Saved to library');
+    } catch (e) {
+      console.error('Failed to save track', e);
+    }
+  };
+
   const handleDrag = (_e: any, info: PanInfo) => {
     const x = info.offset.x;
     const t = 80;
@@ -85,12 +109,15 @@ export default function Discover() {
 
   const handleDragEnd = async (_e: any, info: PanInfo) => {
     const x = info.offset.x;
-    if      (x >  80) { await controls.start({ x: '130vw', opacity: 0, rotate: 18, transition: { duration: 0.35 } }); nextTrack(); }
-    else if (x < -80) { await controls.start({ x: '-130vw', opacity: 0, rotate: -18, transition: { duration: 0.35 } }); nextTrack(); }
+    if      (x >  80) { await controls.start({ x: '130vw', opacity: 0, rotate: 18, transition: { duration: 0.35 } }); nextTrack(true); }
+    else if (x < -80) { await controls.start({ x: '-130vw', opacity: 0, rotate: -18, transition: { duration: 0.35 } }); nextTrack(false); }
     else { controls.start({ x: 0, opacity: 1, rotate: 0, transition: { type: 'spring', stiffness: 300 } }); setLikeOpacity(0); setSkipOpacity(0); }
   };
 
-  const nextTrack = () => {
+  const nextTrack = (wasLiked: boolean = false) => {
+    if (wasLiked && currentTrack) {
+      saveToLibrary(currentTrack);
+    }
     setLikeOpacity(0); setSkipOpacity(0); setLiked(false);
     controls.set({ x: 0, opacity: 0, rotate: 0 });
     controls.start({ opacity: 1, transition: { duration: 0.22 } });
@@ -99,8 +126,13 @@ export default function Discover() {
     setCurrentTime('0:00');
   };
 
-  const handleLike  = () => { setLiked(true); controls.start({ scale: [1, 1.035, 1], transition: { duration: 0.18 } }); };
-  const handleSkip  = () => controls.start({ x: '-130vw', opacity: 0, rotate: -18, transition: { duration: 0.3 } }).then(nextTrack);
+  const handleLike  = () => { 
+    setLiked(true); 
+    saveToLibrary(currentTrack);
+    controls.start({ scale: [1, 1.035, 1], transition: { duration: 0.18 } }); 
+  };
+  
+  const handleSkip  = () => controls.start({ x: '-130vw', opacity: 0, rotate: -18, transition: { duration: 0.3 } }).then(() => nextTrack(false));
 
   if (loading) {
     return (
@@ -301,7 +333,7 @@ export default function Discover() {
               </span>
             </button>
 
-            <button onClick={() => nextTrack()} className="w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition-transform" style={{ background: 'rgba(255,255,255,0.07)' }}>
+            <button onClick={() => nextTrack(false)} className="w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition-transform" style={{ background: 'rgba(255,255,255,0.07)' }}>
               <span className="material-symbols-outlined text-white text-xl" style={{ fontVariationSettings: "'FILL' 0" }}>skip_next</span>
             </button>
           </div>

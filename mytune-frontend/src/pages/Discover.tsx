@@ -5,7 +5,7 @@ import { usePlayer, Track } from '../context/PlayerContext';
 const BRAND_GRAD = 'linear-gradient(135deg, #FFF9EB 0%, #FFF9EB 50%, #FFF9EB 100%)';
 
 export default function Discover() {
-  const { queue, currentTrack, playQueue, playTrack, addToQueue } = usePlayer();
+  const { queue, currentTrack, playQueue, playTrack, addToQueue, insertNext } = usePlayer();
   const [loading, setLoading] = useState(true);
   const [favoriteSinger, setFavoriteSinger] = useState('pop'); // Default
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -20,10 +20,10 @@ export default function Discover() {
         const { data: { user } } = await supabase.auth.getUser();
         if (user && user.user_metadata?.favorite_singer) {
           setFavoriteSinger(user.user_metadata.favorite_singer);
-          await fetchTracks(user.user_metadata.favorite_singer, true);
+          await fetchTracks(user.user_metadata.favorite_singer, 'replace');
           return;
         }
-        await fetchTracks('pop', true);
+        await fetchTracks('pop', 'replace');
       } catch (err) {
         console.error('Discover init error', err);
         setLoading(false);
@@ -38,7 +38,7 @@ export default function Discover() {
     }
   }, []);
 
-  const fetchTracks = async (term: string, replaceQueue: boolean = false) => {
+  const fetchTracks = async (term: string, action: 'replace' | 'append' | 'insertNext' = 'append') => {
     try {
       const itunesUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&limit=25&media=music`;
       const res = await fetch(itunesUrl);
@@ -56,8 +56,10 @@ export default function Discover() {
         // Shuffle
         const shuffled = mapped.sort(() => 0.5 - Math.random());
         
-        if (replaceQueue) {
+        if (action === 'replace') {
           playQueue(shuffled);
+        } else if (action === 'insertNext') {
+          insertNext(shuffled);
         } else {
           shuffled.forEach(t => addToQueue(t));
         }
@@ -122,8 +124,8 @@ export default function Discover() {
           preview_url: track.preview_url
         });
         
-        // Dynamic recommendation: fetch more by this artist
-        fetchTracks(track.artist, false);
+        // Dynamic recommendation: fetch more by this artist and queue them next
+        fetchTracks(track.artist, 'insertNext');
       } catch (e) {
         console.error('Failed to save track', e);
       }
@@ -193,10 +195,6 @@ export default function Discover() {
                   <span className="material-symbols-outlined text-[28px] text-white" style={{ fontVariationSettings: isLiked ? "'FILL' 1" : "'FILL' 0" }}>favorite</span>
                 </button>
                 <span className="text-white/50 text-xs font-bold -mt-4">{isLiked ? 'Liked' : 'Like'}</span>
-
-                <button className="w-12 h-12 rounded-full flex items-center justify-center transition-all active:scale-90" style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)' }}>
-                  <span className="material-symbols-outlined text-white text-[24px]">share</span>
-                </button>
               </div>
             </div>
           </div>

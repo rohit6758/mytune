@@ -19,6 +19,7 @@ interface PlayerContextType {
   playTrack: (track: Track) => void;
   playQueue: (tracks: Track[], startIndex?: number) => void;
   addToQueue: (track: Track) => void;
+  insertNext: (tracks: Track[]) => void;
   pause: () => void;
   resume: () => void;
   next: (forceSkip?: boolean) => void;
@@ -132,6 +133,20 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const insertNext = (tracks: Track[]) => {
+    if (tracks.length === 0) return;
+    setOriginalQueue(prev => {
+      const copy = [...prev];
+      copy.splice(queueIndex + 1, 0, ...tracks);
+      return copy;
+    });
+    setQueue(prev => {
+      const copy = [...prev];
+      copy.splice(queueIndex + 1, 0, ...tracks);
+      return copy;
+    });
+  };
+
   const toggleRepeatMode = () => {
     setRepeatMode(prev => prev === 'off' ? 'all' : prev === 'all' ? 'one' : 'off');
   };
@@ -226,7 +241,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   return (
     <PlayerContext.Provider value={{
       currentTrack, queue, isPlaying, progress, duration, repeatMode, isShuffle,
-      playTrack, playQueue, addToQueue, pause, resume, next, prev, seek, toggleRepeatMode, toggleShuffle
+      playTrack, playQueue, addToQueue, insertNext, pause, resume, next, prev, seek, toggleRepeatMode, toggleShuffle
     }}>
       {children}
     </PlayerContext.Provider>

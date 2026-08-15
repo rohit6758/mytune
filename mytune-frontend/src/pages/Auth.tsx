@@ -10,6 +10,15 @@ export default function Auth() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
+  const validatePassword = (pwd: string) => {
+    if (pwd.length < 8) return "Password must be at least 8 characters long.";
+    if (!/[A-Z]/.test(pwd)) return "Password must contain at least one uppercase letter.";
+    if (!/[a-z]/.test(pwd)) return "Password must contain at least one lowercase letter.";
+    if (!/[0-9]/.test(pwd)) return "Password must contain at least one number.";
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(pwd)) return "Password must contain at least one special character.";
+    return null;
+  };
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -21,6 +30,9 @@ export default function Auth() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       } else {
+        const passError = validatePassword(password);
+        if (passError) throw new Error(passError);
+
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
         setMessage('Check your email for the confirmation link!');
@@ -45,8 +57,8 @@ export default function Auth() {
             {isLogin ? 'Welcome Back' : 'Create Account'}
           </h2>
 
-          {error && <div className="bg-red-500/20 border border-red-500/50 text-red-200 text-sm p-3 rounded-lg mb-4 text-center">{error}</div>}
-          {message && <div className="bg-green-500/20 border border-green-500/50 text-green-200 text-sm p-3 rounded-lg mb-4 text-center">{message}</div>}
+          {error && <div className="bg-red-500/20 border border-red-500/50 text-red-200 text-sm p-3 rounded-lg mb-4 text-center leading-relaxed">{error}</div>}
+          {message && <div className="bg-green-500/20 border border-green-500/50 text-green-200 text-sm p-3 rounded-lg mb-4 text-center leading-relaxed">{message}</div>}
 
           <form onSubmit={handleAuth} className="flex flex-col gap-4">
             <div>

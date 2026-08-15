@@ -148,7 +148,7 @@ export default function Profile({ session }: { session?: Session | null }) {
             )}
             
             {/* Hover overlay for upload */}
-            <label className="absolute inset-0 bg-transparent/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+            <label className={`absolute inset-0 bg-[#16141a]/60 flex flex-col items-center justify-center transition-opacity cursor-pointer ${isEditing ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
               {uploadingAvatar ? (
                 <div className="w-6 h-6 border-2 border-[#C5E384] border-t-transparent rounded-full animate-spin"></div>
               ) : (

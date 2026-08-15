@@ -23,16 +23,9 @@ export default function Onboarding({ session, onComplete }: OnboardingProps) {
     setError(null);
 
     try {
-      // Auto-generate a random username since we removed the username field
-      const randomUsername = `user_${Math.random().toString(36).substring(2, 10)}`;
-
-      const { error } = await supabase.from('profiles').insert([
-        {
-          id: session.user.id,
-          username: randomUsername,
-          favorite_singer: favoriteSinger.trim(),
-        }
-      ]);
+      const { error } = await supabase.auth.updateUser({
+        data: { favorite_singer: favoriteSinger.trim() }
+      });
 
       if (error) throw error;
       onComplete(); // Successfully created profile

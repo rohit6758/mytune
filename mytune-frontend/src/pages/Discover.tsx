@@ -18,13 +18,10 @@ export default function Discover() {
     const initDiscover = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { data } = await supabase.from('profiles').select('favorite_singer').eq('id', user.id).single();
-          if (data && data.favorite_singer) {
-            setFavoriteSinger(data.favorite_singer);
-            await fetchTracks(data.favorite_singer, true);
-            return;
-          }
+        if (user && user.user_metadata?.favorite_singer) {
+          setFavoriteSinger(user.user_metadata.favorite_singer);
+          await fetchTracks(user.user_metadata.favorite_singer, true);
+          return;
         }
         await fetchTracks('pop', true);
       } catch (err) {

@@ -22,7 +22,7 @@ function App() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      if (session) checkProfile(session.user.id);
+      if (session) checkProfile();
       else setLoading(false);
     });
 
@@ -30,7 +30,7 @@ function App() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      if (session) checkProfile(session.user.id);
+      if (session) checkProfile();
       else {
         setHasProfile(null);
         setLoading(false);
@@ -40,11 +40,14 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const checkProfile = async (userId: string) => {
+  const checkProfile = async () => {
     try {
-      const { data, error } = await supabase.from('profiles').select('id').eq('id', userId).single();
-      if (error && error.code !== 'PGRST116') throw error; // PGRST116 is 'not found'
-      setHasProfile(!!data);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.user_metadata?.favorite_singer) {
+        setHasProfile(true);
+      } else {
+        setHasProfile(false);
+      }
     } catch (err) {
       console.error('Error checking profile:', err);
       setHasProfile(false);

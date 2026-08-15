@@ -32,21 +32,17 @@ export default function Profile({ session }: { session?: Session | null }) {
 
   const fetchProfile = async () => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user?.id)
-        .single();
-        
-      if (error) throw error;
-      if (data) {
-        setProfile(data);
-        setEditForm({
-          username: data.username || '',
-          full_name: data.full_name || '',
-          bio: data.bio || '',
-          favorite_singer: data.favorite_singer || ''
-        });
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.user_metadata) {
+        const meta = user.user_metadata;
+        const profileData = {
+          username: meta.username || '',
+          full_name: meta.full_name || '',
+          bio: meta.bio || '',
+          favorite_singer: meta.favorite_singer || ''
+        };
+        setProfile(profileData);
+        setEditForm(profileData);
       }
     } catch (err) {
       console.error('Error fetching profile', err);
@@ -62,22 +58,21 @@ export default function Profile({ session }: { session?: Session | null }) {
   const handleSave = async () => {
     setSaveLoading(true);
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({
+      const { error } = await supabase.auth.updateUser({
+        data: {
           username: editForm.username,
           full_name: editForm.full_name,
           bio: editForm.bio,
           favorite_singer: editForm.favorite_singer,
-        })
-        .eq('id', user?.id);
+        }
+      });
         
       if (error) throw error;
       setProfile(editForm);
       setIsEditing(false);
     } catch (err) {
       console.error('Error saving profile', err);
-      alert('Failed to save profile. Username might be taken.');
+      alert('Failed to save profile.');
     } finally {
       setSaveLoading(false);
     }

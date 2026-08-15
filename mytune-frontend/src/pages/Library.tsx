@@ -91,11 +91,11 @@ export default function Library() {
           <p className="text-sm mt-1 text-center max-w-[250px]">Go to Discover or Search and like some songs to add them here.</p>
         </div>
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {tracks.map(track => {
             const isPlaying = playingTrackId === track.track_id;
             return (
-              <div key={track.id} onClick={() => handlePlay(track)} className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 cursor-pointer transition-colors group">
+              <div key={track.id} onClick={() => handlePlay(track)} className="flex items-center gap-3 p-3 bg-[#1A1625] rounded-xl hover:bg-white/5 cursor-pointer transition-colors group border border-transparent hover:border-white/10">
                 <div className="relative w-14 h-14 rounded-md overflow-hidden flex-shrink-0 shadow-lg">
                   <img src={track.cover_url} className="w-full h-full object-cover" alt={track.title} />
                   <div className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity ${isPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>

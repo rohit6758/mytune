@@ -152,8 +152,7 @@ export default function Discover() {
 
   return (
     <div
-      className="relative w-full bg-[#110D17] overflow-hidden flex flex-col items-center justify-center"
-      style={{ height: 'calc(100dvh - 62px)' }}
+      className="relative w-full bg-[#110D17] overflow-hidden flex flex-col items-center justify-center h-[calc(100dvh-62px)] md:h-[100dvh]"
     >
       <audio 
         ref={audioRef} 

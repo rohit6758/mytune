@@ -136,7 +136,7 @@ export default function Library() {
         </div>
 
         {isCreating && (
-          <div className="flex gap-2 mb-4 bg-[#2A1810] p-3 rounded-xl border border-white/10">
+          <div className="flex gap-2 mb-4 bg-[#1e1b24] p-3 rounded-xl border border-white/10">
             <input 
               value={newPlaylistName}
               onChange={e => setNewPlaylistName(e.target.value)}
@@ -150,14 +150,14 @@ export default function Library() {
         )}
 
         {playlists.length === 0 ? (
-          <div className="bg-[#2A1810] border border-white/5 rounded-2xl p-6 text-center text-white/50">
+          <div className="bg-[#1e1b24] border border-white/5 rounded-2xl p-6 text-center text-white/50">
             You don't have any playlists yet.
           </div>
         ) : (
           <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
             {playlists.map(pl => (
               <div key={pl.id} className="flex-shrink-0 w-36 cursor-pointer group">
-                <div className="w-36 h-36 bg-[#342015] rounded-xl flex items-center justify-center mb-2 shadow-lg group-hover:scale-105 transition-transform">
+                <div className="w-36 h-36 bg-[#25212c] rounded-xl flex items-center justify-center mb-2 shadow-lg group-hover:scale-105 transition-transform">
                   <span className="material-symbols-outlined text-4xl text-white/20">queue_music</span>
                 </div>
                 <p className="text-sm font-bold text-white truncate">{pl.name}</p>
@@ -203,7 +203,7 @@ export default function Library() {
                   <div className="relative w-12 h-12 rounded-md overflow-hidden flex-shrink-0 shadow-md">
                     <img src={track.cover_url} className="w-full h-full object-cover" alt={track.title} />
                     {isPlaying && (
-                      <div className="absolute inset-0 bg-[#200F07]/40 flex items-center justify-center">
+                      <div className="absolute inset-0 bg-transparent/40 flex items-center justify-center">
                         <div className="w-3 h-3 flex justify-between items-end">
                           <div className="w-[3px] bg-[#C5E384] h-full animate-bounce" style={{ animationDelay: '0ms' }} />
                           <div className="w-[3px] bg-[#C5E384] h-2/3 animate-bounce" style={{ animationDelay: '150ms' }} />

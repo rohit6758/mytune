@@ -50,7 +50,7 @@ export default function AddToPlaylistModal({ isOpen, onClose, track }: Props) {
   if (!isOpen || !track) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#200F07]/60 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-transparent/60 backdrop-blur-sm p-4">
       <div className="bg-[#1A1625] w-full max-w-sm rounded-3xl p-6 border border-white/10 shadow-2xl relative">
         <button 
           onClick={onClose}

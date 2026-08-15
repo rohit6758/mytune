@@ -115,7 +115,7 @@ export default function Search() {
           <img src={track.cover_url} alt={track.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
           
           {/* Play Overlay */}
-          <div className={`absolute inset-0 bg-[#200F07]/40 flex items-center justify-center transition-opacity ${isPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+          <div className={`absolute inset-0 bg-transparent/40 flex items-center justify-center transition-opacity ${isPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
             {isPlaying ? (
               <div className="w-6 h-6 flex justify-between items-end">
                 <div className="w-1.5 bg-[#C5E384] h-full animate-bounce" style={{ animationDelay: '0ms' }} />
@@ -135,13 +135,13 @@ export default function Search() {
           <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <button 
                onClick={(e) => saveToLibrary(track, e)}
-               className="w-8 h-8 rounded-full bg-[#200F07]/50 backdrop-blur-md flex items-center justify-center hover:bg-[#200F07]/70 hover:text-[#C5E384] text-white"
+               className="w-8 h-8 rounded-full bg-transparent/50 backdrop-blur-md flex items-center justify-center hover:bg-transparent/70 hover:text-[#C5E384] text-white"
             >
               <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 0" }}>favorite</span>
             </button>
             <button 
                onClick={(e) => openPlaylistModal(track, e)}
-               className="w-8 h-8 rounded-full bg-[#200F07]/50 backdrop-blur-md flex items-center justify-center hover:bg-[#200F07]/70 hover:text-[#C5E384] text-white"
+               className="w-8 h-8 rounded-full bg-transparent/50 backdrop-blur-md flex items-center justify-center hover:bg-transparent/70 hover:text-[#C5E384] text-white"
             >
               <span className="material-symbols-outlined text-[16px]">playlist_add</span>
             </button>
@@ -157,13 +157,13 @@ export default function Search() {
     <div className="inner-scroll h-full overflow-y-auto px-4 pt-4 pb-6 w-full max-w-4xl mx-auto flex flex-col gap-6" style={{ paddingBottom: '100px' }}>
       
       {/* Search Bar */}
-      <div className="sticky top-0 pt-2 pb-2 bg-[#200F07] z-40">
+      <div className="sticky top-0 pt-2 pb-2 bg-transparent z-40">
         <div className="relative w-full">
           <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-white/50 text-xl" style={{ fontVariationSettings: "'FILL' 0" }}>
             search
           </span>
           <input
-            className="w-full bg-[#3E271B] border border-transparent rounded-full py-3.5 pl-12 pr-4 text-base text-white placeholder-white/35 transition-all duration-200 focus:border-[#C5E384] focus:outline-none focus:ring-2 focus:ring-[#C5E384]/25"
+            className="w-full bg-[#110f14] border border-transparent rounded-full py-3.5 pl-12 pr-4 text-base text-white placeholder-white/35 transition-all duration-200 focus:border-[#C5E384] focus:outline-none focus:ring-2 focus:ring-[#C5E384]/25"
             placeholder="Artists, songs, or podcasts"
             type="text"
             value={query}
@@ -188,7 +188,7 @@ export default function Search() {
                   <div key={track.id} onClick={() => handlePlay(track, searchResults)} className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-colors group ${isPlaying ? 'bg-[#C5E384]/10' : 'hover:bg-white/5'}`}>
                     <div className="relative w-12 h-12 rounded-md overflow-hidden flex-shrink-0 shadow-md">
                       <img src={track.cover_url} className="w-full h-full object-cover" alt="" />
-                      <div className={`absolute inset-0 bg-[#200F07]/40 flex items-center justify-center transition-opacity ${isPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                      <div className={`absolute inset-0 bg-transparent/40 flex items-center justify-center transition-opacity ${isPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                          <span className="material-symbols-outlined text-white text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>
                             {isPlaying ? 'pause' : 'play_arrow'}
                          </span>

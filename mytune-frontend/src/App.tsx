@@ -62,7 +62,7 @@ function App() {
         <div className="bg-[#1A1625] p-8 rounded-3xl border border-white/10 max-w-md w-full shadow-2xl">
           <h2 className="text-2xl font-black text-white mb-4">Setup Required</h2>
           <p className="text-white/60 mb-6">
-            Supabase environment variables are missing. To run MyTune, please add <code className="bg-[#200F07]/50 px-2 py-1 rounded text-[#C5E384] text-sm">VITE_SUPABASE_URL</code> and <code className="bg-[#200F07]/50 px-2 py-1 rounded text-[#C5E384] text-sm">VITE_SUPABASE_ANON_KEY</code> to your environment or Vercel project, then redeploy.
+            Supabase environment variables are missing. To run MyTune, please add <code className="bg-transparent/50 px-2 py-1 rounded text-[#C5E384] text-sm">VITE_SUPABASE_URL</code> and <code className="bg-transparent/50 px-2 py-1 rounded text-[#C5E384] text-sm">VITE_SUPABASE_ANON_KEY</code> to your environment or Vercel project, then redeploy.
           </p>
           <div className="w-16 h-16 mx-auto border-4 border-[#FFF9EB] border-t-[#C5E384] rounded-full animate-spin"></div>
         </div>

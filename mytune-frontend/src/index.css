@@ -15,7 +15,7 @@
     height: 100%;
     max-height: 100dvh;
     overflow: hidden;
-    background: #200F07;
+    background: radial-gradient(circle at center top, #2b2832 0%, #16141a 100%);
     color: #e5e2e1;
     font-family: 'Montserrat', 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;

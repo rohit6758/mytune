@@ -40,19 +40,18 @@ export default function Discover() {
 
   const fetchTracks = async (term: string, replaceQueue: boolean = false) => {
     try {
-      const audiusUrl = `https://discoveryprovider.audius.co/v1/tracks/search?query=${encodeURIComponent(term)}`;
-      const res = await fetch(audiusUrl);
-      const json = await res.json();
-      const data = json.data;
+      const itunesUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&limit=25&media=music`;
+      const res = await fetch(itunesUrl);
+      const data = await res.json();
       
-      if (data && data.length > 0) {
-        const mapped: Track[] = data.map((t: any) => ({
-          id: String(t.id),
-          title: t.title,
-          artist: t.user?.name || 'Unknown',
-          cover_url: t.artwork?.['480x480'] || t.user?.profile_picture?.['480x480'] || 'https://via.placeholder.com/480',
-          preview_url: `https://discoveryprovider.audius.co/v1/tracks/${t.id}/stream`,
-        }));
+      if (data && data.results && data.results.length > 0) {
+        const mapped: Track[] = data.results.map((t: any) => ({
+          id: String(t.trackId),
+          title: t.trackName,
+          artist: t.artistName,
+          cover_url: t.artworkUrl100 ? t.artworkUrl100.replace('100x100bb', '600x600bb') : '',
+          preview_url: t.previewUrl,
+        })).filter((t: Track) => t.preview_url && t.cover_url);
         
         // Shuffle
         const shuffled = mapped.sort(() => 0.5 - Math.random());
@@ -150,8 +149,7 @@ export default function Discover() {
   return (
     <div 
       ref={scrollContainerRef}
-      className="relative w-full h-[100dvh] bg-[#110D17] overflow-y-scroll snap-y snap-mandatory no-scrollbar"
-      style={{ paddingBottom: '72px' }} // Space for GlobalPlayer
+      className="relative w-full h-[calc(100dvh-72px)] bg-[#110D17] overflow-y-scroll snap-y snap-mandatory no-scrollbar"
     >
       {queue.map((track) => {
         const isLiked = likedTracks.has(track.id);
@@ -160,7 +158,7 @@ export default function Discover() {
           <div 
             key={track.id + Math.random()} // allow duplicates in queue safely
             data-track-id={track.id}
-            className="w-full h-[100dvh] snap-center relative overflow-hidden flex flex-col justify-end"
+            className="w-full h-full snap-center relative overflow-hidden flex flex-col justify-end"
           >
             {/* Ambient blurred background */}
             <div

@@ -22,17 +22,16 @@ export default function Search() {
   useEffect(() => {
     GENRES.forEach(async (genre) => {
       try {
-        const res = await fetch(`https://discoveryprovider.audius.co/v1/tracks/search?query=${encodeURIComponent(genre)}`);
-        const json = await res.json();
-        const data = json.data;
+        const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(genre)}&limit=15&media=music`);
+        const data = await res.json();
         
-        const mapped = (data || []).map((t: any) => ({
-            id: String(t.id),
-            title: t.title,
-            artist: t.user?.name || 'Unknown',
-            cover_url: t.artwork?.['480x480'] || t.user?.profile_picture?.['480x480'] || 'https://via.placeholder.com/480',
-            preview_url: `https://discoveryprovider.audius.co/v1/tracks/${t.id}/stream`,
-        }));
+        const mapped = (data?.results || []).map((t: any) => ({
+            id: String(t.trackId),
+            title: t.trackName,
+            artist: t.artistName,
+            cover_url: t.artworkUrl100 ? t.artworkUrl100.replace('100x100bb', '600x600bb') : '',
+            preview_url: t.previewUrl,
+        })).filter((t: any) => t.preview_url && t.cover_url);
 
         setGenreTracks(prev => ({ ...prev, [genre]: mapped }));
       } catch (e) {
@@ -52,17 +51,16 @@ export default function Search() {
     const timeoutId = setTimeout(async () => {
       setIsSearching(true);
       try {
-        const res = await fetch(`https://discoveryprovider.audius.co/v1/tracks/search?query=${encodeURIComponent(query)}`);
-        const json = await res.json();
-        const data = json.data;
+        const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&limit=25&media=music`);
+        const data = await res.json();
         
-        const mapped = (data || []).map((t: any) => ({
-            id: String(t.id),
-            title: t.title,
-            artist: t.user?.name || 'Unknown',
-            cover_url: t.artwork?.['480x480'] || t.user?.profile_picture?.['480x480'] || 'https://via.placeholder.com/480',
-            preview_url: `https://discoveryprovider.audius.co/v1/tracks/${t.id}/stream`,
-        }));
+        const mapped = (data?.results || []).map((t: any) => ({
+            id: String(t.trackId),
+            title: t.trackName,
+            artist: t.artistName,
+            cover_url: t.artworkUrl100 ? t.artworkUrl100.replace('100x100bb', '600x600bb') : '',
+            preview_url: t.previewUrl,
+        })).filter((t: any) => t.preview_url && t.cover_url);
 
         setSearchResults(mapped);
       } catch (e) {

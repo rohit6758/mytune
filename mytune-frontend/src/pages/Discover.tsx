@@ -149,7 +149,7 @@ export default function Discover() {
   return (
     <div 
       ref={scrollContainerRef}
-      className="relative w-full h-[calc(100dvh-72px)] bg-[#110D17] overflow-y-scroll snap-y snap-mandatory no-scrollbar"
+      className="relative w-full h-[calc(100dvh-72px)] bg-black overflow-y-scroll snap-y snap-mandatory no-scrollbar"
     >
       {queue.map((track) => {
         const isLiked = likedTracks.has(track.id);

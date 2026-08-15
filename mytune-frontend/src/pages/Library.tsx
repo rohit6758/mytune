@@ -136,7 +136,7 @@ export default function Library() {
         </div>
 
         {isCreating && (
-          <div className="flex gap-2 mb-4 bg-[#1A1625] p-3 rounded-xl border border-white/10">
+          <div className="flex gap-2 mb-4 bg-[#121212] p-3 rounded-xl border border-white/10">
             <input 
               value={newPlaylistName}
               onChange={e => setNewPlaylistName(e.target.value)}
@@ -150,14 +150,14 @@ export default function Library() {
         )}
 
         {playlists.length === 0 ? (
-          <div className="bg-[#1A1625] border border-white/5 rounded-2xl p-6 text-center text-white/50">
+          <div className="bg-[#121212] border border-white/5 rounded-2xl p-6 text-center text-white/50">
             You don't have any playlists yet.
           </div>
         ) : (
           <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
             {playlists.map(pl => (
               <div key={pl.id} className="flex-shrink-0 w-36 cursor-pointer group">
-                <div className="w-36 h-36 bg-[#252031] rounded-xl flex items-center justify-center mb-2 shadow-lg group-hover:scale-105 transition-transform">
+                <div className="w-36 h-36 bg-[#181818] rounded-xl flex items-center justify-center mb-2 shadow-lg group-hover:scale-105 transition-transform">
                   <span className="material-symbols-outlined text-4xl text-white/20">queue_music</span>
                 </div>
                 <p className="text-sm font-bold text-white truncate">{pl.name}</p>

@@ -19,10 +19,10 @@ export default function Layout() {
   const isDiscover = location.pathname === '/discover' || location.pathname === '/';
 
   return (
-    <div className="w-full bg-[#110D17] text-white overflow-hidden flex flex-col md:flex-row" style={{ height: '100dvh' }}>
+    <div className="w-full bg-[#000000] text-white overflow-hidden flex flex-col md:flex-row" style={{ height: '100dvh' }}>
 
       {/* ── Desktop Sidebar Navigation (Hidden on Mobile) ────────────────── */}
-      <aside className="hidden md:flex flex-col w-64 flex-shrink-0 bg-[#1A1625] border-r border-white/5 z-50">
+      <aside className="hidden md:flex flex-col w-64 flex-shrink-0 bg-[#000000] border-r border-white/5 z-50">
         <div className="p-6 overflow-y-auto inner-scroll flex-grow">
           <Logo className="w-32 h-9 mb-10" showText={true} />
           
@@ -76,7 +76,7 @@ export default function Layout() {
 
         {/* ── Mobile Top Header (non-Discover pages) ────────────────── */}
         {!isDiscover && (
-          <header className="md:hidden flex-shrink-0 bg-[#110D17]/95 backdrop-blur-md border-b border-white/8 z-50">
+          <header className="md:hidden flex-shrink-0 bg-[#000000]/95 backdrop-blur-md border-b border-white/8 z-50">
             <div className="flex justify-between items-center w-full px-4 h-14 max-w-7xl mx-auto">
               <Logo className="w-32 h-9" showText={true} />
 
@@ -99,7 +99,7 @@ export default function Layout() {
 
         {/* ── Mobile Bottom Navigation ──────────────── */}
         <nav
-          className="md:hidden flex-shrink-0 w-full flex justify-around items-center bg-[#110D17]/98 backdrop-blur-xl border-t border-white/8 z-50"
+          className="md:hidden flex-shrink-0 w-full flex justify-around items-center bg-[#000000]/98 backdrop-blur-xl border-t border-white/8 z-50"
           style={{ paddingBottom: 'env(safe-area-inset-bottom, 6px)', paddingTop: '6px', height: '62px' }}
         >
           {NAV_ITEMS.map(item => (

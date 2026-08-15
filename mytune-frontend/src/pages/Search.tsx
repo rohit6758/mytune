@@ -157,13 +157,13 @@ export default function Search() {
     <div className="inner-scroll h-full overflow-y-auto px-4 pt-4 pb-6 w-full max-w-4xl mx-auto flex flex-col gap-6" style={{ paddingBottom: '100px' }}>
       
       {/* Search Bar */}
-      <div className="sticky top-0 pt-2 pb-2 bg-[#110D17] z-40">
+      <div className="sticky top-0 pt-2 pb-2 bg-[#000000] z-40">
         <div className="relative w-full">
           <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-white/50 text-xl" style={{ fontVariationSettings: "'FILL' 0" }}>
             search
           </span>
           <input
-            className="w-full bg-[#181818] border border-transparent rounded-full py-3.5 pl-12 pr-4 text-base text-white placeholder-white/35 transition-all duration-200 focus:border-[#D0FF00] focus:outline-none focus:ring-2 focus:ring-[#D0FF00]/25"
+            className="w-full bg-[#242424] border border-transparent rounded-full py-3.5 pl-12 pr-4 text-base text-white placeholder-white/35 transition-all duration-200 focus:border-[#D0FF00] focus:outline-none focus:ring-2 focus:ring-[#D0FF00]/25"
             placeholder="Artists, songs, or podcasts"
             type="text"
             value={query}

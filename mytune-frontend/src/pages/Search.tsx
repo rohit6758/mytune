@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { usePlayer, Track } from '../context/PlayerContext';
 import AddToPlaylistModal from '../components/AddToPlaylistModal';
+import { useNavigate } from 'react-router-dom';
 
 const GENRES = ['Pop', 'Hip Hop', 'Rock', 'Electronic', 'R&B', 'Alternative'];
 const BRAND_GRAD = 'linear-gradient(135deg, #A855F7 0%, #8B16FF 50%, #5E00D4 100%)';
@@ -98,9 +99,12 @@ export default function Search() {
     setModalOpen(true);
   };
 
+  const navigate = useNavigate();
+
   const handlePlay = (track: Track, list: Track[]) => {
     const startIndex = list.findIndex(t => t.id === track.id);
     playQueue(list, startIndex >= 0 ? startIndex : 0);
+    navigate('/discover');
   };
 
   const renderTrackCard = (track: Track, list: Track[]) => {

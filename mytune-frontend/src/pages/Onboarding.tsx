@@ -39,7 +39,7 @@ export default function Onboarding({ session, onComplete }: OnboardingProps) {
 
   return (
     <div className="min-h-[100dvh] w-full bg-[#110D17] flex flex-col items-center justify-center p-6 relative overflow-hidden">
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[50vh] bg-[#8B16FF]/20 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[50vh] bg-[#FFF9EB]/20 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="w-full max-w-sm z-10 flex flex-col items-center">
         <div className="bg-[#1A1625]/80 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl w-full">
@@ -55,7 +55,7 @@ export default function Onboarding({ session, onComplete }: OnboardingProps) {
                 type="text"
                 value={favoriteSinger}
                 onChange={(e) => setFavoriteSinger(e.target.value)}
-                className="w-full bg-[#110D17] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-[#D0FF00] transition-colors"
+                className="w-full bg-[#110D17] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-[#C5E384] transition-colors"
                 placeholder="e.g. The Weeknd, Taylor Swift"
                 required
                 autoFocus
@@ -66,7 +66,7 @@ export default function Onboarding({ session, onComplete }: OnboardingProps) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-4 bg-[#8B16FF] text-white font-extrabold text-lg py-3.5 rounded-full shadow-[0_4px_14px_0_rgba(139,22,255,0.3)] hover:shadow-[0_6px_20px_rgba(139,22,255,0.4)] hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:pointer-events-none"
+              className="w-full mt-4 bg-[#FFF9EB] text-white font-extrabold text-lg py-3.5 rounded-full shadow-[0_4px_14px_0_rgba(139,22,255,0.3)] hover:shadow-[0_6px_20px_rgba(139,22,255,0.4)] hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:pointer-events-none"
             >
               {loading ? 'Setting up...' : 'Start Listening'}
             </button>

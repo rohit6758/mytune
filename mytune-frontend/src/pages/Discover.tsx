@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { usePlayer, Track } from '../context/PlayerContext';
 
-const BRAND_GRAD = 'linear-gradient(135deg, #A855F7 0%, #8B16FF 50%, #5E00D4 100%)';
+const BRAND_GRAD = 'linear-gradient(135deg, #FFF9EB 0%, #FFF9EB 50%, #FFF9EB 100%)';
 
 export default function Discover() {
   const { queue, currentTrack, playQueue, playTrack, addToQueue } = usePlayer();
@@ -133,7 +133,7 @@ export default function Discover() {
   if (loading) {
     return (
       <div className="relative w-full h-screen bg-[#110D17] flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-[#D0FF00] border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-10 h-10 border-4 border-[#C5E384] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -149,7 +149,7 @@ export default function Discover() {
   return (
     <div 
       ref={scrollContainerRef}
-      className="relative w-full h-[calc(100dvh-72px)] bg-black overflow-y-scroll snap-y snap-mandatory no-scrollbar"
+      className="relative w-full h-[calc(100dvh-72px)] bg-[#200F07] overflow-y-scroll snap-y snap-mandatory no-scrollbar"
     >
       {queue.map((track) => {
         const isLiked = likedTracks.has(track.id);

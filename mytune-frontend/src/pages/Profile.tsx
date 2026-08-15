@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Session } from '@supabase/supabase-js';
 
-const BRAND_GRAD = 'linear-gradient(135deg, #A855F7 0%, #8B16FF 50%, #5E00D4 100%)';
+const BRAND_GRAD = 'linear-gradient(135deg, #FFF9EB 0%, #FFF9EB 50%, #FFF9EB 100%)';
 
 interface ProfileData {
   username: string;
@@ -127,20 +127,20 @@ export default function Profile({ session }: { session?: Session | null }) {
   };
 
   if (loading) {
-    return <div className="h-full flex items-center justify-center"><div className="w-8 h-8 border-4 border-[#D0FF00] border-t-transparent rounded-full animate-spin"></div></div>;
+    return <div className="h-full flex items-center justify-center"><div className="w-8 h-8 border-4 border-[#C5E384] border-t-transparent rounded-full animate-spin"></div></div>;
   }
 
   return (
-    <div className="inner-scroll h-full overflow-y-auto w-full max-w-3xl mx-auto flex flex-col bg-[#000000]">
+    <div className="inner-scroll h-full overflow-y-auto w-full max-w-3xl mx-auto flex flex-col bg-[#200F07]">
       {/* Header section */}
       <div className="relative w-full pb-6 pt-16 flex flex-col items-center px-4">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-           <div className="absolute top-[-50%] left-[-10%] w-[120%] h-[150%] bg-[#8B16FF]/20 blur-[80px] rounded-full" />
+           <div className="absolute top-[-50%] left-[-10%] w-[120%] h-[150%] bg-[#FFF9EB]/20 blur-[80px] rounded-full" />
         </div>
 
         {/* Profile Avatar */}
         <div className="relative z-10 w-32 h-32 rounded-full p-[3px] mb-4 shadow-2xl" style={{ background: BRAND_GRAD }}>
-          <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-[#000000] bg-[#1a1a1a] flex items-center justify-center group">
+          <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-[#200F07] bg-[#1a1a1a] flex items-center justify-center group">
             {profile?.avatar_url ? (
                <img src={profile.avatar_url} className="w-full h-full object-cover" alt="avatar" />
             ) : (
@@ -148,9 +148,9 @@ export default function Profile({ session }: { session?: Session | null }) {
             )}
             
             {/* Hover overlay for upload */}
-            <label className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+            <label className="absolute inset-0 bg-[#200F07]/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
               {uploadingAvatar ? (
-                <div className="w-6 h-6 border-2 border-[#D0FF00] border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-6 h-6 border-2 border-[#C5E384] border-t-transparent rounded-full animate-spin"></div>
               ) : (
                 <>
                   <span className="material-symbols-outlined text-white text-2xl">photo_camera</span>
@@ -165,13 +165,13 @@ export default function Profile({ session }: { session?: Session | null }) {
         {/* Name and Stats */}
         <div className="relative z-10 flex flex-col items-center text-center w-full max-w-md pb-10">
           {isEditing ? (
-            <div className="w-full flex flex-col gap-3 mb-6 bg-[#121212] p-6 rounded-2xl border border-white/10 text-left">
+            <div className="w-full flex flex-col gap-3 mb-6 bg-[#2A1810] p-6 rounded-2xl border border-white/10 text-left">
               <div>
                 <label className="text-xs text-white/50 font-bold uppercase tracking-wider">Username</label>
                 <input 
                   value={editForm.username}
                   onChange={e => setEditForm({...editForm, username: e.target.value})}
-                  className="w-full bg-[#000000] border border-white/10 rounded-lg p-2 text-white mt-1"
+                  className="w-full bg-[#200F07] border border-white/10 rounded-lg p-2 text-white mt-1"
                 />
               </div>
               <div>
@@ -179,7 +179,7 @@ export default function Profile({ session }: { session?: Session | null }) {
                 <input 
                   value={editForm.full_name}
                   onChange={e => setEditForm({...editForm, full_name: e.target.value})}
-                  className="w-full bg-[#000000] border border-white/10 rounded-lg p-2 text-white mt-1"
+                  className="w-full bg-[#200F07] border border-white/10 rounded-lg p-2 text-white mt-1"
                 />
               </div>
               <div>
@@ -187,7 +187,7 @@ export default function Profile({ session }: { session?: Session | null }) {
                 <textarea 
                   value={editForm.bio}
                   onChange={e => setEditForm({...editForm, bio: e.target.value})}
-                  className="w-full bg-[#000000] border border-white/10 rounded-lg p-2 text-white mt-1 h-20"
+                  className="w-full bg-[#200F07] border border-white/10 rounded-lg p-2 text-white mt-1 h-20"
                 />
               </div>
               <div>
@@ -195,7 +195,7 @@ export default function Profile({ session }: { session?: Session | null }) {
                 <input 
                   value={editForm.favorite_singer}
                   onChange={e => setEditForm({...editForm, favorite_singer: e.target.value})}
-                  className="w-full bg-[#000000] border border-white/10 rounded-lg p-2 text-white mt-1"
+                  className="w-full bg-[#200F07] border border-white/10 rounded-lg p-2 text-white mt-1"
                 />
               </div>
               <div className="flex gap-2 mt-2">
@@ -206,18 +206,18 @@ export default function Profile({ session }: { session?: Session | null }) {
                 <button 
                   onClick={handleSave}
                   disabled={saveLoading}
-                  className="flex-1 py-2 rounded-lg bg-[#8B16FF] text-white font-bold hover:bg-[#7200e6]"
+                  className="flex-1 py-2 rounded-lg bg-[#FFF9EB] text-white font-bold hover:bg-[#7200e6]"
                 >{saveLoading ? 'Saving...' : 'Save'}</button>
               </div>
             </div>
           ) : (
             <>
               <h1 className="text-3xl font-black text-white mb-1">{profile?.full_name || `@${profile?.username}`}</h1>
-              {profile?.full_name && <p className="text-sm text-[#D0FF00] font-bold mb-2">@{profile?.username}</p>}
+              {profile?.full_name && <p className="text-sm text-[#C5E384] font-bold mb-2">@{profile?.username}</p>}
               
               {profile?.bio && <p className="text-white/80 mb-4">{profile.bio}</p>}
               
-              <div className="flex items-center gap-2 bg-[#8B16FF]/20 text-[#8B16FF] px-4 py-1.5 rounded-full mb-6 text-sm font-bold border border-[#8B16FF]/30">
+              <div className="flex items-center gap-2 bg-[#FFF9EB]/20 text-[#FFF9EB] px-4 py-1.5 rounded-full mb-6 text-sm font-bold border border-[#FFF9EB]/30">
                 <span className="material-symbols-outlined text-sm">mic</span>
                 Fav Singer: {profile?.favorite_singer}
               </div>
@@ -231,7 +231,7 @@ export default function Profile({ session }: { session?: Session | null }) {
                 </button>
                 <button 
                   onClick={handleSignOut}
-                  className="px-6 py-2.5 rounded-full bg-[#D0FF00] text-[#000000] text-sm font-bold shadow-[0_4px_14px_0_rgba(208,255,0,0.2)] hover:shadow-[0_6px_20px_rgba(208,255,0,0.3)] transition-all"
+                  className="px-6 py-2.5 rounded-full bg-[#C5E384] text-[#200F07] text-sm font-bold shadow-[0_4px_14px_0_rgba(208,255,0,0.2)] hover:shadow-[0_6px_20px_rgba(208,255,0,0.3)] transition-all"
                 >
                   Sign Out
                 </button>
@@ -242,9 +242,9 @@ export default function Profile({ session }: { session?: Session | null }) {
 
         {/* Security and Policy Section */}
         <div className="relative z-10 w-full max-w-md px-4 pb-32">
-          <div className="bg-[#121212] border border-white/5 rounded-2xl p-6">
+          <div className="bg-[#2A1810] border border-white/5 rounded-2xl p-6">
             <h2 className="text-lg font-black text-white mb-4 flex items-center gap-2">
-              <span className="material-symbols-outlined text-[#D0FF00]">shield_person</span>
+              <span className="material-symbols-outlined text-[#C5E384]">shield_person</span>
               Security & Policy
             </h2>
             <div className="flex flex-col gap-4 text-sm text-white/70">

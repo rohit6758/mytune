@@ -15,7 +15,7 @@
     height: 100%;
     max-height: 100dvh;
     overflow: hidden;
-    background: #000000;
+    background: #200F07;
     color: #e5e2e1;
     font-family: 'Montserrat', 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -52,10 +52,10 @@
 
 /* Brand gradient utility */
 .brand-gradient {
-  background: linear-gradient(135deg, #A855F7 0%, #8B16FF 50%, #5E00D4 100%);
+  background: linear-gradient(135deg, #FFF9EB 0%, #FFF9EB 50%, #FFF9EB 100%);
 }
 .brand-gradient-text {
-  background: linear-gradient(135deg, #A855F7 0%, #8B16FF 50%, #5E00D4 100%);
+  background: linear-gradient(135deg, #FFF9EB 0%, #FFF9EB 50%, #FFF9EB 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

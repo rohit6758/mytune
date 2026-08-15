@@ -37,7 +37,7 @@ export default function GlobalPlayer() {
   return (
     <div 
       onClick={handlePlayerClick}
-      className="fixed bottom-[72px] md:bottom-0 left-0 md:left-64 right-0 bg-[#121212]/95 backdrop-blur-xl border-t border-white/10 p-2 md:p-4 z-50 flex flex-col md:flex-row items-center justify-between gap-2 md:gap-4 transition-all duration-300 cursor-pointer"
+      className="fixed bottom-[72px] md:bottom-0 left-0 md:left-64 right-0 bg-[#2A1810]/95 backdrop-blur-xl border-t border-white/10 p-2 md:p-4 z-50 flex flex-col md:flex-row items-center justify-between gap-2 md:gap-4 transition-all duration-300 cursor-pointer"
     >
       
       {/* Track Info */}
@@ -71,7 +71,7 @@ export default function GlobalPlayer() {
           
           <button 
             onClick={toggleShuffle} 
-            className={`transition-colors ${isShuffle ? 'text-[#D0FF00]' : 'text-white/50 hover:text-white'}`}
+            className={`transition-colors ${isShuffle ? 'text-[#C5E384]' : 'text-white/50 hover:text-white'}`}
           >
             <span className="material-symbols-outlined text-xl">shuffle</span>
           </button>
@@ -95,7 +95,7 @@ export default function GlobalPlayer() {
 
           <button 
             onClick={toggleRepeatMode} 
-            className={`transition-colors relative ${repeatMode !== 'off' ? 'text-[#D0FF00]' : 'text-white/50 hover:text-white'}`}
+            className={`transition-colors relative ${repeatMode !== 'off' ? 'text-[#C5E384]' : 'text-white/50 hover:text-white'}`}
           >
             <span className="material-symbols-outlined text-xl">
               {repeatMode === 'one' ? 'repeat_one' : 'repeat'}
@@ -112,7 +112,7 @@ export default function GlobalPlayer() {
             max="100" 
             value={progressPercent}
             onChange={handleSeek}
-            className="w-full h-1 bg-white/20 rounded-full appearance-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full cursor-pointer hover:[&::-webkit-slider-thumb]:bg-[#D0FF00]"
+            className="w-full h-1 bg-white/20 rounded-full appearance-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full cursor-pointer hover:[&::-webkit-slider-thumb]:bg-[#C5E384]"
           />
           <span className="text-[10px] text-white/50 w-8">{formatTime(duration)}</span>
         </div>
@@ -131,7 +131,7 @@ export default function GlobalPlayer() {
       {/* Mobile Progress Bar (Absolute positioned at top of player) */}
       <div className="absolute top-0 left-0 w-full h-0.5 bg-white/10 md:hidden">
         <div 
-          className="h-full bg-[#D0FF00] transition-all duration-100 ease-linear"
+          className="h-full bg-[#C5E384] transition-all duration-100 ease-linear"
           style={{ width: `${progressPercent}%` }}
         />
       </div>

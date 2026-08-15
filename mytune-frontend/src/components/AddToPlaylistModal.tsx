@@ -50,7 +50,7 @@ export default function AddToPlaylistModal({ isOpen, onClose, track }: Props) {
   if (!isOpen || !track) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#200F07]/60 backdrop-blur-sm p-4">
       <div className="bg-[#1A1625] w-full max-w-sm rounded-3xl p-6 border border-white/10 shadow-2xl relative">
         <button 
           onClick={onClose}
@@ -71,7 +71,7 @@ export default function AddToPlaylistModal({ isOpen, onClose, track }: Props) {
 
         {loading ? (
           <div className="flex justify-center py-4">
-            <div className="w-6 h-6 border-2 border-[#D0FF00] border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-6 h-6 border-2 border-[#C5E384] border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : playlists.length === 0 ? (
           <p className="text-center text-white/50 py-4 text-sm">You don't have any playlists. Go to Library to create one.</p>
@@ -87,7 +87,7 @@ export default function AddToPlaylistModal({ isOpen, onClose, track }: Props) {
                   <span className="material-symbols-outlined text-white/30 text-xl">queue_music</span>
                 </div>
                 <span className="text-white font-semibold text-sm flex-1 truncate">{pl.name}</span>
-                <span className="material-symbols-outlined text-[#D0FF00] opacity-0 group-hover:opacity-100 transition-opacity">add_circle</span>
+                <span className="material-symbols-outlined text-[#C5E384] opacity-0 group-hover:opacity-100 transition-opacity">add_circle</span>
               </button>
             ))}
           </div>

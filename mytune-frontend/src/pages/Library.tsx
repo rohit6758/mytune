@@ -205,6 +205,16 @@ export default function Library() {
                     <p className={`text-[15px] font-bold truncate ${isPlaying ? 'text-[#C5E384]' : 'text-white'}`}>{track.title}</p>
                     <p className="text-xs text-white/50 truncate mt-0.5">{track.artist}</p>
                   </div>
+                  <button 
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      await supabase.from('playlist_tracks').delete().eq('id', track.id);
+                      setPlaylistTracks(prev => prev.filter(t => t.id !== track.id));
+                    }}
+                    className="p-2 opacity-0 group-hover:opacity-100 transition-opacity text-white/50 hover:text-red-500"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">delete</span>
+                  </button>
                 </div>
               );
             })}

@@ -12,6 +12,7 @@ export default function Create() {
   const [importTitle, setImportTitle] = useState('');
   const [importArtist, setImportArtist] = useState('');
   const [isImporting, setIsImporting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   
   const { playTrack } = usePlayer();
 
@@ -50,10 +51,9 @@ export default function Create() {
           const temporaryCdnUrl = audioMedia ? audioMedia.url : (medias[0]?.url || rapidApiData.data.url);
           if (!temporaryCdnUrl) throw new Error('Could not find media URL in response');
 
-          // 2. Fetch the temporary audio stream as a Blob via CORS proxy
+          // 2. Fetch the temporary audio stream directly (Instagram CDNs allow this!)
           console.log('Downloading audio to device...');
-          const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(temporaryCdnUrl)}`;
-          const audioBlobRes = await fetch(proxyUrl);
+          const audioBlobRes = await fetch(temporaryCdnUrl);
           if (!audioBlobRes.ok) throw new Error('Failed to download audio stream');
           
           const audioBlob = await audioBlobRes.blob();
@@ -76,10 +76,10 @@ export default function Create() {
           const { data: publicData } = supabase.storage.from('audio').getPublicUrl(fileName);
           finalAudioUrl = publicData.publicUrl;
         } catch (extractionError) {
-          console.warn('Extraction failed, using fallback track:', extractionError);
-          alert('Note: Instagram extraction failed (maybe API limit reached?). We are importing a high-quality Demo track instead so you can test your new Insta Songs playlist features!');
-          // Fallback to a royalty free track for testing
-          finalAudioUrl = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+          console.warn('Extraction failed:', extractionError);
+          alert('Instagram extraction failed. The API limit might be reached or the video is private. Please use the Local File Upload option instead.');
+          setIsImporting(false);
+          return;
         }
       }
       
@@ -148,6 +148,53 @@ export default function Create() {
     }
   };
 
+  const handleLocalUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Prompt for title and artist since it's a local file
+    const trackTitle = prompt("Enter a title for this song:", file.name.replace(/\.[^/.]+$/, ""));
+    if (!trackTitle) return;
+    const trackArtist = prompt("Enter the artist name:", "Local Artist") || "Local Artist";
+
+    setIsUploading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not logged in');
+
+      const fileName = `local-${Date.now()}-${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from('audio')
+        .upload(fileName, file, { contentType: file.type });
+
+      if (uploadError) throw uploadError;
+
+      const { data: publicData } = supabase.storage.from('audio').getPublicUrl(fileName);
+      const audioUrl = publicData.publicUrl;
+
+      // Save to library
+      const newTrack = {
+        user_id: user.id,
+        track_id: `custom-${Date.now()}`,
+        title: trackTitle,
+        artist: trackArtist,
+        cover_url: 'https://images.unsplash.com/photo-1614680376593-902f74cf0d41?w=500&q=80', // Default cover
+        preview_url: audioUrl
+      };
+      
+      const { error } = await supabase.from('library').insert(newTrack);
+      if (error) throw error;
+
+      alert('Local file uploaded and saved to Library successfully!');
+    } catch (err: any) {
+      alert('Error uploading file: ' + err.message);
+    } finally {
+      setIsUploading(false);
+      // Reset input
+      e.target.value = '';
+    }
+  };
+
   const navigate = useNavigate();
 
   return (
@@ -191,7 +238,7 @@ export default function Create() {
           </div>
         </button>
 
-        {/* Add Music Card */}
+        {/* Add Music Card (Insta) */}
         <button 
           onClick={() => setShowImportModal(true)}
           className="group relative flex flex-col items-start p-6 bg-[#1A1625] rounded-3xl hover:bg-[#252031] transition-all duration-500 shadow-xl overflow-hidden border border-white/5 hover:border-white/20 text-left"
@@ -200,18 +247,39 @@ export default function Create() {
           {/* Icon */}
           <div className="relative z-10 p-4 rounded-2xl bg-[#110D17] border border-white/5 mb-5">
             <span className="material-symbols-outlined text-[40px] text-white/70" style={{ fontVariationSettings: "'FILL' 1" }}>
-              audio_file
+              smart_toy
             </span>
           </div>
           <div className="relative z-10 w-full">
-            <h3 className="text-lg font-bold text-white mb-2 group-hover:text-white transition-colors duration-300">Add Music</h3>
-            <p className="text-sm text-white/50 mb-5 leading-relaxed">Upload raw cuts or import heavy tracks directly to your library.</p>
+            <h3 className="text-lg font-bold text-white mb-2 group-hover:text-white transition-colors duration-300">Insta Extractor</h3>
+            <p className="text-sm text-white/50 mb-5 leading-relaxed">Paste an Instagram link to extract and save audio.</p>
             <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold uppercase tracking-wider w-full justify-center text-white border border-white/25 group-hover:bg-white group-hover:text-black active:scale-95 transition-all">
-              Import Tracks
-              <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>upload</span>
+              Extract Link
+              <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>link</span>
             </div>
           </div>
         </button>
+
+        {/* Local File Upload Card */}
+        <div className="group relative flex flex-col items-start p-6 bg-[#1A1625] rounded-3xl hover:bg-[#252031] transition-all duration-500 shadow-xl overflow-hidden border border-white/5 hover:border-[#C5E384]/40 text-left sm:col-span-2 md:col-span-1 lg:col-span-3">
+          <input 
+            type="file" 
+            accept="audio/*" 
+            className="absolute inset-0 opacity-0 cursor-pointer z-20" 
+            onChange={handleLocalUpload}
+            disabled={isUploading}
+          />
+          <div className="absolute -right-10 -top-10 w-44 h-44 rounded-full blur-3xl opacity-10 group-hover:opacity-20 transition-opacity duration-500 bg-[#C5E384]" />
+          <div className="relative z-10 flex flex-col items-center justify-center text-center w-full py-4">
+            <span className="material-symbols-outlined text-[48px] text-[#C5E384] mb-3" style={{ fontVariationSettings: "'FILL' 1" }}>
+              upload_file
+            </span>
+            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-[#C5E384] transition-colors duration-300">
+              {isUploading ? 'Uploading...' : 'Upload Local Audio'}
+            </h3>
+            <p className="text-sm text-white/50 max-w-sm mx-auto">Upload an MP3/WAV file directly from your device into your personal library forever.</p>
+          </div>
+        </div>
 
       </section>
 

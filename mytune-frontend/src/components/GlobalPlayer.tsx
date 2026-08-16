@@ -68,7 +68,7 @@ export default function GlobalPlayer() {
     if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('input')) {
       return;
     }
-    navigate('/discover');
+    // Intentionally doing nothing on click to prevent Discover feed queue overrides
   };
 
   return (

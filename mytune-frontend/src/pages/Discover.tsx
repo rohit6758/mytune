@@ -200,21 +200,7 @@ export default function Discover() {
                   <span className="text-white/80 text-[11px] font-bold mt-1 shadow-sm">{isLiked ? 'Liked' : 'Like'}</span>
                 </div>
 
-                {/* Comment Button (Visual only) */}
-                <div className="flex flex-col items-center group cursor-pointer hover:opacity-80 transition-opacity">
-                  <div className="w-12 h-12 rounded-full flex items-center justify-center bg-white/10 backdrop-blur-md shadow-2xl">
-                    <span className="material-symbols-outlined text-[26px] text-white" style={{ fontVariationSettings: "'FILL' 0" }}>chat_bubble</span>
-                  </div>
-                  <span className="text-white/80 text-[11px] font-bold mt-1 shadow-sm">1.2k</span>
-                </div>
-
-                {/* Share Button (Visual only) */}
-                <div className="flex flex-col items-center group cursor-pointer hover:opacity-80 transition-opacity">
-                  <div className="w-12 h-12 rounded-full flex items-center justify-center bg-white/10 backdrop-blur-md shadow-2xl">
-                    <span className="material-symbols-outlined text-[26px] text-white" style={{ fontVariationSettings: "'FILL' 0" }}>send</span>
-                  </div>
-                  <span className="text-white/80 text-[11px] font-bold mt-1 shadow-sm">Share</span>
-                </div>
+                {/* Comment and Share buttons removed per user request */}
                 
                 {/* Options Button */}
                 <div className="flex flex-col items-center mt-2 group cursor-pointer hover:opacity-80 transition-opacity">

@@ -68,13 +68,13 @@ export default function GlobalPlayer() {
     if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('input')) {
       return;
     }
-    // Intentionally doing nothing on click to prevent Discover feed queue overrides
+    navigate('/discover');
   };
 
   return (
     <div 
       onClick={handlePlayerClick}
-      className="fixed bottom-[72px] md:bottom-0 left-0 md:left-64 right-0 bg-[#1e1b24]/95 backdrop-blur-xl border-t border-white/10 p-2 md:p-4 z-50 flex flex-col md:flex-row items-center justify-between gap-2 md:gap-4 transition-all duration-300 cursor-pointer"
+      className="fixed bottom-[72px] md:bottom-0 left-0 md:left-64 right-0 bg-black/60 backdrop-blur-xl border-t border-white/10 p-2 md:p-4 z-[60] flex flex-col md:flex-row items-center justify-between gap-2 md:gap-4 transition-all duration-300 cursor-pointer"
     >
       
       {/* Track Info */}

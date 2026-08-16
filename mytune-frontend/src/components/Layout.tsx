@@ -6,7 +6,7 @@ import GlobalPlayer from './GlobalPlayer';
 import { supabase } from '../lib/supabase';
 
 const NAV_ITEMS = [
-  { name: 'Discover', path: '/discover', icon: 'explore'       },
+  { name: 'Home',     path: '/discover', icon: 'home'          },
   { name: 'Search',   path: '/search',   icon: 'search'        },
   { name: 'Create',   path: '/create',   icon: 'add_circle'    },
   { name: 'Library',  path: '/library',  icon: 'library_music' },
@@ -106,7 +106,7 @@ export default function Layout() {
 
         {/* ── Mobile Top Header (non-Discover pages) ────────────────── */}
         {!isDiscover && (
-          <header className="md:hidden flex-shrink-0 bg-transparent/95 backdrop-blur-md border-b border-white/8 z-50">
+          <header className="md:hidden flex-shrink-0 bg-black/50 backdrop-blur-lg border-b border-white/5 z-50">
             <div className="flex justify-between items-center w-full px-4 h-14 max-w-7xl mx-auto">
               <Logo className="w-32 h-9" showText={true} />
 
@@ -135,7 +135,7 @@ export default function Layout() {
 
         {/* ── Mobile Bottom Navigation ──────────────── */}
         <nav
-          className="md:hidden flex-shrink-0 w-full flex justify-around items-center bg-transparent/98 backdrop-blur-xl border-t border-white/8 z-50"
+          className="md:hidden flex-shrink-0 w-full flex justify-around items-center bg-black/60 backdrop-blur-xl border-t border-white/5 z-50"
           style={{ paddingBottom: 'env(safe-area-inset-bottom, 6px)', paddingTop: '6px', height: '62px' }}
         >
           {NAV_ITEMS.map(item => (
@@ -143,7 +143,7 @@ export default function Layout() {
               key={item.name}
               to={item.path}
               className={({ isActive }) => clsx(
-                'flex flex-col items-center justify-center gap-[3px] flex-1 py-1 transition-all duration-200 group',
+                'flex flex-col items-center justify-center gap-[3px] flex-1 py-1 transition-all duration-200 group relative',
                 isActive ? 'text-white' : 'text-white/40 hover:text-white/65'
               )}
             >
@@ -166,9 +166,6 @@ export default function Layout() {
                   >
                     {item.name}
                   </span>
-                  {isActive && (
-                    <span className="absolute bottom-1 w-1 h-1 rounded-full bg-[#C5E384]" />
-                  )}
                 </>
               )}
             </NavLink>

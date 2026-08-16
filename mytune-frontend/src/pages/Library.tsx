@@ -143,6 +143,20 @@ export default function Library() {
     }
   };
 
+  const deletePlaylist = async () => {
+    if (selectedPlaylist.id === 'liked') return;
+    if (!window.confirm(`Are you sure you want to delete the playlist "${selectedPlaylist.name}"?`)) return;
+    
+    try {
+      await supabase.from('playlists').delete().eq('id', selectedPlaylist.id);
+      setPlaylists(prev => prev.filter(p => p.id !== selectedPlaylist.id));
+      setSelectedPlaylist(null);
+    } catch (err) {
+      console.error(err);
+      alert('Error deleting playlist');
+    }
+  };
+
   if (loading) {
     return (
       <div className="h-full flex items-center justify-center pt-20">
@@ -162,6 +176,17 @@ export default function Library() {
             <span className="material-symbols-outlined text-white">arrow_back</span>
           </button>
           <h1 className="text-3xl font-black text-white tracking-tight flex-1 truncate">{selectedPlaylist.name}</h1>
+          
+          {selectedPlaylist.id !== 'liked' && (
+            <button 
+              onClick={deletePlaylist}
+              className="w-10 h-10 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors"
+              title="Delete Playlist"
+            >
+              <span className="material-symbols-outlined text-[20px]">delete</span>
+            </button>
+          )}
+
           {playlistTracks.length > 0 && (
             <button 
               onClick={handlePlayPlaylist}

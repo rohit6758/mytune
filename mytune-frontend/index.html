@@ -37,7 +37,24 @@
     </style>
   </head>
   <body class="antialiased">
-    <div id="root"></div>
+    <div id="root">
+      <style>
+        #splash {
+          position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+          background: #000; display: flex; flex-direction: column;
+          align-items: center; justify-content: center; z-index: 9999;
+        }
+        #splash img { width: 120px; height: auto; border-radius: 24px; animation: pulse 2s infinite ease-in-out; }
+        @keyframes pulse {
+          0% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.05); opacity: 0.7; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+      </style>
+      <div id="splash">
+        <img src="/logo.png" alt="MyTune" />
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

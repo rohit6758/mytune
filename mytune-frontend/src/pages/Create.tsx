@@ -27,27 +27,28 @@ export default function Create() {
       
       let finalAudioUrl = importUrl;
 
-      // 1. If it's an Instagram link, try to extract via Cobalt API
+      // 1. If it's an Instagram link, try to extract via RapidAPI
       if (importUrl.includes('instagram.com/reel') || importUrl.includes('instagram.com/p')) {
-        console.log('Extracting Instagram audio...');
+        console.log('Extracting Instagram audio via RapidAPI...');
         try {
-          const cobaltRes = await fetch('https://co.wuk.sh/api/json', {
-            method: 'POST',
+          const rapidApiRes = await fetch(`https://instagram-reels-downloader-api.p.rapidapi.com/download?url=${encodeURIComponent(importUrl)}`, {
+            method: 'GET',
             headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              url: importUrl,
-              isAudioOnly: true,
-              aFormat: 'mp3'
-            })
+              'x-rapidapi-host': 'instagram-reels-downloader-api.p.rapidapi.com',
+              'x-rapidapi-key': '5c226095d2msh2c1ed302c0fbeacp11a24ajsn961b6de22f7f'
+            }
           });
 
-          if (!cobaltRes.ok) throw new Error('Failed to extract audio from Instagram');
+          if (!rapidApiRes.ok) throw new Error('Failed to connect to RapidAPI');
           
-          const cobaltData = await cobaltRes.json();
-          const temporaryCdnUrl = cobaltData.url;
+          const rapidApiData = await rapidApiRes.json();
+          if (!rapidApiData.success || !rapidApiData.data) throw new Error('API returned an error or empty data');
+          
+          const medias = rapidApiData.data.medias || [];
+          const audioMedia = medias.find((m: any) => m.type === 'audio') || medias.find((m: any) => m.is_audio);
+          
+          const temporaryCdnUrl = audioMedia ? audioMedia.url : (medias[0]?.url || rapidApiData.data.url);
+          if (!temporaryCdnUrl) throw new Error('Could not find media URL in response');
 
           // 2. Fetch the temporary audio stream as a Blob via CORS proxy
           console.log('Downloading audio to device...');
@@ -76,7 +77,7 @@ export default function Create() {
           finalAudioUrl = publicData.publicUrl;
         } catch (extractionError) {
           console.warn('Extraction failed, using fallback track:', extractionError);
-          alert('Note: The free Instagram extraction server (co.wuk.sh) is currently offline. We are importing a high-quality Demo track instead so you can test your new Insta Songs playlist features!');
+          alert('Note: Instagram extraction failed (maybe API limit reached?). We are importing a high-quality Demo track instead so you can test your new Insta Songs playlist features!');
           // Fallback to a royalty free track for testing
           finalAudioUrl = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
         }

@@ -106,7 +106,10 @@ export default function Library() {
   const createPlaylist = async () => {
     if (!newPlaylistName.trim()) return;
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) {
+      alert("You must be logged in to create a playlist.");
+      return;
+    }
 
     try {
       const { data, error } = await supabase
@@ -121,8 +124,9 @@ export default function Library() {
         setIsCreating(false);
         setNewPlaylistName('');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to create playlist', err);
+      alert('Error creating playlist: ' + (err.message || JSON.stringify(err)) + '\n\nPlease ensure you have run the playlists_setup.sql script in your Supabase SQL Editor.');
     }
   };
 

@@ -15,7 +15,9 @@ export default function Create() {
   const { playTrack } = usePlayer();
 
   const handleImport = async () => {
-    if (!importUrl || !importTitle || !importArtist) return;
+    if (!importUrl) { alert('Please paste a valid link.'); return; }
+    if (!importTitle) { alert('Please give this song a title.'); return; }
+    if (!importArtist) { alert('Please add an artist name.'); return; }
     setIsImporting(true);
     
     try {
@@ -84,8 +86,48 @@ export default function Create() {
       
       const { error } = await supabase.from('library').insert(newTrack);
       if (error) throw error;
+
+      // Automatically add to "Insta Songs" playlist
+      if (importUrl.includes('instagram.com')) {
+        let instaPlaylistId = null;
+        
+        // 1. Check if playlist exists
+        const { data: existingPlaylists } = await supabase
+          .from('playlists')
+          .select('id')
+          .eq('user_id', user.id)
+          .ilike('name', 'Insta Songs')
+          .limit(1);
+
+        if (existingPlaylists && existingPlaylists.length > 0) {
+          instaPlaylistId = existingPlaylists[0].id;
+        } else {
+          // 2. Create if doesn't exist
+          const { data: newPlaylist, error: playlistError } = await supabase
+            .from('playlists')
+            .insert({ user_id: user.id, name: 'Insta Songs' })
+            .select()
+            .single();
+          if (!playlistError && newPlaylist) {
+            instaPlaylistId = newPlaylist.id;
+          }
+        }
+
+        // 3. Add track to playlist
+        if (instaPlaylistId) {
+          await supabase.from('playlist_tracks').insert({
+            playlist_id: instaPlaylistId,
+            user_id: user.id,
+            track_id: newTrack.track_id,
+            title: newTrack.title,
+            artist: newTrack.artist,
+            cover_url: newTrack.cover_url,
+            preview_url: newTrack.preview_url
+          });
+        }
+      }
       
-      alert('Track extracted and imported to your library successfully!');
+      alert('Track extracted and saved to "Insta Songs" playlist!');
       setShowImportModal(false);
       setImportUrl('');
       setImportTitle('');
@@ -192,17 +234,17 @@ export default function Create() {
             
             <input 
               value={importUrl} onChange={e => setImportUrl(e.target.value)}
-              placeholder="Instagram Reel Link (or any MP3 URL)"
+              placeholder="Instagram Reel Link (e.g. https://www.instagram.com/reel/...)"
               className="w-full bg-[#110D17] border border-[#C5E384]/30 rounded-xl p-3 text-white placeholder-white/30 focus:outline-none focus:border-[#C5E384] transition-colors"
             />
             <input 
               value={importTitle} onChange={e => setImportTitle(e.target.value)}
-              placeholder="Track Title"
+              placeholder="Give this edit a title... (Required)"
               className="w-full bg-[#110D17] border border-white/10 rounded-xl p-3 text-white placeholder-white/30"
             />
             <input 
               value={importArtist} onChange={e => setImportArtist(e.target.value)}
-              placeholder="Artist Name"
+              placeholder="Artist Name or Editor... (Required)"
               className="w-full bg-[#110D17] border border-white/10 rounded-xl p-3 text-white placeholder-white/30"
             />
             

@@ -90,13 +90,37 @@ export default function GlobalPlayer() {
         </div>
         
         {/* Mobile Controls right side */}
-        <div className="ml-auto flex md:hidden items-center gap-2">
+        <div className="ml-auto flex md:hidden items-center gap-1 sm:gap-2">
+          <button 
+            onClick={toggleShuffle} 
+            className={`p-1 transition-colors ${isShuffle ? 'text-[#C5E384]' : 'text-white/50'}`}
+          >
+            <span className="material-symbols-outlined text-[18px]">shuffle</span>
+          </button>
+          
+          <button onClick={prev} className="p-1 text-white/70">
+            <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>skip_previous</span>
+          </button>
+
           <button 
             onClick={isPlaying ? pause : resume} 
-            className="w-10 h-10 bg-white text-black rounded-full flex items-center justify-center shadow-lg"
+            className="w-10 h-10 bg-white text-black rounded-full flex items-center justify-center shadow-lg mx-1"
           >
             <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>
               {isPlaying ? 'pause' : 'play_arrow'}
+            </span>
+          </button>
+
+          <button onClick={() => next(true)} className="p-1 text-white/70">
+            <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>skip_next</span>
+          </button>
+
+          <button 
+            onClick={toggleRepeatMode} 
+            className={`p-1 transition-colors relative ${repeatMode !== 'off' ? 'text-[#C5E384]' : 'text-white/50'}`}
+          >
+            <span className="material-symbols-outlined text-[18px]">
+              {repeatMode === 'one' ? 'repeat_one' : 'repeat'}
             </span>
           </button>
         </div>

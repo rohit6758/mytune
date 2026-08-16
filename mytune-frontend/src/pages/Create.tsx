@@ -19,7 +19,6 @@ export default function Create() {
   const handleImport = async () => {
     if (!importUrl) { alert('Please paste a valid link.'); return; }
     if (!importTitle) { alert('Please give this song a title.'); return; }
-    if (!importArtist) { alert('Please add an artist name.'); return; }
     setIsImporting(true);
     
     try {
@@ -87,7 +86,7 @@ export default function Create() {
         user_id: user.id,
         track_id: `custom-${Date.now()}`,
         title: importTitle,
-        artist: importArtist,
+        artist: importArtist || 'Unknown Artist',
         cover_url: `https://picsum.photos/seed/${Date.now()}/500/500`,
         preview_url: finalAudioUrl
       };
@@ -340,7 +339,7 @@ export default function Create() {
             />
             <input 
               value={importArtist} onChange={e => setImportArtist(e.target.value)}
-              placeholder="Artist Name or Editor... (Required)"
+              placeholder="Artist Name or Editor... (Optional)"
               className="w-full bg-[#110D17] border border-white/10 rounded-xl p-3 text-white placeholder-white/30"
             />
             

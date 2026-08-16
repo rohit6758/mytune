@@ -210,76 +210,74 @@ export default function Create() {
         </p>
       </section>
 
-      {/* Creation Options Grid */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto w-full">
+      {/* Creation Options - Two Bars */}
+      <section className="flex flex-col gap-4 max-w-3xl mx-auto w-full pb-20">
 
-        {/* Create New Playlist Card */}
-        <button 
-          onClick={() => navigate('/library')}
-          className="group relative flex flex-col items-start p-6 bg-[#1A1625] rounded-3xl hover:bg-[#252031] transition-all duration-500 shadow-xl overflow-hidden border border-white/5 hover:border-[#FFF9EB]/50 text-left"
-        >
-          <div className="absolute -right-10 -top-10 w-44 h-44 rounded-full blur-3xl opacity-10 group-hover:opacity-30 transition-opacity duration-500" style={{ background: BRAND_GRAD }} />
-          {/* Icon */}
-          <div className="relative z-10 p-4 rounded-2xl bg-[#110D17] border border-white/5 mb-5">
-            <span className="material-symbols-outlined text-[40px]" style={{ fontVariationSettings: "'FILL' 1", background: BRAND_GRAD, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-              queue_music
-            </span>
-          </div>
-          <div className="relative z-10 w-full">
-            <h3 className="text-lg font-bold text-white mb-2 group-hover:text-[#FFF9EB] transition-colors duration-300">Create New Playlist</h3>
-            <p className="text-sm text-white/50 mb-5 leading-relaxed">Curate your aggression. Stack tracks for your next intense session.</p>
-            <div
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold uppercase tracking-wider w-full justify-center text-white active:scale-95 transition-transform"
-              style={{ background: BRAND_GRAD }}
-            >
-              Build Now
-              <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>arrow_forward</span>
-            </div>
-          </div>
-        </button>
-
-        {/* Add Music Card (Insta) */}
-        <button 
-          onClick={() => setShowImportModal(true)}
-          className="group relative flex flex-col items-start p-6 bg-[#1A1625] rounded-3xl hover:bg-[#252031] transition-all duration-500 shadow-xl overflow-hidden border border-white/5 hover:border-white/20 text-left"
-        >
-          <div className="absolute -right-10 -top-10 w-44 h-44 rounded-full blur-3xl opacity-5 group-hover:opacity-10 transition-opacity duration-500 bg-white" />
-          {/* Icon */}
-          <div className="relative z-10 p-4 rounded-2xl bg-[#110D17] border border-white/5 mb-5">
-            <span className="material-symbols-outlined text-[40px] text-white/70" style={{ fontVariationSettings: "'FILL' 1" }}>
-              smart_toy
-            </span>
-          </div>
-          <div className="relative z-10 w-full">
-            <h3 className="text-lg font-bold text-white mb-2 group-hover:text-white transition-colors duration-300">Insta Extractor</h3>
-            <p className="text-sm text-white/50 mb-5 leading-relaxed">Paste an Instagram link to extract and save audio.</p>
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold uppercase tracking-wider w-full justify-center text-white border border-white/25 group-hover:bg-white group-hover:text-black active:scale-95 transition-all">
-              Extract Link
-              <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>link</span>
-            </div>
-          </div>
-        </button>
-
-        {/* Local File Upload Card */}
-        <div className="group relative flex flex-col items-start p-6 bg-[#1A1625] rounded-3xl hover:bg-[#252031] transition-all duration-500 shadow-xl overflow-hidden border border-white/5 hover:border-[#C5E384]/40 text-left sm:col-span-2 md:col-span-1 lg:col-span-3">
+        {/* Bar 1: Local File Upload (Create Your Own Playlist) */}
+        <div className="group relative flex items-center justify-between p-4 sm:p-6 bg-[#1A1625] rounded-3xl hover:bg-[#252031] transition-all duration-500 shadow-xl overflow-hidden border border-white/5 hover:border-[#C5E384]/40 text-left w-full">
           <input 
             type="file" 
             accept="audio/*" 
-            className="absolute inset-0 opacity-0 cursor-pointer z-20" 
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" 
             onChange={handleLocalUpload}
             disabled={isUploading}
           />
-          <div className="absolute -right-10 -top-10 w-44 h-44 rounded-full blur-3xl opacity-10 group-hover:opacity-20 transition-opacity duration-500 bg-[#C5E384]" />
-          <div className="relative z-10 flex flex-col items-center justify-center text-center w-full py-4">
-            <span className="material-symbols-outlined text-[48px] text-[#C5E384] mb-3" style={{ fontVariationSettings: "'FILL' 1" }}>
-              upload_file
-            </span>
-            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-[#C5E384] transition-colors duration-300">
-              {isUploading ? 'Uploading...' : 'Upload Local Audio'}
-            </h3>
-            <p className="text-sm text-white/50 max-w-sm mx-auto">Upload an MP3/WAV file directly from your device into your personal library forever.</p>
+          <div className="absolute -left-10 -bottom-10 w-32 h-32 rounded-full blur-3xl opacity-10 group-hover:opacity-20 transition-opacity duration-500 bg-[#C5E384]" />
+          
+          <div className="relative z-10 flex items-center gap-4 sm:gap-6 flex-1 min-w-0">
+            <div className="p-3 sm:p-4 rounded-2xl bg-[#110D17] border border-white/5 flex-shrink-0 flex items-center justify-center">
+              <span className="material-symbols-outlined text-[32px] sm:text-[40px] text-[#C5E384]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                upload_file
+              </span>
+            </div>
+            <div className="flex-1 min-w-0 pr-4">
+              <h3 className="text-lg sm:text-xl font-bold text-white mb-1 group-hover:text-[#C5E384] transition-colors duration-300 truncate">
+                {isUploading ? 'Uploading...' : 'Create Your Own Playlist'}
+              </h3>
+              <p className="text-xs sm:text-sm text-white/50 leading-relaxed hidden sm:block">
+                Upload an MP3/WAV file directly from your device into your personal library forever.
+              </p>
+            </div>
+          </div>
+          
+          <div className="relative z-10 flex-shrink-0">
+            <div className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-full text-xs sm:text-sm font-bold uppercase tracking-wider text-black bg-[#C5E384] hover:bg-white active:scale-95 transition-all shadow-lg">
+              Upload
+              <span className="material-symbols-outlined text-sm sm:text-base hidden sm:block" style={{ fontVariationSettings: "'FILL' 1" }}>file_upload</span>
+            </div>
           </div>
         </div>
+
+        {/* Bar 2: Insta Songs (Extractor) */}
+        <button 
+          onClick={() => setShowImportModal(true)}
+          className="group relative flex items-center justify-between p-4 sm:p-6 bg-[#1A1625] rounded-3xl hover:bg-[#252031] transition-all duration-500 shadow-xl overflow-hidden border border-white/5 hover:border-white/20 text-left w-full"
+        >
+          <div className="absolute -right-10 -top-10 w-32 h-32 rounded-full blur-3xl opacity-5 group-hover:opacity-10 transition-opacity duration-500 bg-white" />
+          
+          <div className="relative z-10 flex items-center gap-4 sm:gap-6 flex-1 min-w-0">
+            <div className="p-3 sm:p-4 rounded-2xl bg-[#110D17] border border-white/5 flex-shrink-0 flex items-center justify-center">
+              <span className="material-symbols-outlined text-[32px] sm:text-[40px] text-white/70" style={{ fontVariationSettings: "'FILL' 1" }}>
+                smart_toy
+              </span>
+            </div>
+            <div className="flex-1 min-w-0 pr-4">
+              <h3 className="text-lg sm:text-xl font-bold text-white mb-1 group-hover:text-white transition-colors duration-300 truncate">
+                Insta Songs
+              </h3>
+              <p className="text-xs sm:text-sm text-white/50 leading-relaxed hidden sm:block">
+                Paste an Instagram link to extract and save audio to your playlist.
+              </p>
+            </div>
+          </div>
+
+          <div className="relative z-10 flex-shrink-0">
+            <div className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-full text-xs sm:text-sm font-bold uppercase tracking-wider text-white border border-white/25 group-hover:bg-white group-hover:text-black active:scale-95 transition-all">
+              Extract
+              <span className="material-symbols-outlined text-sm sm:text-base hidden sm:block" style={{ fontVariationSettings: "'FILL' 0" }}>link</span>
+            </div>
+          </div>
+        </button>
 
       </section>
 

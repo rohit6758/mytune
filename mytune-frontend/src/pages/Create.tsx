@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { usePlayer } from '../context/PlayerContext';
+import { useNavigate } from 'react-router-dom';
 
 /* Brand gradient — Ultraviolet Sonic */
 const BRAND_GRAD = 'linear-gradient(135deg, #FFF9EB 0%, #FFF9EB 50%, #FFF9EB 100%)';
@@ -146,6 +147,8 @@ export default function Create() {
     }
   };
 
+  const navigate = useNavigate();
+
   return (
     <div className="inner-scroll h-full overflow-y-auto px-4 pt-5 pb-6 flex flex-col gap-6">
 
@@ -155,15 +158,18 @@ export default function Create() {
           Ignite Your Sound
         </h2>
         <p className="text-base text-white/55 max-w-sm mx-auto leading-relaxed">
-          Build the ultimate high-energy playlist, start a real-time jam session, or discover the raw tracks that fuel your momentum.
+          Build the ultimate high-energy playlist or discover the raw tracks that fuel your momentum.
         </p>
       </section>
 
       {/* Creation Options Grid */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto w-full">
+      <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto w-full">
 
         {/* Create New Playlist Card */}
-        <button className="group relative flex flex-col items-start p-6 bg-[#1A1625] rounded-3xl hover:bg-[#252031] transition-all duration-500 shadow-xl overflow-hidden border border-white/5 hover:border-[#FFF9EB]/50 text-left">
+        <button 
+          onClick={() => navigate('/library')}
+          className="group relative flex flex-col items-start p-6 bg-[#1A1625] rounded-3xl hover:bg-[#252031] transition-all duration-500 shadow-xl overflow-hidden border border-white/5 hover:border-[#FFF9EB]/50 text-left"
+        >
           <div className="absolute -right-10 -top-10 w-44 h-44 rounded-full blur-3xl opacity-10 group-hover:opacity-30 transition-opacity duration-500" style={{ background: BRAND_GRAD }} />
           {/* Icon */}
           <div className="relative z-10 p-4 rounded-2xl bg-[#110D17] border border-white/5 mb-5">
@@ -184,31 +190,10 @@ export default function Create() {
           </div>
         </button>
 
-        {/* Start a Jam Card */}
-        <button className="group relative flex flex-col items-start p-6 bg-[#1A1625] rounded-3xl hover:bg-[#252031] transition-all duration-500 shadow-xl overflow-hidden border border-white/5 hover:border-[#C5E384]/40 text-left">
-          <div className="absolute -right-10 -top-10 w-44 h-44 rounded-full blur-3xl opacity-10 group-hover:opacity-20 transition-opacity duration-500 bg-[#C5E384]" />
-          {/* Icon */}
-          <div className="relative z-10 p-4 rounded-2xl bg-[#110D17] border border-white/5 mb-5">
-            <span className="material-symbols-outlined text-[40px] text-[#C5E384]" style={{ fontVariationSettings: "'FILL' 1" }}>
-              vital_signs
-            </span>
-          </div>
-          <div className="relative z-10 w-full">
-            <h3 className="text-lg font-bold text-white mb-2 group-hover:text-[#C5E384] transition-colors duration-300">Start a Jam</h3>
-            <p className="text-sm text-white/50 mb-5 leading-relaxed">Real-time sync. High voltage collaborative listening starts here.</p>
-            <div
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold uppercase tracking-wider w-full justify-center text-black bg-[#C5E384] hover:bg-[#b0d600] active:scale-95 transition-all shadow-[0_4px_14px_0_rgba(208,255,0,0.2)]"
-            >
-              Sync Up
-              <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>cell_tower</span>
-            </div>
-          </div>
-        </button>
-
         {/* Add Music Card */}
         <button 
           onClick={() => setShowImportModal(true)}
-          className="group relative flex flex-col items-start p-6 bg-[#1A1625] rounded-3xl hover:bg-[#252031] transition-all duration-500 shadow-xl overflow-hidden border border-white/5 hover:border-white/20 text-left sm:col-span-2 lg:col-span-1"
+          className="group relative flex flex-col items-start p-6 bg-[#1A1625] rounded-3xl hover:bg-[#252031] transition-all duration-500 shadow-xl overflow-hidden border border-white/5 hover:border-white/20 text-left"
         >
           <div className="absolute -right-10 -top-10 w-44 h-44 rounded-full blur-3xl opacity-5 group-hover:opacity-10 transition-opacity duration-500 bg-white" />
           {/* Icon */}

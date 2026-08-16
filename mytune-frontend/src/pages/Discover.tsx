@@ -186,15 +186,41 @@ export default function Discover() {
               </div>
 
               {/* Actions Right Column */}
-              <div className="flex flex-col gap-6 items-center">
-                <button
-                  onClick={() => handleLike(track)}
-                  className="w-14 h-14 rounded-full flex items-center justify-center transition-all active:scale-90 shadow-2xl"
-                  style={{ background: isLiked ? BRAND_GRAD : 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)' }}
-                >
-                  <span className="material-symbols-outlined text-[28px] text-white" style={{ fontVariationSettings: isLiked ? "'FILL' 1" : "'FILL' 0" }}>favorite</span>
-                </button>
-                <span className="text-white/50 text-xs font-bold -mt-4">{isLiked ? 'Liked' : 'Like'}</span>
+              <div className="flex flex-col gap-5 items-center">
+                
+                {/* Like Button */}
+                <div className="flex flex-col items-center">
+                  <button
+                    onClick={() => handleLike(track)}
+                    className="w-12 h-12 rounded-full flex items-center justify-center transition-all active:scale-90 shadow-2xl"
+                    style={{ background: isLiked ? BRAND_GRAD : 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)' }}
+                  >
+                    <span className="material-symbols-outlined text-[26px] text-white" style={{ fontVariationSettings: isLiked ? "'FILL' 1" : "'FILL' 0" }}>favorite</span>
+                  </button>
+                  <span className="text-white/80 text-[11px] font-bold mt-1 shadow-sm">{isLiked ? 'Liked' : 'Like'}</span>
+                </div>
+
+                {/* Comment Button (Visual only) */}
+                <div className="flex flex-col items-center group cursor-pointer hover:opacity-80 transition-opacity">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center bg-white/10 backdrop-blur-md shadow-2xl">
+                    <span className="material-symbols-outlined text-[26px] text-white" style={{ fontVariationSettings: "'FILL' 0" }}>chat_bubble</span>
+                  </div>
+                  <span className="text-white/80 text-[11px] font-bold mt-1 shadow-sm">1.2k</span>
+                </div>
+
+                {/* Share Button (Visual only) */}
+                <div className="flex flex-col items-center group cursor-pointer hover:opacity-80 transition-opacity">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center bg-white/10 backdrop-blur-md shadow-2xl">
+                    <span className="material-symbols-outlined text-[26px] text-white" style={{ fontVariationSettings: "'FILL' 0" }}>send</span>
+                  </div>
+                  <span className="text-white/80 text-[11px] font-bold mt-1 shadow-sm">Share</span>
+                </div>
+                
+                {/* Options Button */}
+                <div className="flex flex-col items-center mt-2 group cursor-pointer hover:opacity-80 transition-opacity">
+                  <span className="material-symbols-outlined text-[26px] text-white" style={{ fontVariationSettings: "'FILL' 0" }}>more_horiz</span>
+                </div>
+                
               </div>
             </div>
           </div>

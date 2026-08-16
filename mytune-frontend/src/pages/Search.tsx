@@ -104,7 +104,6 @@ export default function Search() {
   const handlePlay = (track: Track, list: Track[]) => {
     const startIndex = list.findIndex(t => t.id === track.id);
     playQueue(list, startIndex >= 0 ? startIndex : 0);
-    navigate('/discover');
   };
 
   const renderTrackCard = (track: Track, list: Track[]) => {

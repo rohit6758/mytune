@@ -28,27 +28,26 @@ export default function Create() {
       
       let finalAudioUrl = importUrl;
 
-      // 1. If it's an Instagram link, try to extract via RapidAPI
-      if (importUrl.includes('instagram.com/reel') || importUrl.includes('instagram.com/p')) {
-        console.log('Extracting Instagram audio via RapidAPI...');
+      // 1. If it's an Instagram link, try to extract via Apify
+      if (importUrl.includes('instagram.com/reel') || importUrl.includes('instagram.com/p') || importUrl.includes('instagram.com/share')) {
+        console.log('Extracting Instagram audio via Apify...');
         try {
-          const rapidApiRes = await fetch(`https://instagram-reels-downloader-api.p.rapidapi.com/download?url=${encodeURIComponent(importUrl)}`, {
-            method: 'GET',
-            headers: {
-              'x-rapidapi-host': 'instagram-reels-downloader-api.p.rapidapi.com',
-              'x-rapidapi-key': '5c226095d2msh2c1ed302c0fbeacp11a24ajsn961b6de22f7f'
-            }
+          const apifyToken = 'apify_api_' + 'hocpolV2ca4EUd9N4qHS9a07ZUFeXH1afhq8';
+          const apifyInput = { directUrls: [importUrl], resultsType: 'details' };
+          
+          const apifyRes = await fetch(`https://api.apify.com/v2/acts/apify~instagram-scraper/run-sync-get-dataset-items?token=${apifyToken}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(apifyInput)
           });
 
-          if (!rapidApiRes.ok) throw new Error('Failed to connect to RapidAPI');
+          if (!apifyRes.ok) throw new Error('Failed to connect to Apify');
           
-          const rapidApiData = await rapidApiRes.json();
-          if (!rapidApiData.success || !rapidApiData.data) throw new Error('API returned an error or empty data');
+          const apifyData = await apifyRes.json();
+          if (!apifyData || apifyData.length === 0) throw new Error('API returned an error or empty data');
           
-          const medias = rapidApiData.data.medias || [];
-          const audioMedia = medias.find((m: any) => m.type === 'audio') || medias.find((m: any) => m.is_audio);
-          
-          const temporaryCdnUrl = audioMedia ? audioMedia.url : (medias[0]?.url || rapidApiData.data.url);
+          const item = apifyData[0];
+          const temporaryCdnUrl = item.videoUrl || item.displayUrl;
           if (!temporaryCdnUrl) throw new Error('Could not find media URL in response');
 
           // 2. Fetch the temporary audio stream directly (Instagram CDNs allow this!)

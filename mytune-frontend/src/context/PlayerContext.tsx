@@ -85,7 +85,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         title: currentTrack.title,
         artist: currentTrack.artist,
         artwork: [
-          { src: currentTrack.cover_url, sizes: '512x512', type: 'image/jpeg' }
+          { src: currentTrack.cover_url, sizes: '512x512' },
+          { src: currentTrack.cover_url, sizes: '192x192' }
         ]
       });
 

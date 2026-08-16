@@ -1,7 +1,9 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import Logo from './Logo';
 import GlobalPlayer from './GlobalPlayer';
+import { supabase } from '../lib/supabase';
 
 const NAV_ITEMS = [
   { name: 'Discover', path: '/discover', icon: 'explore'       },
@@ -17,6 +19,26 @@ const BRAND_GRAD = 'linear-gradient(135deg, #FFF9EB 0%, #FFF9EB 50%, #FFF9EB 100
 export default function Layout() {
   const location = useLocation();
   const isDiscover = location.pathname === '/discover' || location.pathname === '/';
+  
+  const [profile, setProfile] = useState<{ full_name?: string, username?: string, avatar_url?: string } | null>(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // First try to load from metadata for instant load
+        if (user.user_metadata) {
+          setProfile(user.user_metadata);
+        }
+        // Then get fresh from DB
+        const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+        if (data) {
+          setProfile(data);
+        }
+      }
+    };
+    fetchProfile();
+  }, [location.pathname]); // Re-fetch when navigating (e.g., coming back from Profile page)
 
   return (
     <div className="w-full bg-transparent text-white overflow-hidden flex flex-col md:flex-row" style={{ height: '100dvh' }}>
@@ -58,13 +80,21 @@ export default function Layout() {
         
         <div className="mt-auto p-6 border-t border-white/5">
           <NavLink to="/profile" className="flex items-center gap-3 w-full hover:opacity-80 transition-opacity text-left">
-            <img
-              alt="Profile"
-              className="w-10 h-10 rounded-full border border-[#FFF9EB]/40 object-cover"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfj3tQSx3IVr5o2QnbJrKGzCJauZeVk0JuIodxhvhoriIUYMD5nvxBqGOPEX17ogOrbuFggejn5PgjCAn2Dyk2IwKYoH7sEa4sDsyiigbFkrpWJW5cUGWPAnSJFmfxGJzFYjXRzj8nULuwLLSbuVxvinb5V965KiKtcI2jcoO5hRUDP9yzbSEa_8_MexIatHG_VpggvPQWYaJVbh4Db6XjCNdrl4CfKHy07EWv94yzWE6pXSwQ0rwWcQ"
-            />
+            {profile?.avatar_url ? (
+              <img
+                alt="Profile"
+                className="w-10 h-10 rounded-full border border-[#FFF9EB]/40 object-cover"
+                src={profile.avatar_url}
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full border border-[#FFF9EB]/40 bg-[#1a1a1a] flex items-center justify-center">
+                <span className="material-symbols-outlined text-white/40 text-xl">person</span>
+              </div>
+            )}
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-white truncate">Your Account</p>
+              <p className="text-sm font-bold text-white truncate">
+                {profile?.full_name || profile?.username ? (profile.full_name || `@${profile.username}`) : 'Your Account'}
+              </p>
               <p className="text-xs text-white/50 truncate">View Profile</p>
             </div>
           </NavLink>
@@ -82,11 +112,17 @@ export default function Layout() {
 
               {/* Avatar */}
               <NavLink to="/profile" className="hover:scale-95 transition-transform block">
-                <img
-                  alt="Profile"
-                  className="w-8 h-8 rounded-full border border-[#FFF9EB]/40 object-cover"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfj3tQSx3IVr5o2QnbJrKGzCJauZeVk0JuIodxhvhoriIUYMD5nvxBqGOPEX17ogOrbuFggejn5PgjCAn2Dyk2IwKYoH7sEa4sDsyiigbFkrpWJW5cUGWPAnSJFmfxGJzFYjXRzj8nULuwLLSbuVxvinb5V965KiKtcI2jcoO5hRUDP9yzbSEa_8_MexIatHG_VpggvPQWYaJVbh4Db6XjCNdrl4CfKHy07EWv94yzWE6pXSwQ0rwWcQ"
-                />
+                {profile?.avatar_url ? (
+                  <img
+                    alt="Profile"
+                    className="w-8 h-8 rounded-full border border-[#FFF9EB]/40 object-cover"
+                    src={profile.avatar_url}
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full border border-[#FFF9EB]/40 bg-[#1a1a1a] flex items-center justify-center">
+                    <span className="material-symbols-outlined text-white/40 text-sm">person</span>
+                  </div>
+                )}
               </NavLink>
             </div>
           </header>

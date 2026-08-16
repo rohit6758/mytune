@@ -88,7 +88,7 @@ export default function Create() {
         track_id: `custom-${Date.now()}`,
         title: importTitle,
         artist: importArtist,
-        cover_url: 'https://images.unsplash.com/photo-1614680376593-902f74cf0d41?w=500&q=80',
+        cover_url: `https://picsum.photos/seed/${Date.now()}/500/500`,
         preview_url: finalAudioUrl
       };
       
@@ -177,14 +177,52 @@ export default function Create() {
         track_id: `custom-${Date.now()}`,
         title: trackTitle,
         artist: trackArtist,
-        cover_url: 'https://images.unsplash.com/photo-1614680376593-902f74cf0d41?w=500&q=80', // Default cover
+        cover_url: `https://picsum.photos/seed/${Date.now()}/500/500`, // Random good pic
         preview_url: audioUrl
       };
       
       const { error } = await supabase.from('library').insert(newTrack);
       if (error) throw error;
 
-      alert('Local file uploaded and saved to Library successfully!');
+      // Automatically add to "Local Uploads" playlist
+      let localPlaylistId = null;
+      
+      // 1. Check if playlist exists
+      const { data: existingPlaylists } = await supabase
+        .from('playlists')
+        .select('id')
+        .eq('user_id', user.id)
+        .ilike('name', 'Local Uploads')
+        .limit(1);
+
+      if (existingPlaylists && existingPlaylists.length > 0) {
+        localPlaylistId = existingPlaylists[0].id;
+      } else {
+        // 2. Create if doesn't exist
+        const { data: newPlaylist, error: playlistError } = await supabase
+          .from('playlists')
+          .insert({ user_id: user.id, name: 'Local Uploads' })
+          .select()
+          .single();
+        if (!playlistError && newPlaylist) {
+          localPlaylistId = newPlaylist.id;
+        }
+      }
+
+      // 3. Add track to playlist
+      if (localPlaylistId) {
+        await supabase.from('playlist_tracks').insert({
+          playlist_id: localPlaylistId,
+          user_id: user.id,
+          track_id: newTrack.track_id,
+          title: newTrack.title,
+          artist: newTrack.artist,
+          cover_url: newTrack.cover_url,
+          preview_url: newTrack.preview_url
+        });
+      }
+
+      alert('Local file uploaded and saved to "Local Uploads" playlist!');
     } catch (err: any) {
       alert('Error uploading file: ' + err.message);
     } finally {

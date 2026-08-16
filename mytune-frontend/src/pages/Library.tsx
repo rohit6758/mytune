@@ -208,8 +208,14 @@ export default function Library() {
                   <button 
                     onClick={async (e) => {
                       e.stopPropagation();
-                      await supabase.from('playlist_tracks').delete().eq('id', track.id);
-                      setPlaylistTracks(prev => prev.filter(t => t.id !== track.id));
+                      if (selectedPlaylist.id === 'liked') {
+                        await supabase.from('library').delete().eq('id', track.id);
+                        setPlaylistTracks(prev => prev.filter(t => t.id !== track.id));
+                        setLikedTracks(prev => prev.filter(t => t.id !== track.id));
+                      } else {
+                        await supabase.from('playlist_tracks').delete().eq('id', track.id);
+                        setPlaylistTracks(prev => prev.filter(t => t.id !== track.id));
+                      }
                     }}
                     className="p-2 opacity-0 group-hover:opacity-100 transition-opacity text-white/50 hover:text-red-500"
                   >
@@ -262,86 +268,32 @@ export default function Library() {
           </div>
         )}
 
-        {playlists.length === 0 ? (
-          <div className="bg-[#1e1b24] border border-white/5 rounded-2xl p-6 text-center text-white/50">
-            You don't have any playlists yet.
+        <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
+          {/* Synthetic Liked Songs Playlist Box */}
+          <div 
+            onClick={() => {
+              setSelectedPlaylist({ id: 'liked', name: 'Liked Songs' });
+              setPlaylistTracks(likedTracks);
+            }} 
+            className="flex-shrink-0 w-36 cursor-pointer group"
+          >
+            <div className="w-36 h-36 bg-gradient-to-br from-[#1e1b24] to-[#2a2533] rounded-xl flex items-center justify-center mb-2 shadow-lg group-hover:scale-105 transition-transform border border-[#C5E384]/20 group-hover:border-[#C5E384]/60">
+              <span className="material-symbols-outlined text-5xl text-[#C5E384]" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
+            </div>
+            <p className="text-sm font-bold text-white truncate">Liked Songs</p>
+            <p className="text-xs text-[#C5E384]">Library ({likedTracks.length})</p>
           </div>
-        ) : (
-          <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
-            {playlists.map(pl => (
-              <div key={pl.id} onClick={() => openPlaylist(pl)} className="flex-shrink-0 w-36 cursor-pointer group">
-                <div className="w-36 h-36 bg-[#25212c] rounded-xl flex items-center justify-center mb-2 shadow-lg group-hover:scale-105 transition-transform border border-white/5">
-                  <span className="material-symbols-outlined text-4xl text-white/20">queue_music</span>
-                </div>
-                <p className="text-sm font-bold text-white truncate">{pl.name}</p>
-                <p className="text-xs text-white/50">Playlist</p>
+
+          {playlists.map(pl => (
+            <div key={pl.id} onClick={() => openPlaylist(pl)} className="flex-shrink-0 w-36 cursor-pointer group">
+              <div className="w-36 h-36 bg-[#25212c] rounded-xl flex items-center justify-center mb-2 shadow-lg group-hover:scale-105 transition-transform border border-white/5">
+                <span className="material-symbols-outlined text-4xl text-white/20">queue_music</span>
               </div>
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* Liked Songs Section */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-white">Liked Songs</h2>
-          {likedTracks.length > 0 && (
-            <button 
-              onClick={handlePlayLiked}
-              className="w-10 h-10 rounded-full bg-[#C5E384] text-black flex items-center justify-center hover:scale-105 transition-transform shadow-[0_4px_14px_0_rgba(208,255,0,0.2)]"
-            >
-              <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
-            </button>
-          )}
+              <p className="text-sm font-bold text-white truncate">{pl.name}</p>
+              <p className="text-xs text-white/50">Playlist</p>
+            </div>
+          ))}
         </div>
-
-        {likedTracks.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 opacity-50">
-            <span className="material-symbols-outlined text-[64px] mb-4" style={{ fontVariationSettings: "'FILL' 0" }}>favorite_border</span>
-            <p className="text-lg font-bold">No liked songs</p>
-            <p className="text-sm mt-1 text-center max-w-[250px]">Go to Discover and like some songs to add them here.</p>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {likedTracks.map((track, index) => {
-              const isPlaying = currentTrack?.id === track.track_id;
-              return (
-                <div 
-                  key={track.id} 
-                  onClick={() => handlePlayTrack(track)} 
-                  className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-colors group ${isPlaying ? 'bg-[#C5E384]/10' : 'hover:bg-white/5'}`}
-                >
-                  <span className="text-white/30 text-xs w-4 text-center font-mono">{index + 1}</span>
-                  
-                  <div className="relative w-12 h-12 rounded-md overflow-hidden flex-shrink-0 shadow-md">
-                    <img src={track.cover_url} className="w-full h-full object-cover" alt={track.title} />
-                    {isPlaying && (
-                      <div className="absolute inset-0 bg-transparent/40 flex items-center justify-center">
-                        <div className="w-3 h-3 flex justify-between items-end">
-                          <div className="w-[3px] bg-[#C5E384] h-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                          <div className="w-[3px] bg-[#C5E384] h-2/3 animate-bounce" style={{ animationDelay: '150ms' }} />
-                          <div className="w-[3px] bg-[#C5E384] h-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-[15px] font-bold truncate ${isPlaying ? 'text-[#C5E384]' : 'text-white'}`}>{track.title}</p>
-                    <p className="text-xs text-white/50 truncate mt-0.5">{track.artist}</p>
-                  </div>
-                  
-                  <button 
-                    onClick={(e) => removeTrack(track.track_id, e)}
-                    className="p-2 opacity-0 group-hover:opacity-100 transition-opacity text-[#C5E384]"
-                  >
-                    <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        )}
       </section>
     </div>
   );

@@ -10,14 +10,15 @@ VALUES ('covers', 'covers', true)
 ON CONFLICT (id) DO NOTHING;
 
 -- 3. Allow authenticated users to upload to the covers bucket
-CREATE POLICY IF NOT EXISTS "Authenticated users can upload covers"
+-- (Note: If you run this multiple times and get a "policy already exists" error, that is perfectly fine and can be ignored!)
+CREATE POLICY "Authenticated users can upload covers"
 ON storage.objects FOR INSERT TO authenticated
 WITH CHECK (bucket_id = 'covers');
 
-CREATE POLICY IF NOT EXISTS "Anyone can view covers"
+CREATE POLICY "Anyone can view covers"
 ON storage.objects FOR SELECT TO public
 USING (bucket_id = 'covers');
 
-CREATE POLICY IF NOT EXISTS "Users can update their own covers"
+CREATE POLICY "Users can update their own covers"
 ON storage.objects FOR UPDATE TO authenticated
 USING (bucket_id = 'covers');

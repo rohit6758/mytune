@@ -123,20 +123,21 @@ export default function Discover() {
 
   if (loading) {
     return (
-      <div className="w-full h-full bg-black flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-[#FF9900] border-t-transparent rounded-full animate-spin" />
+      <div className="w-full h-full flex items-center justify-center" style={{ background: '#0a0a0f' }}>
+        <div className="w-10 h-10 border-4 border-[#F5E642] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   if (queue.length === 0) {
     return (
-      <div className="w-full h-full bg-black flex flex-col items-center justify-center gap-4 text-white/50 p-8 text-center">
-        <span className="material-symbols-outlined text-5xl text-[#FF9900]">music_off</span>
+      <div className="w-full h-full flex flex-col items-center justify-center gap-4 text-white/50 p-8 text-center" style={{ background: '#0a0a0f' }}>
+        <span className="material-symbols-outlined text-5xl text-[#F5E642]">music_off</span>
         <p>No tracks found. Try searching for something!</p>
       </div>
     );
   }
+
 
   return (
     <div
@@ -187,15 +188,15 @@ export default function Discover() {
                   @{track.artist.toLowerCase().replace(/\s+/g, '')}
                 </p>
 
-                {/* Play/Pause + Skip — only shown on current card */}
+                {/* Play/Pause + Skip — only on current card */}
                 {isCurrent && (
                   <div className="flex items-center gap-3 mt-1">
                     <button
                       onClick={() => toggle()}
-                      className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform"
-                      style={{ background: 'linear-gradient(135deg, #FF9900, #FF2020)' }}
+                      className="w-12 h-12 rounded-full flex items-center justify-center active:scale-90 transition-transform"
+                      style={{ background: '#F5E642', boxShadow: '0 4px 20px rgba(245,230,66,0.35)' }}
                     >
-                      <span className="material-symbols-outlined text-white text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+                      <span className="material-symbols-outlined text-black text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>
                         {isPlaying ? 'pause' : 'play_arrow'}
                       </span>
                     </button>
@@ -205,26 +206,28 @@ export default function Discover() {
                         const next = queue[(idx + 1) % queue.length];
                         if (next) playTrack(next);
                       }}
-                      className="w-10 h-10 rounded-full bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center active:scale-90 transition-transform"
+                      className="w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition-transform"
+                      style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.15)' }}
                     >
                       <span className="material-symbols-outlined text-white text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>skip_next</span>
                     </button>
                   </div>
                 )}
 
-                {/* Tap to play — when not current track */}
+                {/* Tap to play — when not current */}
                 {!isCurrent && (
                   <button
                     onClick={() => playTrack(track)}
-                    className="self-start mt-1 flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur border border-white/20 text-white text-sm font-semibold active:scale-95 transition-transform"
+                    className="self-start mt-1 flex items-center gap-2 px-4 py-2 rounded-full text-black text-sm font-bold active:scale-95 transition-transform"
+                    style={{ background: '#F5E642', boxShadow: '0 2px 12px rgba(245,230,66,0.3)' }}
                   >
-                    <span className="material-symbols-outlined text-[#FF9900] text-base" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
+                    <span className="material-symbols-outlined text-black text-base" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
                     Play
                   </button>
                 )}
               </div>
 
-              {/* Right: Vertical action column — VERTICAL not horizontal */}
+              {/* Right: Vertical action column */}
               <div className="flex flex-col items-center gap-4 pb-1 flex-shrink-0">
                 {/* Like */}
                 <div className="flex flex-col items-center gap-0.5">
@@ -232,15 +235,15 @@ export default function Discover() {
                     onClick={() => handleLike(track)}
                     className="w-11 h-11 rounded-full flex items-center justify-center transition-all active:scale-90 shadow-lg"
                     style={{
-                      background: isLiked
-                        ? 'linear-gradient(135deg, #FF9900, #FF2020)'
-                        : 'rgba(255,255,255,0.12)',
-                      backdropFilter: 'blur(10px)',
+                      background: isLiked ? '#F5E642' : 'rgba(255,255,255,0.1)',
+                      backdropFilter: 'blur(12px)',
+                      border: '1px solid rgba(255,255,255,0.12)',
+                      boxShadow: isLiked ? '0 0 16px rgba(245,230,66,0.4)' : 'none',
                     }}
                   >
                     <span
-                      className="material-symbols-outlined text-white text-[22px]"
-                      style={{ fontVariationSettings: isLiked ? "'FILL' 1" : "'FILL' 0" }}
+                      className="material-symbols-outlined text-[22px]"
+                      style={{ fontVariationSettings: isLiked ? "'FILL' 1" : "'FILL' 0", color: isLiked ? '#0a0a0f' : 'white' }}
                     >
                       favorite
                     </span>
@@ -251,12 +254,9 @@ export default function Discover() {
                 {/* Add to playlist */}
                 <div className="flex flex-col items-center gap-0.5">
                   <button
-                    onClick={() => {
-                      // Trigger GlobalPlayer's playlist modal via a custom event
-                      window.dispatchEvent(new CustomEvent('mytune:add-to-playlist', { detail: track }));
-                    }}
-                    className="w-11 h-11 rounded-full bg-white/12 backdrop-blur border border-white/20 flex items-center justify-center active:scale-90 transition-transform"
-                    style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(10px)' }}
+                    onClick={() => window.dispatchEvent(new CustomEvent('mytune:add-to-playlist', { detail: track }))}
+                    className="w-11 h-11 rounded-full flex items-center justify-center active:scale-90 transition-transform"
+                    style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.12)' }}
                   >
                     <span className="material-symbols-outlined text-white text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>playlist_add</span>
                   </button>
@@ -266,13 +266,9 @@ export default function Discover() {
                 {/* Share */}
                 <div className="flex flex-col items-center gap-0.5">
                   <button
-                    onClick={() => {
-                      if (navigator.share) {
-                        navigator.share({ title: track.title, text: `Listen to ${track.title} by ${track.artist} on MyTune` });
-                      }
-                    }}
+                    onClick={() => navigator.share?.({ title: track.title, text: `Listen to ${track.title} by ${track.artist} on MyTune` })}
                     className="w-11 h-11 rounded-full flex items-center justify-center active:scale-90 transition-transform"
-                    style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(10px)' }}
+                    style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.12)' }}
                   >
                     <span className="material-symbols-outlined text-white text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>share</span>
                   </button>

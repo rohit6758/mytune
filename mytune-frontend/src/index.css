@@ -5,6 +5,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Global Design Tokens ─────────────────────────────────────── */
+:root {
+  --brand:      #F5E642;   /* Banana yellow — primary accent */
+  --brand-dim:  #c9bc1a;   /* Darker yellow for hover */
+  --glass-bg:   rgba(255, 255, 255, 0.06);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
 @layer base {
   * {
     -webkit-tap-highlight-color: transparent;
@@ -15,21 +24,22 @@
     height: 100%;
     max-height: 100dvh;
     overflow: hidden;
-    background: radial-gradient(circle at center top, #2b2832 0%, #16141a 100%);
-    color: #e5e2e1;
+    /* Rich dark background with subtle purple hue for glass to pop against */
+    background: #0a0a0f;
+    color: #f0eee8;
     font-family: 'Montserrat', 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 }
 
-/* Material Symbols — filled by default */
+/* ── Material Symbols ─────────────────────────────────────────── */
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 1;
   user-select: none;
 }
 
-/* Polyfill classes for old font-* custom font family usage */
+/* ── Font family polyfills ────────────────────────────────────── */
 .font-headline-lg-mobile,
 .font-headline-lg,
 .font-headline-md,
@@ -41,43 +51,76 @@
   font-family: 'Montserrat', sans-serif;
 }
 
-/* Custom scrollbar for inner scrollable areas */
+/* ── Glassmorphism base classes ───────────────────────────────── */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+.glass-dark {
+  background: rgba(10, 10, 20, 0.55);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+}
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+/* ── Brand utility ─────────────────────────────────────────────── */
+.brand-bg  { background: #F5E642; }
+.brand-text { color: #F5E642; }
+.brand-border { border-color: #F5E642; }
+.brand-glow { box-shadow: 0 0 20px rgba(245, 230, 66, 0.35); }
+
+/* ── Inner scrollable areas ──────────────────────────────────── */
 .inner-scroll {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
-.inner-scroll::-webkit-scrollbar { width: 4px; }
+.inner-scroll::-webkit-scrollbar { width: 3px; }
 .inner-scroll::-webkit-scrollbar-track { background: transparent; }
-.inner-scroll::-webkit-scrollbar-thumb { background: rgba(139, 22, 255, 0.3); border-radius: 99px; }
+.inner-scroll::-webkit-scrollbar-thumb { background: rgba(245, 230, 66, 0.2); border-radius: 99px; }
 
-/* Brand gradient utility */
-.brand-gradient {
-  background: linear-gradient(135deg, #FFF9EB 0%, #FFF9EB 50%, #FFF9EB 100%);
+/* Hide scrollbar for snapping feed */
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* ── Animated ambient background orbs ───────────────────────── */
+.ambient-orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+  animation: drift 18s ease-in-out infinite alternate;
 }
-.brand-gradient-text {
-  background: linear-gradient(135deg, #FFF9EB 0%, #FFF9EB 50%, #FFF9EB 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+@keyframes drift {
+  0%   { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(30px, -20px) scale(1.05); }
 }
 
-/* Radial gradient background for ambient effects */
-.bg-gradient-radial {
-  background: radial-gradient(ellipse at center, var(--tw-gradient-stops));
-}
-
-/* Hide scrollbars but allow scrolling */
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.scrollbar-hide::-webkit-scrollbar { display: none; }
-
-/* Smooth page transitions */
+/* ── Page transitions ─────────────────────────────────────────── */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.page-enter {
-  animation: fadeIn 0.2s ease-out forwards;
+.page-enter { animation: fadeIn 0.22s ease-out forwards; }
+
+/* ── Input focus ring in brand yellow ────────────────────────── */
+input:focus, textarea:focus {
+  outline: none;
+  border-color: rgba(245, 230, 66, 0.6) !important;
+  box-shadow: 0 0 0 3px rgba(245, 230, 66, 0.12);
 }
+
+/* ── Active press scale for buttons ─────────────────────────── */
+button:active { transform: scale(0.96); }

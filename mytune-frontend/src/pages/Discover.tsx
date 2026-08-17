@@ -2,62 +2,50 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { usePlayer, Track } from '../context/PlayerContext';
 
-const BRAND_GRAD = 'linear-gradient(135deg, #FFF9EB 0%, #FFF9EB 50%, #FFF9EB 100%)';
-
 export default function Discover() {
-  const { queue, currentTrack, playQueue, playTrack, addToQueue, insertNext } = usePlayer();
+  const { queue, currentTrack, loadQueue, playTrack, toggle, isPlaying, addToQueue, insertNext } = usePlayer();
   const [loading, setLoading] = useState(true);
-  const [favoriteSinger, setFavoriteSinger] = useState('pop'); // Default
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  
-  // Track liking state
   const [likedTracks, setLikedTracks] = useState<Set<string>>(new Set());
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // 1. Fetch Profile to get favorite_singer
+  // Fetch tracks on mount — use loadQueue (NO auto-play)
   useEffect(() => {
-    const initDiscover = async () => {
+    const init = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        if (user && user.user_metadata?.favorite_singer) {
-          setFavoriteSinger(user.user_metadata.favorite_singer);
-          await fetchTracks(user.user_metadata.favorite_singer, 'replace');
-          return;
-        }
-        await fetchTracks('pop', 'replace');
+        const singer = user?.user_metadata?.favorite_singer || 'pop';
+        await fetchTracks(singer, 'replace');
       } catch (err) {
         console.error('Discover init error', err);
         setLoading(false);
       }
     };
-    
-    // Only fetch if queue is empty (don't override existing session)
-    if (queue.length === 0) {
-      initDiscover();
-    } else {
-      setLoading(false);
-    }
+
+    if (queue.length === 0) init();
+    else setLoading(false);
   }, []);
 
   const fetchTracks = async (term: string, action: 'replace' | 'append' | 'insertNext' = 'append') => {
     try {
-      const itunesUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&limit=25&media=music`;
-      const res = await fetch(itunesUrl);
+      const url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&limit=30&media=music`;
+      const res = await fetch(url);
       const data = await res.json();
-      
-      if (data && data.results && data.results.length > 0) {
-        const mapped: Track[] = data.results.map((t: any) => ({
-          id: String(t.trackId),
-          title: t.trackName,
-          artist: t.artistName,
-          cover_url: t.artworkUrl100 ? t.artworkUrl100.replace('100x100bb', '600x600bb') : '',
-          preview_url: t.previewUrl,
-        })).filter((t: Track) => t.preview_url && t.cover_url);
-        
-        // Shuffle
-        const shuffled = mapped.sort(() => 0.5 - Math.random());
-        
+
+      if (data?.results?.length > 0) {
+        const mapped: Track[] = data.results
+          .map((t: any) => ({
+            id: String(t.trackId),
+            title: t.trackName,
+            artist: t.artistName,
+            cover_url: t.artworkUrl100?.replace('100x100bb', '600x600bb') || '',
+            preview_url: t.previewUrl || '',
+          }))
+          .filter((t: Track) => t.preview_url && t.cover_url);
+
+        const shuffled = [...mapped].sort(() => 0.5 - Math.random());
+
         if (action === 'replace') {
-          playQueue(shuffled);
+          loadQueue(shuffled); // ← NO auto-play on first load
         } else if (action === 'insertNext') {
           insertNext(shuffled);
         } else {
@@ -65,29 +53,27 @@ export default function Discover() {
         }
       }
     } catch (err) {
-      console.error("Failed to fetch tracks", err);
+      console.error('Failed to fetch tracks', err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Auto-scroll when currentTrack changes (e.g. from GlobalPlayer next button)
+  // Sync scroll position when currentTrack changes from GlobalPlayer controls
   useEffect(() => {
     if (currentTrack && scrollContainerRef.current) {
       const index = queue.findIndex(t => t.id === currentTrack.id);
       if (index !== -1) {
         const slide = scrollContainerRef.current.children[index] as HTMLElement;
-        if (slide) {
-          slide.scrollIntoView({ behavior: 'smooth' });
-        }
+        slide?.scrollIntoView({ behavior: 'smooth' });
       }
     }
-  }, [currentTrack, queue]);
+  }, [currentTrack]);
 
-  // Handle intersection observer to update currentTrack when user scrolls
+  // IntersectionObserver — change track when user scrolls to a new card (but don't play automatically)
   useEffect(() => {
     const container = scrollContainerRef.current;
-    if (!container) return;
+    if (!container || queue.length === 0) return;
 
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -95,23 +81,27 @@ export default function Discover() {
           const trackId = entry.target.getAttribute('data-track-id');
           if (trackId && currentTrack?.id !== trackId) {
             const track = queue.find(t => t.id === trackId);
-            if (track) playTrack(track);
+            // Only switch track — DON'T auto-play (user must tap play)
+            if (track) {
+              // Just update the "current" without playing — preload it
+              if (window._mytuneAudio) {
+                window._mytuneAudio.src = track.preview_url;
+                window._mytuneAudio.load();
+              }
+            }
           }
         }
       });
-    }, { threshold: 0.6 });
+    }, { threshold: 0.65, rootMargin: '0px' });
 
     Array.from(container.children).forEach(child => observer.observe(child));
-
     return () => observer.disconnect();
-  }, [queue, currentTrack, playTrack]);
+  }, [queue, currentTrack]);
 
   const handleLike = async (track: Track) => {
-    if (likedTracks.has(track.id)) return; // Already liked
-    
-    // Add to local state for fast UI update
+    if (likedTracks.has(track.id)) return;
     setLikedTracks(prev => new Set(prev).add(track.id));
-    
+
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       try {
@@ -121,10 +111,9 @@ export default function Discover() {
           title: track.title,
           artist: track.artist,
           cover_url: track.cover_url,
-          preview_url: track.preview_url
+          preview_url: track.preview_url,
         });
-        
-        // Dynamic recommendation: fetch more by this artist and queue them next
+        // Recommend more from this artist (insert after current position)
         fetchTracks(track.artist, 'insertNext');
       } catch (e) {
         console.error('Failed to save track', e);
@@ -134,79 +123,161 @@ export default function Discover() {
 
   if (loading) {
     return (
-      <div className="relative w-full h-screen bg-[#110D17] flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-[#C5E384] border-t-transparent rounded-full animate-spin"></div>
+      <div className="w-full h-full bg-black flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-[#FF9900] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   if (queue.length === 0) {
     return (
-      <div className="relative w-full h-screen bg-[#110D17] flex items-center justify-center text-white/50">
-        No tracks found for {favoriteSinger}.
+      <div className="w-full h-full bg-black flex flex-col items-center justify-center gap-4 text-white/50 p-8 text-center">
+        <span className="material-symbols-outlined text-5xl text-[#FF9900]">music_off</span>
+        <p>No tracks found. Try searching for something!</p>
       </div>
     );
   }
 
   return (
-    <div 
+    <div
       ref={scrollContainerRef}
-      className="relative w-full h-[calc(100dvh-72px)] bg-transparent overflow-y-scroll snap-y snap-mandatory no-scrollbar"
+      className="relative w-full h-full bg-black overflow-y-scroll snap-y snap-mandatory no-scrollbar"
+      style={{ touchAction: 'pan-y' }}
     >
       {queue.map((track) => {
         const isLiked = likedTracks.has(track.id);
-        
+        const isCurrent = currentTrack?.id === track.id;
+
         return (
-          <div 
-            key={track.id + Math.random()} // allow duplicates in queue safely
+          <div
+            key={track.id}
             data-track-id={track.id}
-            className="w-full h-full snap-center relative overflow-hidden flex flex-col justify-end"
+            className="relative w-full h-full snap-center flex-shrink-0 overflow-hidden"
           >
-            {/* Ambient blurred background */}
+            {/* Full-bleed ambient background */}
             <div
               className="absolute inset-0 bg-cover bg-center scale-110"
               style={{
                 backgroundImage: `url(${track.cover_url})`,
-                filter: 'blur(32px) brightness(0.3) saturate(1.4)',
+                filter: 'blur(28px) brightness(0.25) saturate(1.5)',
               }}
             />
             {/* Vignette */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/90 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/95 pointer-events-none" />
 
-            {/* Track Info (bottom) */}
-            <div className="relative z-10 px-6 pb-24 md:pb-32 flex justify-between items-end">
-              <div className="flex-1 min-w-0 pr-4">
-                <img 
-                  src={track.cover_url} 
-                  className="w-24 h-24 md:w-48 md:h-48 rounded-xl shadow-2xl mb-4 border border-white/10" 
-                  alt="cover" 
-                />
-                <h2 className="text-3xl md:text-5xl font-black text-white leading-tight truncate">{track.title}</h2>
-                <p className="text-lg md:text-xl text-white/70 font-medium mt-1 truncate">@{track.artist.toLowerCase().replace(/\s+/g, '')}</p>
+            {/* Album art — centered upper half */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none" style={{ paddingBottom: '45%' }}>
+              <img
+                src={track.cover_url}
+                className="w-52 h-52 sm:w-64 sm:h-64 rounded-2xl shadow-2xl object-cover border border-white/10"
+                alt={track.title}
+                draggable={false}
+              />
+            </div>
+
+            {/* Bottom info row */}
+            <div className="absolute bottom-0 left-0 right-0 px-4 pb-6 flex flex-row items-end justify-between gap-2">
+              
+              {/* Left: Track info + controls */}
+              <div className="flex-1 min-w-0 flex flex-col gap-2">
+                <h2 className="text-xl sm:text-2xl font-black text-white leading-tight" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.8)' }}>
+                  {track.title}
+                </h2>
+                <p className="text-sm text-white/70 font-semibold truncate">
+                  @{track.artist.toLowerCase().replace(/\s+/g, '')}
+                </p>
+
+                {/* Play/Pause + Skip — only shown on current card */}
+                {isCurrent && (
+                  <div className="flex items-center gap-3 mt-1">
+                    <button
+                      onClick={() => toggle()}
+                      className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform"
+                      style={{ background: 'linear-gradient(135deg, #FF9900, #FF2020)' }}
+                    >
+                      <span className="material-symbols-outlined text-white text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+                        {isPlaying ? 'pause' : 'play_arrow'}
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        const idx = queue.findIndex(t => t.id === track.id);
+                        const next = queue[(idx + 1) % queue.length];
+                        if (next) playTrack(next);
+                      }}
+                      className="w-10 h-10 rounded-full bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center active:scale-90 transition-transform"
+                    >
+                      <span className="material-symbols-outlined text-white text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>skip_next</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* Tap to play — when not current track */}
+                {!isCurrent && (
+                  <button
+                    onClick={() => playTrack(track)}
+                    className="self-start mt-1 flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur border border-white/20 text-white text-sm font-semibold active:scale-95 transition-transform"
+                  >
+                    <span className="material-symbols-outlined text-[#FF9900] text-base" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
+                    Play
+                  </button>
+                )}
               </div>
 
-              {/* Actions Right Column */}
-              <div className="flex flex-col gap-5 items-center">
-                
-                {/* Like Button */}
-                <div className="flex flex-col items-center">
+              {/* Right: Vertical action column — VERTICAL not horizontal */}
+              <div className="flex flex-col items-center gap-4 pb-1 flex-shrink-0">
+                {/* Like */}
+                <div className="flex flex-col items-center gap-0.5">
                   <button
                     onClick={() => handleLike(track)}
-                    className="w-12 h-12 rounded-full flex items-center justify-center transition-all active:scale-90 shadow-2xl"
-                    style={{ background: isLiked ? BRAND_GRAD : 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)' }}
+                    className="w-11 h-11 rounded-full flex items-center justify-center transition-all active:scale-90 shadow-lg"
+                    style={{
+                      background: isLiked
+                        ? 'linear-gradient(135deg, #FF9900, #FF2020)'
+                        : 'rgba(255,255,255,0.12)',
+                      backdropFilter: 'blur(10px)',
+                    }}
                   >
-                    <span className="material-symbols-outlined text-[26px] text-white" style={{ fontVariationSettings: isLiked ? "'FILL' 1" : "'FILL' 0" }}>favorite</span>
+                    <span
+                      className="material-symbols-outlined text-white text-[22px]"
+                      style={{ fontVariationSettings: isLiked ? "'FILL' 1" : "'FILL' 0" }}
+                    >
+                      favorite
+                    </span>
                   </button>
-                  <span className="text-white/80 text-[11px] font-bold mt-1 shadow-sm">{isLiked ? 'Liked' : 'Like'}</span>
+                  <span className="text-white/70 text-[10px] font-bold">{isLiked ? 'Liked' : 'Like'}</span>
                 </div>
 
-                {/* Comment and Share buttons removed per user request */}
-                
-                {/* Options Button */}
-                <div className="flex flex-col items-center mt-2 group cursor-pointer hover:opacity-80 transition-opacity">
-                  <span className="material-symbols-outlined text-[26px] text-white" style={{ fontVariationSettings: "'FILL' 0" }}>more_horiz</span>
+                {/* Add to playlist */}
+                <div className="flex flex-col items-center gap-0.5">
+                  <button
+                    onClick={() => {
+                      // Trigger GlobalPlayer's playlist modal via a custom event
+                      window.dispatchEvent(new CustomEvent('mytune:add-to-playlist', { detail: track }));
+                    }}
+                    className="w-11 h-11 rounded-full bg-white/12 backdrop-blur border border-white/20 flex items-center justify-center active:scale-90 transition-transform"
+                    style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(10px)' }}
+                  >
+                    <span className="material-symbols-outlined text-white text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>playlist_add</span>
+                  </button>
+                  <span className="text-white/70 text-[10px] font-bold">Save</span>
                 </div>
-                
+
+                {/* Share */}
+                <div className="flex flex-col items-center gap-0.5">
+                  <button
+                    onClick={() => {
+                      if (navigator.share) {
+                        navigator.share({ title: track.title, text: `Listen to ${track.title} by ${track.artist} on MyTune` });
+                      }
+                    }}
+                    className="w-11 h-11 rounded-full flex items-center justify-center active:scale-90 transition-transform"
+                    style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(10px)' }}
+                  >
+                    <span className="material-symbols-outlined text-white text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>share</span>
+                  </button>
+                  <span className="text-white/70 text-[10px] font-bold">Share</span>
+                </div>
               </div>
             </div>
           </div>

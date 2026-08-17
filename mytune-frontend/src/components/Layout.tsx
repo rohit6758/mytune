@@ -1,5 +1,5 @@
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
 import clsx from 'clsx';
 import Logo from './Logo';
 import GlobalPlayer from './GlobalPlayer';
@@ -13,35 +13,59 @@ const NAV_ITEMS = [
   { name: 'Profile',  path: '/profile',  icon: 'person'        },
 ];
 
-/* Ultraviolet brand gradient */
-const BRAND_GRAD = 'linear-gradient(135deg, #FFF9EB 0%, #FFF9EB 50%, #FFF9EB 100%)';
+/* Brand colors */
+const ACTIVE_COLOR = '#FF9900';
 
 export default function Layout() {
   const location = useLocation();
+  const navigate = useNavigate();
   const isDiscover = location.pathname === '/discover' || location.pathname === '/';
-  
+  const lastBackPress = useRef<number>(0);
+  const [backToast, setBackToast] = useState(false);
   const [profile, setProfile] = useState<{ full_name?: string, username?: string, avatar_url?: string } | null>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        // First try to load from metadata for instant load
-        if (user.user_metadata) {
-          setProfile(user.user_metadata);
-        }
-        // Then get fresh from DB
+        if (user.user_metadata) setProfile(user.user_metadata);
         const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-        if (data) {
-          setProfile(data);
-        }
+        if (data) setProfile(data);
       }
     };
     fetchProfile();
-  }, [location.pathname]); // Re-fetch when navigating (e.g., coming back from Profile page)
+  }, [location.pathname]);
+
+  // Double-back-to-quit (Android PWA behavior)
+  useEffect(() => {
+    const handlePopState = () => {
+      if (location.pathname === '/discover' || location.pathname === '/') {
+        const now = Date.now();
+        if (now - lastBackPress.current < 2000) {
+          // Second back press within 2s — exit
+          window.history.go(-(window.history.length));
+        } else {
+          lastBackPress.current = now;
+          setBackToast(true);
+          setTimeout(() => setBackToast(false), 2000);
+          // Push a dummy state so back can be caught again
+          window.history.pushState(null, '', window.location.href);
+        }
+      }
+    };
+    window.history.pushState(null, '', window.location.href);
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [location.pathname]);
 
   return (
     <div className="w-full bg-transparent text-white overflow-hidden flex flex-col md:flex-row" style={{ height: '100dvh' }}>
+      {/* Double-back toast */}
+      {backToast && (
+        <div className="fixed bottom-36 left-1/2 -translate-x-1/2 z-[300] bg-black/80 text-white text-sm px-5 py-2 rounded-full border border-white/20 backdrop-blur">
+          Press back again to exit
+        </div>
+      )}
 
       {/* ── Desktop Sidebar Navigation (Hidden on Mobile) ────────────────── */}
       <aside className="hidden md:flex flex-col w-64 flex-shrink-0 bg-transparent border-r border-white/5 z-50">
@@ -56,7 +80,7 @@ export default function Layout() {
                 to={item.path}
                 className={({ isActive }) => clsx(
                   'flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 group',
-                  isActive ? 'bg-[#C5E384]/10 text-[#C5E384]' : 'hover:bg-white/5 text-white/60 hover:text-white'
+                  isActive ? 'bg-[#FF9900]/10 text-[#FF9900]' : 'hover:bg-white/5 text-white/60 hover:text-white'
                 )}
               >
                 {({ isActive }) => (
@@ -65,7 +89,7 @@ export default function Layout() {
                       className="material-symbols-outlined text-[24px] transition-all"
                       style={{
                         fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0",
-                        filter: isActive ? 'drop-shadow(0 0 8px rgba(208, 255, 0, 0.4))' : 'none'
+                        filter: isActive ? 'drop-shadow(0 0 8px rgba(255,153,0,0.4))' : 'none'
                       }}
                     >
                       {item.icon}
@@ -153,17 +177,17 @@ export default function Layout() {
                     className="material-symbols-outlined transition-all duration-200"
                     style={{
                       fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0",
-                      fontSize: '24px',
-                      filter: isActive ? 'drop-shadow(0 0 5px rgba(208, 255, 0, 0.4))' : 'none',
-                      color: isActive ? '#C5E384' : undefined,
+                    fontSize: '24px',
+                       filter: isActive ? `drop-shadow(0 0 5px rgba(255,153,0,0.5))` : 'none',
+                       color: isActive ? ACTIVE_COLOR : undefined,
                     }}
                   >
                     {item.icon}
                   </span>
                   <span
                     className="text-[10px] font-semibold tracking-wide transition-colors duration-200"
-                    style={{ color: isActive ? '#C5E384' : undefined }}
-                  >
+                     style={{ color: isActive ? ACTIVE_COLOR : undefined }}
+                   >
                     {item.name}
                   </span>
                 </>

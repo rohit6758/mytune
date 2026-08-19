@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase';
 import { usePlayer, Track } from '../context/PlayerContext';
 
 export default function Discover() {
-  const { queue, currentTrack, loadQueue, playTrack, toggle, isPlaying, addToQueue, insertNext } = usePlayer();
+  const { queue, currentTrack, loadQueue, playTrack, toggle, isPlaying, addToQueue, insertNext, loadOnly } = usePlayer();
   const [loading, setLoading] = useState(true);
   const [likedTracks, setLikedTracks] = useState<Set<string>>(new Set());
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -81,13 +81,9 @@ export default function Discover() {
           const trackId = entry.target.getAttribute('data-track-id');
           if (trackId && currentTrack?.id !== trackId) {
             const track = queue.find(t => t.id === trackId);
-            // Only switch track — DON'T auto-play (user must tap play)
             if (track) {
               // Just update the "current" without playing — preload it
-              if (window._mytuneAudio) {
-                window._mytuneAudio.src = track.preview_url;
-                window._mytuneAudio.load();
-              }
+              loadOnly(track);
             }
           }
         }

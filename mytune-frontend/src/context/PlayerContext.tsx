@@ -21,6 +21,7 @@ interface PlayerContextType {
   playTrack: (track: Track) => void;
   playQueue: (tracks: Track[], startIndex?: number) => void;
   loadQueue: (tracks: Track[], startIndex?: number) => void; 
+  loadOnly: (track: Track) => void;
   addToQueue: (track: Track) => void;
   insertNext: (tracks: Track[]) => void;
   pause: () => void;
@@ -285,7 +286,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   return (
     <PlayerContext.Provider value={{
       currentTrack, queue, isPlaying, progress, duration, repeatMode, isShuffle,
-      playTrack, playQueue, loadQueue, addToQueue, insertNext,
+      playTrack, playQueue, loadQueue, loadOnly, addToQueue, insertNext,
       pause, resume, toggle, next, prev, seek, toggleRepeatMode, toggleShuffle,
     }}>
       {children}

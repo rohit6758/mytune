@@ -98,17 +98,32 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     navigator.mediaSession.setActionHandler('nexttrack', () => next(true));
   }, [currentTrack]);
 
+  const fetchFullYTAudio = async (track: Track): Promise<string | null> => {
+    // If it's a YT ID (11 chars)
+    if (track.id && track.id.length === 11 && !track.id.includes('-')) {
+      return await getAudioStreamUrl(track.id);
+    }
+    // Otherwise it's an iTunes ID (numbers) or custom ID. Let's search YT for it!
+    try {
+      const results = await searchYTSongs(`${track.title} ${track.artist}`);
+      if (results && results.length > 0) {
+        return await getAudioStreamUrl(results[0].id);
+      }
+    } catch (e) {
+      console.warn('Failed to find YT stream for iTunes track', e);
+    }
+    return null;
+  };
+
   const loadAndPlay = async (track: Track) => {
     if (!audioRef.current) return;
     
     let url = track.preview_url;
-    // Fetch stream from Piped if missing
-    if (!url && track.id) {
-      const fetchedUrl = await getAudioStreamUrl(track.id);
-      if (fetchedUrl) {
-        url = fetchedUrl;
-        track.preview_url = fetchedUrl;
-      }
+    // Always try to fetch full stream from YT first
+    const fullUrl = await fetchFullYTAudio(track);
+    if (fullUrl) {
+      url = fullUrl;
+      track.preview_url = fullUrl; // Cache it
     }
 
     if (!url) {
@@ -131,11 +146,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     if (!audioRef.current) return;
     
     let url = track.preview_url;
-    if (!url && track.id) {
-      const fetchedUrl = await getAudioStreamUrl(track.id);
-      if (fetchedUrl) {
-        url = fetchedUrl;
-        track.preview_url = fetchedUrl;
+    // Do NOT aggressively search YT on preload, only if it's already a YT ID to save API calls
+    if (track.id && track.id.length === 11 && !track.id.includes('-')) {
+      const fullUrl = await fetchFullYTAudio(track);
+      if (fullUrl) {
+        url = fullUrl;
+        track.preview_url = fullUrl;
       }
     }
     

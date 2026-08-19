@@ -492,30 +492,7 @@ export default function Library() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 border-b border-white/5 pb-3">
-        {['Playlists', 'Songs', 'Albums', 'Artists'].map((tab, i) => (
-          <button key={tab} className={`px-4 py-2 rounded-xl text-sm font-medium ${i === 0 ? 'bg-white/10 text-white' : 'text-white/60 hover:bg-white/5'}`}>
-            {tab}
-          </button>
-        ))}
-      </div>
-
-      {/* Filters Row */}
-      <div className="flex items-center justify-between mt-[-10px]">
-        <button className="flex items-center gap-2 bg-[#8ab4f8] text-black px-4 py-2 rounded-full text-sm font-bold">
-          Date added
-          <span className="material-symbols-outlined text-[18px]">expand_more</span>
-        </button>
-        <div className="flex gap-2">
-          <button className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/50">
-            <span className="material-symbols-outlined">view_list</span>
-          </button>
-          <button className="w-10 h-10 rounded-full bg-[#8ab4f8] flex items-center justify-center text-black">
-            <span className="material-symbols-outlined">grid_view</span>
-          </button>
-        </div>
-      </div>
+      {/* Tabs and Filters removed to avoid dead UI elements */}
 
       {/* Main 4 Grid - Smaller horizontal items */}
       <div className="grid grid-cols-2 gap-3">

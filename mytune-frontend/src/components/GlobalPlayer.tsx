@@ -124,28 +124,26 @@ export default function GlobalPlayer() {
           <button className="p-2 text-white/70">
             <span className="material-symbols-outlined">more_vert</span>
           </button>
-        </div>
-
-        {/* Album Art */}
+              {/* Album Art */}
         <div className="flex-1 flex items-center justify-center p-8 min-h-0">
           <img 
             src={currentTrack.cover_url} 
             alt={currentTrack.title} 
-            className="w-full max-w-[320px] aspect-square object-cover rounded-xl shadow-2xl shadow-black/50"
-            style={{ border: '1px solid rgba(255,255,255,0.05)' }}
+            className="w-full max-w-[500px] aspect-square object-cover rounded-2xl shadow-2xl shadow-black/60"
+            style={{ border: '1px solid rgba(255,255,255,0.08)' }}
           />
         </div>
 
         {/* Controls Section */}
-        <div className="px-6 pb-6 flex flex-col gap-6">
+        <div className="px-6 pb-6 md:pb-12 flex flex-col gap-6 max-w-[800px] mx-auto w-full">
           {/* Track Info */}
           <div className="flex justify-between items-center">
             <div className="flex-1 min-w-0">
-              <h2 className="text-2xl font-bold text-white truncate">{currentTrack.title}</h2>
-              <p className="text-base text-white/60 truncate">{currentTrack.artist}</p>
+              <h2 className="text-3xl md:text-4xl font-bold text-white truncate">{currentTrack.title}</h2>
+              <p className="text-xl text-white/60 truncate">{currentTrack.artist}</p>
             </div>
             <button className="p-2 text-white/70 active:text-[#F5E642]">
-              <span className="material-symbols-outlined text-3xl">add_circle</span>
+              <span className="material-symbols-outlined text-4xl">add_circle</span>
             </button>
           </div>
 
@@ -154,57 +152,54 @@ export default function GlobalPlayer() {
             <input 
               type="range" min="0" max={duration || 100} value={progress}
               onChange={(e) => seek(Number(e.target.value))}
-              className="w-full h-1.5 bg-white/20 rounded-full appearance-none outline-none overflow-hidden"
-              style={{
-                boxShadow: `inset ${pct}% 0 0 0 #F5E642`
-              }}
+              className="w-full h-2 bg-white/20 rounded-full appearance-none outline-none overflow-hidden cursor-pointer"
+              style={{ boxShadow: `inset ${pct}% 0 0 0 #F5E642` }}
             />
-            <div className="flex justify-between text-xs text-white/50 font-medium">
+            <div className="flex justify-between text-sm text-white/50 font-medium">
               <span>{fmt(progress)}</span>
               <span>{fmt(duration)}</span>
             </div>
           </div>
 
           {/* Playback Controls */}
-          <div className="flex justify-between items-center px-2">
+          <div className="flex justify-between items-center px-4 md:px-12 mt-2">
             <button onClick={toggleShuffle} className={clsx("p-2 transition-colors", isShuffle ? "text-[#F5E642]" : "text-white/50")}>
-              <span className="material-symbols-outlined text-2xl">shuffle</span>
+              <span className="material-symbols-outlined text-3xl">shuffle</span>
             </button>
             <button onClick={prev} className="p-2 text-white hover:scale-110 transition-transform">
-              <span className="material-symbols-outlined text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>skip_previous</span>
+              <span className="material-symbols-outlined text-5xl" style={{ fontVariationSettings: "'FILL' 1" }}>skip_previous</span>
             </button>
-            <button onClick={toggle} className="w-20 h-20 rounded-full bg-white flex items-center justify-center shadow-lg active:scale-95 transition-transform">
-              <span className="material-symbols-outlined text-black text-5xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+            <button onClick={toggle} className="w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-2xl active:scale-95 transition-transform hover:bg-[#F5E642]">
+              <span className="material-symbols-outlined text-black text-6xl" style={{ fontVariationSettings: "'FILL' 1" }}>
                 {isPlaying ? 'pause' : 'play_arrow'}
               </span>
             </button>
             <button onClick={() => next(true)} className="p-2 text-white hover:scale-110 transition-transform">
-              <span className="material-symbols-outlined text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>skip_next</span>
+              <span className="material-symbols-outlined text-5xl" style={{ fontVariationSettings: "'FILL' 1" }}>skip_next</span>
             </button>
             <button onClick={toggleRepeatMode} className={clsx("p-2 transition-colors relative", repeatMode !== 'off' ? "text-[#F5E642]" : "text-white/50")}>
-              <span className="material-symbols-outlined text-2xl">{repeatMode === 'one' ? 'repeat_one' : 'repeat'}</span>
+              <span className="material-symbols-outlined text-3xl">{repeatMode === 'one' ? 'repeat_one' : 'repeat'}</span>
             </button>
           </div>
           
           {/* Bottom Actions */}
-          <div className="flex justify-between items-center text-white/50 px-2 pt-2">
-            <span className="material-symbols-outlined">speaker_group</span>
-            <span className="material-symbols-outlined">share</span>
-            <span className="material-symbols-outlined">menu</span>
+          <div className="flex justify-between items-center text-white/50 px-2 pt-4">
+            <span className="material-symbols-outlined text-2xl hover:text-white cursor-pointer">speaker_group</span>
+            <span className="material-symbols-outlined text-2xl hover:text-white cursor-pointer">share</span>
+            <span className="material-symbols-outlined text-2xl hover:text-white cursor-pointer">menu</span>
           </div>
 
-
           {/* Lyrics Preview */}
-          <div className="mt-2 p-4 rounded-2xl glass-card relative overflow-hidden group max-h-[300px] overflow-y-auto no-scrollbar">
-             <div className="absolute inset-0 bg-gradient-to-t from-[#701540] to-[#a02050] opacity-80 pointer-events-none" />
+          <div className="mt-4 p-6 rounded-2xl glass-card relative overflow-hidden group max-h-[400px] overflow-y-auto no-scrollbar border border-white/5 bg-black/40">
+             <div className="absolute inset-0 bg-gradient-to-t from-[#111] to-transparent opacity-80 pointer-events-none" />
              <div className="relative z-10">
-               <div className="flex justify-between items-center mb-2">
-                 <span className="text-white font-bold">Lyrics</span>
+               <div className="flex justify-between items-center mb-4">
+                 <span className="text-white font-bold text-xl">Lyrics</span>
                </div>
                {loadingLyrics ? (
-                 <p className="text-white/50 text-sm animate-pulse">Searching for lyrics...</p>
+                 <p className="text-white/50 text-base animate-pulse">Searching for lyrics...</p>
                ) : (
-                 <p className="text-white/80 text-base font-medium whitespace-pre-line leading-relaxed pb-4">
+                 <p className="text-white/80 text-lg font-medium whitespace-pre-line leading-relaxed pb-8">
                    {lyrics}
                  </p>
                )}
@@ -213,40 +208,39 @@ export default function GlobalPlayer() {
         </div>
       </div>
 
-      {/* Mini Player — glass bar */}
+      {/* Mini Player */}
       <div
         className={clsx(
-          "fixed bottom-[65px] md:bottom-0 left-0 md:left-64 right-0 z-[60] px-3 py-2.5 flex flex-col gap-0 transition-transform duration-300",
+          "fixed bottom-[65px] md:bottom-0 left-0 md:left-64 right-0 z-[60] px-4 py-3 flex flex-col gap-0 transition-transform duration-300 shadow-2xl",
           isExpanded ? "translate-y-full opacity-0 pointer-events-none" : "translate-y-0 opacity-100"
         )}
         style={{
-          background: 'rgba(10, 10, 18, 0.85)',
-          backdropFilter: 'blur(30px) saturate(200%)',
-          borderTop: '1px solid rgba(255,255,255,0.08)',
+          background: '#111116',
+          borderTop: '1px solid rgba(255,255,255,0.05)',
         }}
         onClick={() => setIsExpanded(true)}
       >
-        <div className="w-full h-0.5 bg-white/10 rounded-full overflow-hidden mb-2.5">
+        <div className="w-full h-0.5 bg-white/10 rounded-full overflow-hidden mb-3 absolute top-0 left-0 right-0">
           <div className="h-full rounded-full" style={{ width: `${pct}%`, background: '#F5E642', transition: 'width 0.1s linear' }} />
         </div>
 
-        <div className="flex items-center gap-3">
-          <img src={currentTrack.cover_url} alt="" className="w-10 h-10 rounded-md object-cover flex-shrink-0 shadow-md border border-white/10" />
+        <div className="flex items-center gap-4 cursor-pointer hover:bg-white/5 p-1 rounded-lg transition-colors">
+          <img src={currentTrack.cover_url} alt="" className="w-12 h-12 rounded-md object-cover flex-shrink-0 shadow-md border border-white/5" />
 
           <div className="flex flex-col min-w-0 flex-1">
-            <span className="text-white font-bold text-sm leading-tight truncate">{currentTrack.title}</span>
-            <span className="text-white/50 text-xs truncate">{currentTrack.artist}</span>
+            <span className="text-white font-bold text-base leading-tight truncate">{currentTrack.title}</span>
+            <span className="text-white/50 text-sm truncate mt-0.5">{currentTrack.artist}</span>
           </div>
 
-          <div className="flex items-center gap-1 flex-shrink-0" onClick={e => e.stopPropagation()}>
-            <button onClick={prev} className="p-2 text-white/50 active:text-white"><span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>skip_previous</span></button>
-            <button onClick={toggle} className="w-10 h-10 rounded-full bg-[#F5E642] flex items-center justify-center shadow-md active:scale-90 text-black">
-              <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>{isPlaying ? 'pause' : 'play_arrow'}</span>
+          <div className="flex items-center gap-3 flex-shrink-0" onClick={e => e.stopPropagation()}>
+            <button onClick={prev} className="p-2 text-white/50 hover:text-white transition-colors"><span className="material-symbols-outlined text-[28px]" style={{ fontVariationSettings: "'FILL' 1" }}>skip_previous</span></button>
+            <button onClick={toggle} className="w-12 h-12 rounded-full bg-[#F5E642] flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 text-black transition-all">
+              <span className="material-symbols-outlined text-[28px]" style={{ fontVariationSettings: "'FILL' 1" }}>{isPlaying ? 'pause' : 'play_arrow'}</span>
             </button>
-            <button onClick={() => next(true)} className="p-2 text-white/50 active:text-white"><span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>skip_next</span></button>
+            <button onClick={() => next(true)} className="p-2 text-white/50 hover:text-white transition-colors"><span className="material-symbols-outlined text-[28px]" style={{ fontVariationSettings: "'FILL' 1" }}>skip_next</span></button>
           </div>
         </div>
-      </div>
+      </div>      </div>
     </>
   );
 }

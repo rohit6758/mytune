@@ -517,56 +517,46 @@ export default function Library() {
         </div>
       </div>
 
-      {/* Main 4 Grid */}
-      <div className="grid grid-cols-2 gap-4">
+      {/* Main 4 Grid - Smaller horizontal items */}
+      <div className="grid grid-cols-2 gap-3">
         {/* Liked */}
-        <div onClick={() => { setSelectedPlaylist({ id: 'liked', name: 'Liked Songs', cover: null }); setPlaylistTracks(likedTracks); }} className="cursor-pointer group">
-          <div className="w-full aspect-square rounded-xl bg-[#1c1c20] flex items-center justify-center mb-2 active:scale-95 transition-transform border border-transparent hover:border-white/10">
-             <span className="material-symbols-outlined text-7xl text-white/70 font-light">favorite</span>
-          </div>
+        <div onClick={() => { setSelectedPlaylist({ id: 'liked', name: 'Liked Songs', cover: null }); setPlaylistTracks(likedTracks); }} className="flex items-center gap-3 p-4 bg-[#1c1c20] rounded-2xl cursor-pointer active:scale-95 transition-transform border border-white/5">
+          <span className="material-symbols-outlined text-2xl text-white/70">favorite</span>
           <p className="text-sm font-bold text-white">Liked</p>
         </div>
 
         {/* Downloaded */}
-        <div className="cursor-pointer group">
-          <div className="w-full aspect-square rounded-xl bg-[#1c1c20] flex items-center justify-center mb-2 active:scale-95 transition-transform border border-transparent hover:border-white/10">
-             <span className="material-symbols-outlined text-7xl text-white/70 font-light">download_done</span>
-          </div>
-          <p className="text-sm font-bold text-white">Downloaded</p>
+        <div className="flex items-center gap-3 p-4 bg-[#1c1c20] rounded-2xl cursor-pointer active:scale-95 transition-transform border border-white/5">
+          <span className="material-symbols-outlined text-2xl text-white/70">download_done</span>
+          <p className="text-sm font-bold text-white truncate">Downloaded</p>
         </div>
 
         {/* My top 50 */}
-        <div className="cursor-pointer group">
-          <div className="w-full aspect-square rounded-xl bg-[#1c1c20] flex items-center justify-center mb-2 active:scale-95 transition-transform border border-transparent hover:border-white/10">
-             <span className="material-symbols-outlined text-7xl text-white/70 font-light">trending_up</span>
-          </div>
-          <p className="text-sm font-bold text-white">My top 50</p>
+        <div className="flex items-center gap-3 p-4 bg-[#1c1c20] rounded-2xl cursor-pointer active:scale-95 transition-transform border border-white/5">
+          <span className="material-symbols-outlined text-2xl text-white/70">trending_up</span>
+          <p className="text-sm font-bold text-white truncate">Top 50</p>
         </div>
 
         {/* Cached */}
-        <div className="cursor-pointer group">
-          <div className="w-full aspect-square rounded-xl bg-[#1c1c20] flex items-center justify-center mb-2 active:scale-95 transition-transform border border-transparent hover:border-white/10">
-             <span className="material-symbols-outlined text-7xl text-white/70 font-light">sync</span>
-          </div>
+        <div className="flex items-center gap-3 p-4 bg-[#1c1c20] rounded-2xl cursor-pointer active:scale-95 transition-transform border border-white/5">
+          <span className="material-symbols-outlined text-2xl text-white/70">sync</span>
           <p className="text-sm font-bold text-white">Cached</p>
         </div>
       </div>
 
       {/* User playlists */}
       {playlists.length > 0 && (
-         <div className="mt-4">
-           <h2 className="text-lg font-bold text-white mb-4">Your Playlists</h2>
-           <div className="grid grid-cols-2 gap-4">
-             {playlists.map(pl => (
-               <div key={pl.id} onClick={() => openPlaylist(pl)} className="cursor-pointer group">
-                 <div className="w-full aspect-square rounded-xl overflow-hidden mb-2 shadow-lg group-hover:scale-105 transition-transform group-active:scale-95">
-                   <PlaylistCover cover={pl.cover} size="lg" />
-                 </div>
-                 <p className="text-sm font-bold text-white truncate">{pl.name}</p>
+         <div className="mt-4 flex flex-col gap-3">
+           <h2 className="text-lg font-bold text-white mb-2">Your Playlists</h2>
+           {playlists.map(pl => (
+             <div key={pl.id} onClick={() => openPlaylist(pl)} className="flex items-center gap-4 cursor-pointer group hover:bg-white/5 p-2 rounded-xl transition-colors active:scale-95">
+               <PlaylistCover cover={pl.cover} size="sm" />
+               <div className="flex-1 min-w-0">
+                 <p className="text-sm font-bold text-white truncate group-hover:text-[#F5E642] transition-colors">{pl.name}</p>
                  <p className="text-xs text-white/50">Playlist</p>
                </div>
-             ))}
-           </div>
+             </div>
+           ))}
          </div>
       )}
 

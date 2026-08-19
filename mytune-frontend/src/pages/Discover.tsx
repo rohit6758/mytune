@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { usePlayer, Track } from '../context/PlayerContext';
+import { searchYTSongs } from '../lib/ytmusic';
 
 export default function Discover() {
   const { queue, currentTrack, loadQueue, playTrack, toggle, isPlaying, addToQueue, insertNext, loadOnly } = usePlayer();
@@ -8,7 +9,6 @@ export default function Discover() {
   const [likedTracks, setLikedTracks] = useState<Set<string>>(new Set());
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Fetch tracks on mount — use loadQueue (NO auto-play)
   useEffect(() => {
     const init = async () => {
       try {
@@ -20,32 +20,17 @@ export default function Discover() {
         setLoading(false);
       }
     };
-
     if (queue.length === 0) init();
     else setLoading(false);
   }, []);
 
   const fetchTracks = async (term: string, action: 'replace' | 'append' | 'insertNext' = 'append') => {
     try {
-      const url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&limit=30&media=music`;
-      const res = await fetch(url);
-      const data = await res.json();
-
-      if (data?.results?.length > 0) {
-        const mapped: Track[] = data.results
-          .map((t: any) => ({
-            id: String(t.trackId),
-            title: t.trackName,
-            artist: t.artistName,
-            cover_url: t.artworkUrl100?.replace('100x100bb', '600x600bb') || '',
-            preview_url: t.previewUrl || '',
-          }))
-          .filter((t: Track) => t.preview_url && t.cover_url);
-
-        const shuffled = [...mapped].sort(() => 0.5 - Math.random());
-
+      const results = await searchYTSongs(term);
+      if (results.length > 0) {
+        const shuffled = [...results].sort(() => 0.5 - Math.random());
         if (action === 'replace') {
-          loadQueue(shuffled); // ← NO auto-play on first load
+          loadQueue(shuffled);
         } else if (action === 'insertNext') {
           insertNext(shuffled);
         } else {
@@ -59,7 +44,6 @@ export default function Discover() {
     }
   };
 
-  // Sync scroll position when currentTrack changes from GlobalPlayer controls
   useEffect(() => {
     if (currentTrack && scrollContainerRef.current) {
       const index = queue.findIndex(t => t.id === currentTrack.id);
@@ -70,26 +54,20 @@ export default function Discover() {
     }
   }, [currentTrack]);
 
-  // IntersectionObserver — change track when user scrolls to a new card (but don't play automatically)
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container || queue.length === 0) return;
-
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           const trackId = entry.target.getAttribute('data-track-id');
           if (trackId && currentTrack?.id !== trackId) {
             const track = queue.find(t => t.id === trackId);
-            if (track) {
-              // Just update the "current" without playing — preload it
-              loadOnly(track);
-            }
+            if (track) loadOnly(track);
           }
         }
       });
     }, { threshold: 0.65, rootMargin: '0px' });
-
     Array.from(container.children).forEach(child => observer.observe(child));
     return () => observer.disconnect();
   }, [queue, currentTrack]);
@@ -97,98 +75,14 @@ export default function Discover() {
   const handleLike = async (track: Track) => {
     if (likedTracks.has(track.id)) return;
     setLikedTracks(prev => new Set(prev).add(track.id));
-
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       try {
         await supabase.from('library').insert({
-          user_id: user.id,
-          track_id: track.id,
-          title: track.title,
-          artist: track.artist,
-          cover_url: track.cover_url,
-          preview_url: track.preview_url,
+          user_id: user.id, track_id: track.id, title: track.title, artist: track.artist, cover_url: track.cover_url, preview_url: track.preview_url,
         });
-        // Recommend more from this artist (insert after current position)
         fetchTracks(track.artist, 'insertNext');
-      } catch (e) {
-        console.error('Failed to save track', e);
-      }
-    }
-  };
-  const [showImportModal, setShowImportModal] = useState(false);
-  const [importUrl, setImportUrl] = useState('');
-  const [importTitle, setImportTitle] = useState('');
-  const [importArtist, setImportArtist] = useState('');
-  const [isImporting, setIsImporting] = useState(false);
-
-  const handleImport = async () => {
-    if (!importUrl) { alert('Please paste a valid link.'); return; }
-    if (!importTitle) { alert('Please give this song a title.'); return; }
-    setIsImporting(true);
-    
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not logged in');
-      
-      let finalAudioUrl = importUrl;
-
-      // 1. If it's an Instagram link, try to extract via Apify
-      if (importUrl.includes('instagram.com/reel') || importUrl.includes('instagram.com/p') || importUrl.includes('instagram.com/share')) {
-        console.log('Extracting Instagram audio via Apify...');
-        try {
-          const apifyToken = 'apify_api_' + 'hocpolV2ca4EUd9N4qHS9a07ZUFeXH1afhq8';
-          const apifyInput = { directUrls: [importUrl], resultsType: 'details' };
-          
-          const apifyRes = await fetch(`https://api.apify.com/v2/acts/apify~instagram-scraper/run-sync-get-dataset-items?token=${apifyToken}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(apifyInput)
-          });
-
-          if (!apifyRes.ok) throw new Error('Failed to connect to Apify');
-          
-          const apifyData = await apifyRes.json();
-          if (!apifyData || apifyData.length === 0) throw new Error('API returned an error or empty data');
-          
-          const item = apifyData[0];
-          const temporaryCdnUrl = item.videoUrl || item.displayUrl;
-          if (!temporaryCdnUrl) throw new Error('Could not find media URL in response');
-
-          const audioBlobRes = await fetch(temporaryCdnUrl);
-          if (!audioBlobRes.ok) throw new Error('Failed to download audio stream');
-          
-          const audioBlob = await audioBlobRes.blob();
-          const fileName = `insta-${Date.now()}.mp3`;
-          const { error: uploadError } = await supabase.storage.from('audio').upload(fileName, audioBlob, { contentType: 'audio/mpeg' });
-
-          if (uploadError) throw uploadError;
-
-          const { data: publicData } = supabase.storage.from('audio').getPublicUrl(fileName);
-          finalAudioUrl = publicData.publicUrl;
-        } catch (extractionError) {
-          console.warn('Extraction failed:', extractionError);
-          alert('Instagram extraction failed. API limit reached or private video.');
-          setIsImporting(false);
-          return;
-        }
-      }
-      
-      const newTrack = {
-        user_id: user.id, track_id: `custom-${Date.now()}`, title: importTitle, artist: importArtist || 'Unknown Artist',
-        cover_url: `https://picsum.photos/seed/${Date.now()}/500/500`, preview_url: finalAudioUrl
-      };
-      
-      const { error } = await supabase.from('library').insert(newTrack);
-      if (error) throw error;
-      
-      alert('Track extracted and saved!');
-      setShowImportModal(false);
-      setImportUrl(''); setImportTitle(''); setImportArtist('');
-    } catch (err: any) {
-      alert('Error importing track: ' + err.message);
-    } finally {
-      setIsImporting(false);
+      } catch (e) { console.error('Failed to save', e); }
     }
   };
 
@@ -209,61 +103,9 @@ export default function Discover() {
     );
   }
 
-
   return (
-    <div
-      ref={scrollContainerRef}
-      className="relative w-full h-full overflow-y-scroll snap-y snap-mandatory no-scrollbar"
-      style={{ touchAction: 'pan-y', background: '#0a0a0f' }}
-    >
-      {/* Floating Insta Highlight Button */}
-      <div className="fixed top-4 left-0 right-0 z-[100] flex justify-center pointer-events-none">
-        <button 
-          onClick={() => setShowImportModal(true)}
+    <div ref={scrollContainerRef} className="relative w-full h-full overflow-y-scroll snap-y snap-mandatory no-scrollbar" style={{ touchAction: 'pan-y', background: '#0a0a0f' }}>
 
-          className="pointer-events-auto flex items-center gap-2 px-6 py-3 rounded-full shadow-2xl active:scale-95 transition-transform"
-          style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.2)' }}
-        >
-          <span className="text-xl">✨</span>
-          <span className="text-white font-bold text-sm tracking-wide">Insta Downloader</span>
-        </button>
-      </div>
-
-      {/* Import Modal */}
-      {showImportModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[300] flex items-center justify-center p-4">
-          <div className="glass-card border border-white/10 p-6 rounded-3xl w-full max-w-md shadow-2xl flex flex-col gap-4">
-            <h3 className="text-2xl font-black text-white flex items-center gap-2">
-              <span className="material-symbols-outlined text-[#F5E642]">smart_toy</span> 
-              Insta Extractor
-            </h3>
-            <p className="text-sm text-white/60 leading-relaxed">Paste an Instagram Reel URL to extract pure audio and save it to your library.</p>
-            
-            <input 
-              value={importUrl} onChange={e => setImportUrl(e.target.value)}
-              placeholder="Instagram Reel Link..."
-              className="w-full bg-[#110D17] border border-[#F5E642]/30 rounded-xl p-3 text-white placeholder-white/30 focus:outline-none focus:border-[#F5E642] transition-colors"
-            />
-            <input 
-              value={importTitle} onChange={e => setImportTitle(e.target.value)}
-              placeholder="Title (Required)"
-              className="w-full bg-[#110D17] border border-white/10 rounded-xl p-3 text-white placeholder-white/30"
-            />
-            <input 
-              value={importArtist} onChange={e => setImportArtist(e.target.value)}
-              placeholder="Artist (Optional)"
-              className="w-full bg-[#110D17] border border-white/10 rounded-xl p-3 text-white placeholder-white/30"
-            />
-            
-            <div className="flex gap-3 mt-2">
-              <button onClick={() => setShowImportModal(false)} className="flex-1 py-3 rounded-xl bg-white/10 text-white font-bold hover:bg-white/20">Cancel</button>
-              <button onClick={handleImport} disabled={isImporting} className="flex-1 py-3 rounded-xl text-black font-bold" style={{ background: '#F5E642' }}>
-                {isImporting ? 'Importing...' : 'Save Track'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {queue.map((track) => {
         const isLiked = likedTracks.has(track.id);

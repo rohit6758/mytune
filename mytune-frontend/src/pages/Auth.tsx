@@ -19,80 +19,91 @@ export default function Auth() {
     return null;
   };
 
-  const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true); setError(null); setMessage(null);
-    try {
-      if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-      } else {
-        const passError = validatePassword(password);
-        if (passError) throw new Error(passError);
-        const { error } = await supabase.auth.signUp({ email, password });
-        if (error) throw error;
-        setMessage('Check your email for the confirmation link!');
+    const [showPassword, setShowPassword] = useState(false);
+
+    const handleAuth = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setLoading(true); setError(null); setMessage(null);
+      try {
+        if (isLogin) {
+          const { error } = await supabase.auth.signInWithPassword({ email, password });
+          if (error) throw error;
+        } else {
+          const passError = validatePassword(password);
+          if (passError) throw new Error(passError);
+          const { error } = await supabase.auth.signUp({ email, password });
+          if (error) throw error;
+          setMessage('Check your email for the confirmation link!');
+        }
+      } catch (err: any) {
+        setError(err.message || 'An error occurred');
+      } finally {
+        setLoading(false);
       }
-    } catch (err: any) {
-      setError(err.message || 'An error occurred');
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  return (
-    <div
-      className="min-h-[100dvh] w-full flex flex-col items-center justify-center p-6 relative overflow-hidden"
-      style={{ background: '#0a0a0f' }}
-    >
-      {/* Ambient orbs */}
-      <div className="absolute top-[-10%] left-[-5%] w-80 h-80 rounded-full blur-[100px] bg-[#F5E642]/8 pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-5%] w-96 h-96 rounded-full blur-[120px] bg-purple-900/15 pointer-events-none" />
+    return (
+      <div
+        className="min-h-[100dvh] w-full flex flex-col items-center justify-center p-6 relative overflow-hidden"
+        style={{ background: '#0a0a0f' }}
+      >
+        {/* Ambient orbs */}
+        <div className="absolute top-[-10%] left-[-5%] w-80 h-80 rounded-full blur-[100px] bg-[#F5E642]/8 pointer-events-none" />
+        <div className="absolute bottom-[-10%] right-[-5%] w-96 h-96 rounded-full blur-[120px] bg-purple-900/15 pointer-events-none" />
 
-      <div className="w-full max-w-sm z-10 flex flex-col items-center gap-8">
-        <Logo className="w-44 h-12" showText={true} />
+        <div className="w-full max-w-sm z-10 flex flex-col items-center gap-8">
+          <Logo className="w-44 h-12" showText={true} />
 
-        {/* Glass card */}
-        <div
-          className="w-full p-8 rounded-3xl flex flex-col gap-5"
-          style={{
-            background: 'rgba(255,255,255,0.05)',
-            backdropFilter: 'blur(24px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            boxShadow: '0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08)',
-          }}
-        >
-          <h2 className="text-2xl font-black text-white text-center">
-            {isLogin ? 'Welcome Back 👋' : 'Join MyTune'}
-          </h2>
+          {/* Glass card */}
+          <div
+            className="w-full p-8 rounded-3xl flex flex-col gap-5"
+            style={{
+              background: 'rgba(255,255,255,0.05)',
+              backdropFilter: 'blur(24px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              boxShadow: '0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08)',
+            }}
+          >
+            <h2 className="text-2xl font-black text-white text-center">
+              {isLogin ? 'Welcome Back 👋' : 'Join MyTune'}
+            </h2>
 
-          {error && (
-            <div className="bg-red-500/15 border border-red-500/30 text-red-300 text-sm p-3 rounded-xl text-center leading-relaxed">{error}</div>
-          )}
-          {message && (
-            <div className="bg-green-500/15 border border-green-500/30 text-green-300 text-sm p-3 rounded-xl text-center leading-relaxed">{message}</div>
-          )}
+            {error && (
+              <div className="bg-red-500/15 border border-red-500/30 text-red-300 text-sm p-3 rounded-xl text-center leading-relaxed">{error}</div>
+            )}
+            {message && (
+              <div className="bg-green-500/15 border border-green-500/30 text-green-300 text-sm p-3 rounded-xl text-center leading-relaxed">{message}</div>
+            )}
 
-          <form onSubmit={handleAuth} className="flex flex-col gap-4">
-            <div>
-              <label className="block text-[11px] font-bold text-white/50 uppercase tracking-widest mb-1.5 ml-1">Email</label>
-              <input
-                type="email" value={email} onChange={e => setEmail(e.target.value)}
-                className="w-full rounded-xl px-4 py-3 text-white placeholder-white/25 transition-all text-sm"
-                style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }}
-                placeholder="your@email.com" required
-              />
-            </div>
-            <div>
-              <label className="block text-[11px] font-bold text-white/50 uppercase tracking-widest mb-1.5 ml-1">Password</label>
-              <input
-                type="password" value={password} onChange={e => setPassword(e.target.value)}
-                className="w-full rounded-xl px-4 py-3 text-white placeholder-white/25 transition-all text-sm"
-                style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }}
-                placeholder="••••••••" required
-              />
-            </div>
+            <form onSubmit={handleAuth} className="flex flex-col gap-4">
+              <div>
+                <label className="block text-[11px] font-bold text-white/50 uppercase tracking-widest mb-1.5 ml-1">Email</label>
+                <input
+                  type="email" value={email} onChange={e => setEmail(e.target.value)}
+                  className="w-full rounded-xl px-4 py-3 text-white placeholder-white/25 transition-all text-sm outline-none focus:border-[#F5E642]"
+                  style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }}
+                  placeholder="your@email.com" required
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-white/50 uppercase tracking-widest mb-1.5 ml-1">Password</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)}
+                    className="w-full rounded-xl pl-4 pr-12 py-3 text-white placeholder-white/25 transition-all text-sm outline-none focus:border-[#F5E642]"
+                    style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }}
+                    placeholder="••••••••" required
+                  />
+                  <button 
+                    type="button" 
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/80 transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">{showPassword ? 'visibility_off' : 'visibility'}</span>
+                  </button>
+                </div>
+              </div>
 
             <button
               type="submit" disabled={loading}

@@ -3,11 +3,12 @@ import { supabase } from '../lib/supabase';
 import { usePlayer, Track } from '../context/PlayerContext';
 
 export default function Discover() {
-  const { queue, currentTrack, loadQueue, playTrack, toggle, isPlaying, addToQueue, insertNext, loadOnly } = usePlayer();
+  const { queue, currentTrack, loadQueue, playTrack, playQueue, next, toggle, isPlaying, addToQueue, insertNext } = usePlayer();
   const [loading, setLoading] = useState(true);
   const [likedTracks, setLikedTracks] = useState<Set<string>>(new Set());
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  // Fetch tracks on mount — use loadQueue (NO auto-play)
   useEffect(() => {
     const init = async () => {
       try {
@@ -19,32 +20,32 @@ export default function Discover() {
         setLoading(false);
       }
     };
+
     if (queue.length === 0) init();
     else setLoading(false);
   }, []);
 
   const fetchTracks = async (term: string, action: 'replace' | 'append' | 'insertNext' = 'append') => {
     try {
-      // Use iTunes API for ultra-fast, high-quality metadata and covers
-      const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&limit=30&media=music`);
+      const url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&limit=30&media=music`;
+      const res = await fetch(url);
       const data = await res.json();
-      
-      let results: Track[] = [];
-      if (data?.results?.length > 0) {
-        results = data.results.map((t: any) => ({
-          id: String(t.trackId), // iTunes ID
-          title: t.trackName,
-          artist: t.artistName,
-          cover_url: t.artworkUrl100?.replace('100x100bb', '600x600bb') || '',
-          preview_url: t.previewUrl || '',
-          duration: t.trackTimeMillis ? Math.floor(t.trackTimeMillis / 1000) : 0,
-        })).filter((t: any) => t.preview_url && t.cover_url);
-      }
 
-      if (results && results.length > 0) {
-        const shuffled = [...results].sort(() => 0.5 - Math.random());
+      if (data?.results?.length > 0) {
+        const mapped: Track[] = data.results
+          .map((t: any) => ({
+            id: String(t.trackId),
+            title: t.trackName,
+            artist: t.artistName,
+            cover_url: t.artworkUrl100?.replace('100x100bb', '600x600bb') || '',
+            preview_url: t.previewUrl || '',
+          }))
+          .filter((t: Track) => t.preview_url && t.cover_url);
+
+        const shuffled = [...mapped].sort(() => 0.5 - Math.random());
+
         if (action === 'replace') {
-          loadQueue(shuffled);
+          loadQueue(shuffled); // ← NO auto-play on first load
         } else if (action === 'insertNext') {
           insertNext(shuffled);
         } else {
@@ -58,6 +59,7 @@ export default function Discover() {
     }
   };
 
+  // Sync scroll position when currentTrack changes from GlobalPlayer controls
   useEffect(() => {
     if (currentTrack && scrollContainerRef.current) {
       const index = queue.findIndex(t => t.id === currentTrack.id);
@@ -68,20 +70,30 @@ export default function Discover() {
     }
   }, [currentTrack]);
 
+  // IntersectionObserver — change track when user scrolls to a new card (but don't play automatically)
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container || queue.length === 0) return;
+
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           const trackId = entry.target.getAttribute('data-track-id');
           if (trackId && currentTrack?.id !== trackId) {
             const track = queue.find(t => t.id === trackId);
-            if (track) loadOnly(track);
+            // Only switch track — DON'T auto-play (user must tap play)
+            if (track) {
+              // Just update the "current" without playing — preload it
+              if (window._mytuneAudio) {
+                window._mytuneAudio.src = track.preview_url;
+                window._mytuneAudio.load();
+              }
+            }
           }
         }
       });
     }, { threshold: 0.65, rootMargin: '0px' });
+
     Array.from(container.children).forEach(child => observer.observe(child));
     return () => observer.disconnect();
   }, [queue, currentTrack]);
@@ -89,14 +101,23 @@ export default function Discover() {
   const handleLike = async (track: Track) => {
     if (likedTracks.has(track.id)) return;
     setLikedTracks(prev => new Set(prev).add(track.id));
+
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       try {
         await supabase.from('library').insert({
-          user_id: user.id, track_id: track.id, title: track.title, artist: track.artist, cover_url: track.cover_url, preview_url: track.preview_url,
+          user_id: user.id,
+          track_id: track.id,
+          title: track.title,
+          artist: track.artist,
+          cover_url: track.cover_url,
+          preview_url: track.preview_url,
         });
+        // Recommend more from this artist (insert after current position)
         fetchTracks(track.artist, 'insertNext');
-      } catch (e) { console.error('Failed to save', e); }
+      } catch (e) {
+        console.error('Failed to save track', e);
+      }
     }
   };
 
@@ -117,10 +138,13 @@ export default function Discover() {
     );
   }
 
+
   return (
-    <div ref={scrollContainerRef} className="relative w-full h-full overflow-y-scroll snap-y snap-mandatory no-scrollbar" style={{ touchAction: 'pan-y', background: '#0a0a0f' }}>
-
-
+    <div
+      ref={scrollContainerRef}
+      className="relative w-full h-full bg-black overflow-y-scroll snap-y snap-mandatory no-scrollbar"
+      style={{ touchAction: 'pan-y' }}
+    >
       {queue.map((track) => {
         const isLiked = likedTracks.has(track.id);
         const isCurrent = currentTrack?.id === track.id;
@@ -177,11 +201,7 @@ export default function Discover() {
                       </span>
                     </button>
                     <button
-                      onClick={() => {
-                        const idx = queue.findIndex(t => t.id === track.id);
-                        const next = queue[(idx + 1) % queue.length];
-                        if (next) playTrack(next);
-                      }}
+                      onClick={() => next(true)}
                       className="w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition-transform"
                       style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.15)' }}
                     >
@@ -193,7 +213,10 @@ export default function Discover() {
                 {/* Tap to play — when not current */}
                 {!isCurrent && (
                   <button
-                    onClick={() => playTrack(track)}
+                    onClick={() => {
+                      const idx = queue.findIndex(t => t.id === track.id);
+                      playQueue(queue, idx);
+                    }}
                     className="self-start mt-1 flex items-center gap-2 px-4 py-2 rounded-full text-black text-sm font-bold active:scale-95 transition-transform"
                     style={{ background: '#F5E642', boxShadow: '0 2px 12px rgba(245,230,66,0.3)' }}
                   >

@@ -1,13 +1,11 @@
-// @ts-nocheck
-import React, { createContext, useContext, useState, useRef, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useRef, useEffect, useCallback, ReactNode } from 'react';
 
 export interface Track {
   id: string;
   title: string;
   artist: string;
   cover_url: string;
-  preview_url?: string;
-  duration?: number;
+  preview_url: string;
 }
 
 interface PlayerContextType {
@@ -20,8 +18,7 @@ interface PlayerContextType {
   isShuffle: boolean;
   playTrack: (track: Track) => void;
   playQueue: (tracks: Track[], startIndex?: number) => void;
-  loadQueue: (tracks: Track[], startIndex?: number) => void; 
-  loadOnly: (track: Track) => void;
+  loadQueue: (tracks: Track[], startIndex?: number) => void; // Load without auto-playing
   addToQueue: (track: Track) => void;
   insertNext: (tracks: Track[]) => void;
   pause: () => void;
@@ -44,14 +41,16 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [repeatMode, setRepeatMode] = useState<'off' | 'all' | 'one'>('all'); 
+  const [repeatMode, setRepeatMode] = useState<'off' | 'all' | 'one'>('all'); // Default to loop all
   const [isShuffle, setIsShuffle] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Create audio element once
   useEffect(() => {
     if (!audioRef.current) {
       audioRef.current = new Audio();
+      // Keep playing when screen locks / app goes to background
       audioRef.current.preload = 'metadata';
     }
     const audio = audioRef.current;
@@ -74,6 +73,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  // Bind "ended" separately so it always captures fresh state
   useEffect(() => {
     if (!audioRef.current) return;
     const audio = audioRef.current;
@@ -82,6 +82,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     return () => audio.removeEventListener('ended', handleEnded);
   }, [queue, queueIndex, repeatMode, isShuffle]);
 
+  // MediaSession API — keeps controls on lock screen & notification shade
   useEffect(() => {
     if (!currentTrack || !('mediaSession' in navigator)) return;
     navigator.mediaSession.metadata = new MediaMetadata({
@@ -100,36 +101,28 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   const loadAndPlay = (track: Track) => {
     if (!audioRef.current) return;
-    if (audioRef.current.src === track.preview_url || audioRef.current.src.endsWith(track.preview_url)) {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play().catch(console.error);
-      setIsPlaying(true);
-      return;
-    }
-    setCurrentTrack(track);
-    audioRef.current.src = track.preview_url || '';
+    audioRef.current.src = track.preview_url;
     audioRef.current.play().catch(console.error);
-    setIsPlaying(true);
   };
 
   const loadOnly = (track: Track) => {
     if (!audioRef.current) return;
-    setCurrentTrack(track);
-    audioRef.current.src = track.preview_url || '';
-    audioRef.current.load();
-    setIsPlaying(false);
+    audioRef.current.src = track.preview_url;
+    audioRef.current.load(); // Preload but DO NOT play
   };
 
   const pause = () => { audioRef.current?.pause(); };
   const resume = () => { if (audioRef.current && currentTrack) audioRef.current.play().catch(console.error); };
   const toggle = () => { isPlaying ? pause() : resume(); };
 
+  // Load without auto-play — used when the feed loads tracks
   const loadQueue = (tracks: Track[], startIndex = 0) => {
     if (!tracks.length) return;
     setOriginalQueue(tracks);
     setQueue(tracks);
     setQueueIndex(startIndex);
-    loadOnly(tracks[startIndex]);
+    setCurrentTrack(tracks[startIndex]);
+    loadOnly(tracks[startIndex]); // no auto-play
   };
 
   const playQueue = (tracks: Track[], startIndex = 0) => {
@@ -141,10 +134,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       const newQueue = [current, ...remaining];
       setQueue(newQueue);
       setQueueIndex(0);
+      setCurrentTrack(current);
       loadAndPlay(current);
     } else {
       setQueue(tracks);
       setQueueIndex(startIndex);
+      setCurrentTrack(tracks[startIndex]);
       loadAndPlay(tracks[startIndex]);
     }
   };
@@ -153,18 +148,20 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     setOriginalQueue([track]);
     setQueue([track]);
     setQueueIndex(0);
+    setCurrentTrack(track);
     loadAndPlay(track);
   };
 
   const addToQueue = (track: Track) => {
     setOriginalQueue(prev => [...prev, track]);
     setQueue(prev => {
-      const nextQ = [...prev, track];
+      const next = [...prev, track];
       if (!currentTrack) {
         setQueueIndex(0);
+        setCurrentTrack(track);
         loadOnly(track);
       }
-      return nextQ;
+      return next;
     });
   };
 
@@ -191,14 +188,13 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     if (queueIndex < queue.length - 1) {
       const ni = queueIndex + 1;
       setQueueIndex(ni);
+      setCurrentTrack(queue[ni]);
       loadAndPlay(queue[ni]);
     } else {
-      if (repeatMode === 'off' && !forceSkip) {
-        pause();
-      } else {
-        setQueueIndex(0);
-        loadAndPlay(queue[0]);
-      }
+      // Always loop back — treat as 'all' repeat for infinite listen
+      setQueueIndex(0);
+      setCurrentTrack(queue[0]);
+      loadAndPlay(queue[0]);
     }
   };
 
@@ -208,10 +204,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     } else if (queueIndex > 0) {
       const pi = queueIndex - 1;
       setQueueIndex(pi);
+      setCurrentTrack(queue[pi]);
       loadAndPlay(queue[pi]);
     } else {
       const last = queue.length - 1;
       setQueueIndex(last);
+      setCurrentTrack(queue[last]);
       loadAndPlay(queue[last]);
     }
   };
@@ -223,12 +221,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const toggleRepeatMode = () => setRepeatMode(prev => prev === 'off' ? 'all' : prev === 'all' ? 'one' : 'off');
+  const toggleRepeatMode = () => {
+    setRepeatMode(prev => prev === 'off' ? 'all' : prev === 'all' ? 'one' : 'off');
+  };
 
   const toggleShuffle = () => {
     setIsShuffle(prev => {
-      const nextVal = !prev;
-      if (nextVal) {
+      const next = !prev;
+      if (next) {
         const remaining = originalQueue.filter(t => t.id !== currentTrack?.id).sort(() => Math.random() - 0.5);
         if (currentTrack) {
           setQueue([currentTrack, ...remaining]);
@@ -238,14 +238,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         setQueue(originalQueue);
         setQueueIndex(Math.max(0, originalQueue.findIndex(t => t.id === currentTrack?.id)));
       }
-      return nextVal;
+      return next;
     });
   };
 
   return (
     <PlayerContext.Provider value={{
       currentTrack, queue, isPlaying, progress, duration, repeatMode, isShuffle,
-      playTrack, playQueue, loadQueue, loadOnly, addToQueue, insertNext,
+      playTrack, playQueue, loadQueue, addToQueue, insertNext,
       pause, resume, toggle, next, prev, seek, toggleRepeatMode, toggleShuffle,
     }}>
       {children}

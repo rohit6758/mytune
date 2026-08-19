@@ -10,8 +10,6 @@ import Search from './pages/Search';
 import Create from './pages/Create';
 import Library from './pages/Library';
 import Profile from './pages/Profile';
-import Settings from './pages/Settings';
-import Together from './pages/Together';
 
 import { PlayerProvider } from './context/PlayerContext';
 import Onboarding from './pages/Onboarding';
@@ -64,16 +62,16 @@ function App() {
         <div className="bg-[#1A1625] p-8 rounded-3xl border border-white/10 max-w-md w-full shadow-2xl">
           <h2 className="text-2xl font-black text-white mb-4">Setup Required</h2>
           <p className="text-white/60 mb-6">
-            Supabase environment variables are missing. To run MyTune, please add <code className="bg-transparent/50 px-2 py-1 rounded text-[#F5E642] text-sm">VITE_SUPABASE_URL</code> and <code className="bg-transparent/50 px-2 py-1 rounded text-[#F5E642] text-sm">VITE_SUPABASE_ANON_KEY</code> to your environment, then redeploy.
+            Supabase environment variables are missing. To run MyTune, please add <code className="bg-transparent/50 px-2 py-1 rounded text-[#C5E384] text-sm">VITE_SUPABASE_URL</code> and <code className="bg-transparent/50 px-2 py-1 rounded text-[#C5E384] text-sm">VITE_SUPABASE_ANON_KEY</code> to your environment or Vercel project, then redeploy.
           </p>
-          <div className="w-16 h-16 mx-auto border-4 border-[#FFF9EB] border-t-[#F5E642] rounded-full animate-spin"></div>
+          <div className="w-16 h-16 mx-auto border-4 border-[#FFF9EB] border-t-[#C5E384] rounded-full animate-spin"></div>
         </div>
       </div>
     );
   }
 
   if (loading) {
-    return <div className="min-h-screen bg-[#110D17] flex items-center justify-center"><div className="w-10 h-10 border-4 border-[#F5E642] border-t-transparent rounded-full animate-spin"></div></div>;
+    return <div className="min-h-screen bg-[#110D17] flex items-center justify-center"><div className="w-10 h-10 border-4 border-[#C5E384] border-t-transparent rounded-full animate-spin"></div></div>;
   }
 
   if (!session) {
@@ -95,8 +93,6 @@ function App() {
             <Route path="create"   element={<Create />} />
             <Route path="library"  element={<Library />} />
             <Route path="profile"  element={<Profile session={session} />} />
-            <Route path="settings" element={<Settings />} />
-            <Route path="together" element={<Together />} />
           </Route>
         </Routes>
       </Router>

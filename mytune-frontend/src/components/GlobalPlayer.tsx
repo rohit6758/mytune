@@ -1,29 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { usePlayer, Track } from '../context/PlayerContext';
+import React, { useState, useEffect } from 'react';
+import { usePlayer } from '../context/PlayerContext';
+import type { Track } from '../context/PlayerContext';
 import { supabase } from '../lib/supabase';
-import clsx from 'clsx';
+
+declare global { interface Window { _mytuneAudio?: HTMLAudioElement; } }
 
 export default function GlobalPlayer() {
-  const { currentTrack, isPlaying, progress, duration, repeatMode, isShuffle, toggle, next, prev, seek, toggleRepeatMode, toggleShuffle } = usePlayer();
+  const { currentTrack, isPlaying, progress, duration, toggle, next, prev, seek } = usePlayer();
   const [showPlaylistMenu, setShowPlaylistMenu] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
   const [pendingTrack, setPendingTrack] = useState<Track | null>(null);
   const [userPlaylists, setUserPlaylists] = useState<any[]>([]);
   const [toast, setToast] = useState<string | null>(null);
-  const [lyrics, setLyrics] = useState<string | null>(null);
-  const [loadingLyrics, setLoadingLyrics] = useState(false);
-
-  useEffect(() => {
-    if (!currentTrack) return;
-    setLyrics(null);
-    setLoadingLyrics(true);
-    const artist = currentTrack.artist.split(' feat')[0].split(' ft')[0].trim();
-    fetch(`https://api.lyrics.ovh/v1/${encodeURIComponent(artist)}/${encodeURIComponent(currentTrack.title)}`)
-      .then(res => res.json())
-      .then(data => setLyrics(data.lyrics || "♪ Lyrics not found for this track ♪"))
-      .catch(() => setLyrics("♪ Lyrics not found for this track ♪"))
-      .finally(() => setLoadingLyrics(false));
-  }, [currentTrack]);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -70,177 +57,113 @@ export default function GlobalPlayer() {
 
   return (
     <>
+      {/* Toast */}
       {toast && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[300] bg-[#F5E642] text-black font-bold text-sm px-5 py-2 rounded-full shadow-lg">
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[200] bg-[#F5E642] text-black font-bold text-sm px-5 py-2 rounded-full shadow-lg">
           {toast}
         </div>
       )}
 
-      {/* Playlist Menu Modal */}
+      {/* Add to Playlist — glass bottom sheet */}
       {showPlaylistMenu && (
-        <div className="fixed inset-0 z-[250] flex items-end" onClick={() => { setShowPlaylistMenu(false); setPendingTrack(null); }}>
+        <div className="fixed inset-0 z-[150] flex items-end" onClick={() => { setShowPlaylistMenu(false); setPendingTrack(null); }}>
           <div className="absolute inset-0 bg-black/50 backdrop-blur-md" />
-          <div className="relative w-full rounded-t-3xl p-6 flex flex-col gap-4 z-10 glass-dark" onClick={e => e.stopPropagation()}>
+          <div
+            className="relative w-full rounded-t-3xl p-6 flex flex-col gap-4 z-10"
+            style={{
+              background: 'rgba(16, 14, 24, 0.85)',
+              backdropFilter: 'blur(32px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(32px) saturate(180%)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderBottom: 'none',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
             <div className="w-10 h-1 bg-white/20 rounded-full mx-auto -mt-1 mb-1" />
             <h3 className="text-lg font-black text-white">Add to Playlist</h3>
             <p className="text-white/40 text-sm -mt-2 truncate">{(pendingTrack || currentTrack)?.title}</p>
+
             {userPlaylists.length === 0 ? (
-              <p className="text-white/30 text-sm py-4 text-center">No playlists yet.</p>
+              <p className="text-white/30 text-sm py-4 text-center">No playlists yet. Create one in the Library tab!</p>
             ) : (
               <div className="flex flex-col gap-2 max-h-56 overflow-y-auto inner-scroll">
                 {userPlaylists.map(pl => (
-                  <button key={pl.id} onClick={() => addToPlaylist(pl.id)} className="flex items-center gap-3 p-3 rounded-2xl glass-card text-left active:scale-95">
-                    <span className="material-symbols-outlined text-[#F5E642]" style={{ fontVariationSettings: "'FILL' 1" }}>queue_music</span>
+                  <button
+                    key={pl.id}
+                    onClick={() => addToPlaylist(pl.id)}
+                    className="flex items-center gap-3 p-3 rounded-2xl glass-card text-left active:scale-95 transition-transform"
+                  >
+                    <span className="material-symbols-outlined text-[#F5E642] text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>queue_music</span>
                     <span className="text-white font-semibold text-sm truncate">{pl.name}</span>
                   </button>
                 ))}
               </div>
             )}
-            <button onClick={() => { setShowPlaylistMenu(false); setPendingTrack(null); }} className="w-full py-3 rounded-full glass text-white/60 font-bold text-sm">Cancel</button>
+
+            <button onClick={() => { setShowPlaylistMenu(false); setPendingTrack(null); }}
+              className="w-full py-3 rounded-full glass text-white/60 font-bold text-sm mt-1">
+              Cancel
+            </button>
           </div>
         </div>
       )}
 
-      {/* Full Screen Player (Vivi Style) */}
-      <div 
-        className={clsx(
-          "fixed inset-0 z-[150] transition-transform duration-300 ease-in-out flex flex-col",
-          isExpanded ? "translate-y-0" : "translate-y-full"
-        )}
+      {/* Mini Player — glass bar above bottom nav */}
+      <div
+        className="fixed bottom-[65px] left-0 right-0 z-[60] px-3 py-2.5 flex flex-col gap-0"
         style={{
-          background: `linear-gradient(to bottom, rgba(40,10,40,0.95), rgba(10,5,10,1))`,
-          backdropFilter: 'blur(40px)',
+          background: 'rgba(10, 10, 18, 0.8)',
+          backdropFilter: 'blur(30px) saturate(200%)',
+          WebkitBackdropFilter: 'blur(30px) saturate(200%)',
+          borderTop: '1px solid rgba(255,255,255,0.08)',
         }}
       >
-        {/* Top Bar */}
-        <div className="flex justify-between items-center p-4 pt-safe">
-          <button onClick={() => setIsExpanded(false)} className="p-2 text-white/70 active:text-white">
-            <span className="material-symbols-outlined text-3xl">expand_more</span>
-          </button>
-          <div className="text-center">
-            <p className="text-xs text-white/50 uppercase tracking-widest font-bold">Playing from Search</p>
-            <p className="text-sm text-white font-bold truncate max-w-[200px]">YouTube Music</p>
-          </div>
-          <button className="p-2 text-white/70">
-            <span className="material-symbols-outlined">more_vert</span>
-          </button>
-              {/* Album Art */}
-        <div className="flex-1 flex items-center justify-center p-8 min-h-0">
-          <img 
-            src={currentTrack.cover_url} 
-            alt={currentTrack.title} 
-            className="w-full max-w-[500px] aspect-square object-cover rounded-2xl shadow-2xl shadow-black/60"
-            style={{ border: '1px solid rgba(255,255,255,0.08)' }}
+        {/* Yellow progress bar */}
+        <div className="w-full h-0.5 bg-white/10 rounded-full overflow-hidden mb-2.5">
+          <div
+            className="h-full rounded-full"
+            style={{ width: `${pct}%`, background: '#F5E642', transition: 'width 0.1s linear' }}
           />
         </div>
 
-        {/* Controls Section */}
-        <div className="px-6 pb-6 md:pb-12 flex flex-col gap-6 max-w-[800px] mx-auto w-full">
-          {/* Track Info */}
-          <div className="flex justify-between items-center">
-            <div className="flex-1 min-w-0">
-              <h2 className="text-3xl md:text-4xl font-bold text-white truncate">{currentTrack.title}</h2>
-              <p className="text-xl text-white/60 truncate">{currentTrack.artist}</p>
-            </div>
-            <button className="p-2 text-white/70 active:text-[#F5E642]">
-              <span className="material-symbols-outlined text-4xl">add_circle</span>
-            </button>
+        <div className="flex items-center gap-3">
+          <img src={currentTrack.cover_url} alt={currentTrack.title}
+            className="w-10 h-10 rounded-xl object-cover flex-shrink-0 shadow-md"
+            style={{ border: '1px solid rgba(255,255,255,0.1)' }} />
+
+          <div className="flex flex-col min-w-0 flex-1">
+            <span className="text-white font-bold text-sm leading-tight truncate">{currentTrack.title}</span>
+            <span className="text-white/40 text-xs truncate">{currentTrack.artist}</span>
           </div>
 
-          {/* Progress */}
-          <div className="flex flex-col gap-2">
-            <input 
-              type="range" min="0" max={duration || 100} value={progress}
-              onChange={(e) => seek(Number(e.target.value))}
-              className="w-full h-2 bg-white/20 rounded-full appearance-none outline-none overflow-hidden cursor-pointer"
-              style={{ boxShadow: `inset ${pct}% 0 0 0 #F5E642` }}
-            />
-            <div className="flex justify-between text-sm text-white/50 font-medium">
-              <span>{fmt(progress)}</span>
-              <span>{fmt(duration)}</span>
-            </div>
-          </div>
+          <div className="flex items-center gap-0.5 flex-shrink-0">
+            <button onClick={prev} className="p-2 text-white/50 active:text-white transition-colors">
+              <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>skip_previous</span>
+            </button>
 
-          {/* Playback Controls */}
-          <div className="flex justify-between items-center px-4 md:px-12 mt-2">
-            <button onClick={toggleShuffle} className={clsx("p-2 transition-colors", isShuffle ? "text-[#F5E642]" : "text-white/50")}>
-              <span className="material-symbols-outlined text-3xl">shuffle</span>
-            </button>
-            <button onClick={prev} className="p-2 text-white hover:scale-110 transition-transform">
-              <span className="material-symbols-outlined text-5xl" style={{ fontVariationSettings: "'FILL' 1" }}>skip_previous</span>
-            </button>
-            <button onClick={toggle} className="w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-2xl active:scale-95 transition-transform hover:bg-[#F5E642]">
-              <span className="material-symbols-outlined text-black text-6xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+            <button
+              onClick={toggle}
+              className="w-10 h-10 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-transform mx-0.5"
+              style={{ background: '#F5E642' }}
+            >
+              <span className="material-symbols-outlined text-black text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>
                 {isPlaying ? 'pause' : 'play_arrow'}
               </span>
             </button>
-            <button onClick={() => next(true)} className="p-2 text-white hover:scale-110 transition-transform">
-              <span className="material-symbols-outlined text-5xl" style={{ fontVariationSettings: "'FILL' 1" }}>skip_next</span>
-            </button>
-            <button onClick={toggleRepeatMode} className={clsx("p-2 transition-colors relative", repeatMode !== 'off' ? "text-[#F5E642]" : "text-white/50")}>
-              <span className="material-symbols-outlined text-3xl">{repeatMode === 'one' ? 'repeat_one' : 'repeat'}</span>
-            </button>
-          </div>
-          
-          {/* Bottom Actions */}
-          <div className="flex justify-between items-center text-white/50 px-2 pt-4">
-            <span className="material-symbols-outlined text-2xl hover:text-white cursor-pointer">speaker_group</span>
-            <span className="material-symbols-outlined text-2xl hover:text-white cursor-pointer">share</span>
-            <span className="material-symbols-outlined text-2xl hover:text-white cursor-pointer">menu</span>
-          </div>
 
-          {/* Lyrics Preview */}
-          <div className="mt-4 p-6 rounded-2xl glass-card relative overflow-hidden group max-h-[400px] overflow-y-auto no-scrollbar border border-white/5 bg-black/40">
-             <div className="absolute inset-0 bg-gradient-to-t from-[#111] to-transparent opacity-80 pointer-events-none" />
-             <div className="relative z-10">
-               <div className="flex justify-between items-center mb-4">
-                 <span className="text-white font-bold text-xl">Lyrics</span>
-               </div>
-               {loadingLyrics ? (
-                 <p className="text-white/50 text-base animate-pulse">Searching for lyrics...</p>
-               ) : (
-                 <p className="text-white/80 text-lg font-medium whitespace-pre-line leading-relaxed pb-8">
-                   {lyrics}
-                 </p>
-               )}
-             </div>
+            <button onClick={() => next(true)} className="p-2 text-white/50 active:text-white transition-colors">
+              <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>skip_next</span>
+            </button>
+
+            <button
+              onClick={() => { setPendingTrack(currentTrack); loadPlaylists(); setShowPlaylistMenu(true); }}
+              className="p-2 text-white/50 active:text-[#F5E642] transition-colors"
+            >
+              <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 0" }}>playlist_add</span>
+            </button>
           </div>
         </div>
       </div>
-
-      {/* Mini Player */}
-      <div
-        className={clsx(
-          "fixed bottom-[65px] md:bottom-0 left-0 md:left-64 right-0 z-[60] px-4 py-3 flex flex-col gap-0 transition-transform duration-300 shadow-2xl",
-          isExpanded ? "translate-y-full opacity-0 pointer-events-none" : "translate-y-0 opacity-100"
-        )}
-        style={{
-          background: '#111116',
-          borderTop: '1px solid rgba(255,255,255,0.05)',
-        }}
-        onClick={() => setIsExpanded(true)}
-      >
-        <div className="w-full h-0.5 bg-white/10 rounded-full overflow-hidden mb-3 absolute top-0 left-0 right-0">
-          <div className="h-full rounded-full" style={{ width: `${pct}%`, background: '#F5E642', transition: 'width 0.1s linear' }} />
-        </div>
-
-        <div className="flex items-center gap-4 cursor-pointer hover:bg-white/5 p-1 rounded-lg transition-colors">
-          <img src={currentTrack.cover_url} alt="" className="w-12 h-12 rounded-md object-cover flex-shrink-0 shadow-md border border-white/5" />
-
-          <div className="flex flex-col min-w-0 flex-1">
-            <span className="text-white font-bold text-base leading-tight truncate">{currentTrack.title}</span>
-            <span className="text-white/50 text-sm truncate mt-0.5">{currentTrack.artist}</span>
-          </div>
-
-          <div className="flex items-center gap-3 flex-shrink-0" onClick={e => e.stopPropagation()}>
-            <button onClick={prev} className="p-2 text-white/50 hover:text-white transition-colors"><span className="material-symbols-outlined text-[28px]" style={{ fontVariationSettings: "'FILL' 1" }}>skip_previous</span></button>
-            <button onClick={toggle} className="w-12 h-12 rounded-full bg-[#F5E642] flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 text-black transition-all">
-              <span className="material-symbols-outlined text-[28px]" style={{ fontVariationSettings: "'FILL' 1" }}>{isPlaying ? 'pause' : 'play_arrow'}</span>
-            </button>
-            <button onClick={() => next(true)} className="p-2 text-white/50 hover:text-white transition-colors"><span className="material-symbols-outlined text-[28px]" style={{ fontVariationSettings: "'FILL' 1" }}>skip_next</span></button>
-          </div>
-        </div>
-      </div>      </div>
     </>
   );
 }

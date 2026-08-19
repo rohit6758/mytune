@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useRef, useEffect, ReactNode } from 'react';
-import { getAudioStreamUrl } from '../lib/ytmusic';
+import { getAudioStreamUrl, searchYTSongs } from '../lib/ytmusic';
 
 export interface Track {
   id: string;

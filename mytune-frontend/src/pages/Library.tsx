@@ -474,98 +474,107 @@ export default function Library() {
     );
   }
 
-  // ── Library List View ──────────────────────────────────────────────────────
+  // ── Library List View (Vivi Style) ─────────────────────────────────────────
   return (
-    <div className="inner-scroll h-full overflow-y-auto px-4 pt-6 w-full max-w-2xl mx-auto flex flex-col gap-6" style={{ paddingBottom: '120px' }}>
-      <h1 className="text-3xl font-black text-white">Your Library</h1>
+    <div className="inner-scroll h-full overflow-y-auto px-4 pt-4 pb-6 w-full mx-auto flex flex-col gap-6" style={{ paddingBottom: '120px' }}>
+      
+      {/* Top Header */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <span className="material-symbols-outlined text-[#8ab4f8] text-3xl">library_music</span>
+          Library
+        </h1>
+        <div className="flex items-center gap-4 text-white/70">
+          <span className="material-symbols-outlined">history</span>
+          <span className="material-symbols-outlined">trending_up</span>
+          <span className="material-symbols-outlined">group</span>
+          <span className="material-symbols-outlined text-green-400">settings</span>
+        </div>
+      </div>
 
-      {/* Playlists */}
-      <section className="flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-white">Playlists</h2>
-          <button
-            onClick={() => setIsCreating(!isCreating)}
-            className="flex items-center gap-1 text-sm text-[#FF9900] font-bold bg-[#FF9900]/10 px-3 py-1.5 rounded-full hover:bg-[#FF9900]/20 transition-colors"
-          >
-            <span className="material-symbols-outlined text-[18px]">add</span>
-            New
+      {/* Tabs */}
+      <div className="flex gap-2 border-b border-white/5 pb-3">
+        {['Playlists', 'Songs', 'Albums', 'Artists'].map((tab, i) => (
+          <button key={tab} className={`px-4 py-2 rounded-xl text-sm font-medium ${i === 0 ? 'bg-white/10 text-white' : 'text-white/60 hover:bg-white/5'}`}>
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      {/* Filters Row */}
+      <div className="flex items-center justify-between mt-[-10px]">
+        <button className="flex items-center gap-2 bg-[#8ab4f8] text-black px-4 py-2 rounded-full text-sm font-bold">
+          Date added
+          <span className="material-symbols-outlined text-[18px]">expand_more</span>
+        </button>
+        <div className="flex gap-2">
+          <button className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/50">
+            <span className="material-symbols-outlined">view_list</span>
+          </button>
+          <button className="w-10 h-10 rounded-full bg-[#8ab4f8] flex items-center justify-center text-black">
+            <span className="material-symbols-outlined">grid_view</span>
           </button>
         </div>
+      </div>
 
-        {/* Create playlist form */}
-        {isCreating && (
-          <div className="bg-[#1e1b24] border border-white/10 rounded-2xl p-4 flex flex-col gap-4">
-            <div className="flex items-center gap-3">
-              {/* Cover preview — tap to change */}
-              <button
-                onClick={() => setShowCoverPicker(true)}
-                className="relative flex-shrink-0 group"
-                title="Choose cover"
-              >
-                <PlaylistCover cover={newPlaylistCover} size="sm" />
-                <div className="absolute inset-0 bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 group-active:opacity-100 flex items-center justify-center transition-opacity">
-                  <span className="material-symbols-outlined text-white text-base">edit</span>
-                </div>
-              </button>
-              <input
-                value={newPlaylistName}
-                onChange={e => setNewPlaylistName(e.target.value)}
-                placeholder="Playlist name..."
-                className="flex-1 bg-transparent text-white outline-none placeholder-white/30 text-base font-semibold py-1 border-b border-white/10 focus:border-[#FF9900] transition-colors"
-                autoFocus
-                onKeyDown={e => e.key === 'Enter' && createPlaylist()}
-              />
-            </div>
-            <p className="text-xs text-white/40 -mt-2 ml-15">Tap the icon above to pick a cover.</p>
-            <div className="flex gap-2">
-              <button onClick={() => { setIsCreating(false); setNewPlaylistName(''); }} className="flex-1 py-2.5 rounded-xl bg-white/10 text-white font-bold text-sm">Cancel</button>
-              <button
-                onClick={createPlaylist}
-                disabled={!newPlaylistName.trim()}
-                className="flex-1 py-2.5 rounded-xl font-bold text-sm text-black disabled:opacity-40"
-                style={{ background: 'linear-gradient(135deg, #FF9900, #FF2020)' }}
-              >
-                Create
-              </button>
-            </div>
+      {/* Main 4 Grid */}
+      <div className="grid grid-cols-2 gap-4">
+        {/* Liked */}
+        <div onClick={() => { setSelectedPlaylist({ id: 'liked', name: 'Liked Songs', cover: null }); setPlaylistTracks(likedTracks); }} className="cursor-pointer group">
+          <div className="w-full aspect-square rounded-xl bg-[#1c1c20] flex items-center justify-center mb-2 active:scale-95 transition-transform border border-transparent hover:border-white/10">
+             <span className="material-symbols-outlined text-7xl text-white/70 font-light">favorite</span>
           </div>
-        )}
-
-        {/* Horizontal playlist grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-          {/* Liked Songs */}
-          <div
-            onClick={() => { setSelectedPlaylist({ id: 'liked', name: 'Liked Songs', cover: null }); setPlaylistTracks(likedTracks); }}
-            className="cursor-pointer group"
-          >
-            <div className="w-full aspect-square rounded-xl flex items-center justify-center mb-2 shadow-lg group-hover:scale-105 transition-transform border border-[#FF9900]/20 group-active:scale-95" style={{ background: 'linear-gradient(135deg, #FF9900 0%, #FF2020 100%)' }}>
-              <span className="material-symbols-outlined text-5xl text-white" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
-            </div>
-            <p className="text-sm font-bold text-white truncate">Liked Songs</p>
-            <p className="text-xs text-[#FF9900]">{likedTracks.length} songs</p>
-          </div>
-
-          {/* User playlists */}
-          {playlists.map(pl => (
-            <div key={pl.id} onClick={() => openPlaylist(pl)} className="cursor-pointer group">
-              <div className="w-full aspect-square rounded-xl overflow-hidden mb-2 shadow-lg group-hover:scale-105 transition-transform group-active:scale-95">
-                <PlaylistCover cover={pl.cover} size="lg" />
-              </div>
-              <p className="text-sm font-bold text-white truncate">{pl.name}</p>
-              <p className="text-xs text-white/50">Playlist</p>
-            </div>
-          ))}
+          <p className="text-sm font-bold text-white">Liked</p>
         </div>
-      </section>
+
+        {/* Downloaded */}
+        <div className="cursor-pointer group">
+          <div className="w-full aspect-square rounded-xl bg-[#1c1c20] flex items-center justify-center mb-2 active:scale-95 transition-transform border border-transparent hover:border-white/10">
+             <span className="material-symbols-outlined text-7xl text-white/70 font-light">download_done</span>
+          </div>
+          <p className="text-sm font-bold text-white">Downloaded</p>
+        </div>
+
+        {/* My top 50 */}
+        <div className="cursor-pointer group">
+          <div className="w-full aspect-square rounded-xl bg-[#1c1c20] flex items-center justify-center mb-2 active:scale-95 transition-transform border border-transparent hover:border-white/10">
+             <span className="material-symbols-outlined text-7xl text-white/70 font-light">trending_up</span>
+          </div>
+          <p className="text-sm font-bold text-white">My top 50</p>
+        </div>
+
+        {/* Cached */}
+        <div className="cursor-pointer group">
+          <div className="w-full aspect-square rounded-xl bg-[#1c1c20] flex items-center justify-center mb-2 active:scale-95 transition-transform border border-transparent hover:border-white/10">
+             <span className="material-symbols-outlined text-7xl text-white/70 font-light">sync</span>
+          </div>
+          <p className="text-sm font-bold text-white">Cached</p>
+        </div>
+      </div>
+
+      {/* User playlists */}
+      {playlists.length > 0 && (
+         <div className="mt-4">
+           <h2 className="text-lg font-bold text-white mb-4">Your Playlists</h2>
+           <div className="grid grid-cols-2 gap-4">
+             {playlists.map(pl => (
+               <div key={pl.id} onClick={() => openPlaylist(pl)} className="cursor-pointer group">
+                 <div className="w-full aspect-square rounded-xl overflow-hidden mb-2 shadow-lg group-hover:scale-105 transition-transform group-active:scale-95">
+                   <PlaylistCover cover={pl.cover} size="lg" />
+                 </div>
+                 <p className="text-sm font-bold text-white truncate">{pl.name}</p>
+                 <p className="text-xs text-white/50">Playlist</p>
+               </div>
+             ))}
+           </div>
+         </div>
+      )}
 
       {/* Cover picker for new playlist */}
       {showCoverPicker && (
-        <CoverPickerModal
-          current={newPlaylistCover}
-          onSave={c => setNewPlaylistCover(c)}
-          onClose={() => setShowCoverPicker(false)}
-        />
+        <CoverPickerModal current={newPlaylistCover} onSave={c => setNewPlaylistCover(c)} onClose={() => setShowCoverPicker(false)} />
       )}
     </div>
   );
 }
+

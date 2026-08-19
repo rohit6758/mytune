@@ -1,11 +1,13 @@
-import React, { createContext, useContext, useState, useRef, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useRef, useEffect, ReactNode } from 'react';
+import { getAudioStreamUrl } from '../lib/ytmusic';
 
 export interface Track {
   id: string;
   title: string;
   artist: string;
   cover_url: string;
-  preview_url: string;
+  preview_url?: string;
+  duration?: number;
 }
 
 interface PlayerContextType {
@@ -18,7 +20,7 @@ interface PlayerContextType {
   isShuffle: boolean;
   playTrack: (track: Track) => void;
   playQueue: (tracks: Track[], startIndex?: number) => void;
-  loadQueue: (tracks: Track[], startIndex?: number) => void; // Load without auto-playing
+  loadQueue: (tracks: Track[], startIndex?: number) => void; 
   addToQueue: (track: Track) => void;
   insertNext: (tracks: Track[]) => void;
   pause: () => void;
@@ -41,16 +43,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [repeatMode, setRepeatMode] = useState<'off' | 'all' | 'one'>('all'); // Default to loop all
+  const [repeatMode, setRepeatMode] = useState<'off' | 'all' | 'one'>('all'); 
   const [isShuffle, setIsShuffle] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Create audio element once
   useEffect(() => {
     if (!audioRef.current) {
       audioRef.current = new Audio();
-      // Keep playing when screen locks / app goes to background
       audioRef.current.preload = 'metadata';
     }
     const audio = audioRef.current;
@@ -73,7 +73,6 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // Bind "ended" separately so it always captures fresh state
   useEffect(() => {
     if (!audioRef.current) return;
     const audio = audioRef.current;
@@ -82,7 +81,6 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     return () => audio.removeEventListener('ended', handleEnded);
   }, [queue, queueIndex, repeatMode, isShuffle]);
 
-  // MediaSession API — keeps controls on lock screen & notification shade
   useEffect(() => {
     if (!currentTrack || !('mediaSession' in navigator)) return;
     navigator.mediaSession.metadata = new MediaMetadata({
@@ -99,30 +97,64 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     navigator.mediaSession.setActionHandler('nexttrack', () => next(true));
   }, [currentTrack]);
 
-  const loadAndPlay = (track: Track) => {
+  const loadAndPlay = async (track: Track) => {
     if (!audioRef.current) return;
-    audioRef.current.src = track.preview_url;
+    
+    let url = track.preview_url;
+    // Fetch stream from Piped if missing
+    if (!url && track.id) {
+      const fetchedUrl = await getAudioStreamUrl(track.id);
+      if (fetchedUrl) {
+        url = fetchedUrl;
+        track.preview_url = fetchedUrl;
+      }
+    }
+
+    if (!url) {
+      console.error("No audio URL found for track");
+      return;
+    }
+
+    // Optimization: If it's the exact same track looping, just seek to 0
+    if (audioRef.current.src === url || audioRef.current.src.endsWith(url)) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(console.error);
+      return;
+    }
+
+    audioRef.current.src = url;
     audioRef.current.play().catch(console.error);
   };
 
-  const loadOnly = (track: Track) => {
+  const loadOnly = async (track: Track) => {
     if (!audioRef.current) return;
-    audioRef.current.src = track.preview_url;
-    audioRef.current.load(); // Preload but DO NOT play
+    
+    let url = track.preview_url;
+    if (!url && track.id) {
+      const fetchedUrl = await getAudioStreamUrl(track.id);
+      if (fetchedUrl) {
+        url = fetchedUrl;
+        track.preview_url = fetchedUrl;
+      }
+    }
+    
+    if (url && audioRef.current.src !== url) {
+      audioRef.current.src = url;
+      audioRef.current.load();
+    }
   };
 
   const pause = () => { audioRef.current?.pause(); };
   const resume = () => { if (audioRef.current && currentTrack) audioRef.current.play().catch(console.error); };
   const toggle = () => { isPlaying ? pause() : resume(); };
 
-  // Load without auto-play — used when the feed loads tracks
   const loadQueue = (tracks: Track[], startIndex = 0) => {
     if (!tracks.length) return;
     setOriginalQueue(tracks);
     setQueue(tracks);
     setQueueIndex(startIndex);
     setCurrentTrack(tracks[startIndex]);
-    loadOnly(tracks[startIndex]); // no auto-play
+    loadOnly(tracks[startIndex]); 
   };
 
   const playQueue = (tracks: Track[], startIndex = 0) => {
@@ -180,21 +212,29 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   };
 
   const next = (forceSkip = true) => {
+    // If not forced (i.e. track ended naturally) and repeat is ONE, loop it
     if (!forceSkip && repeatMode === 'one') {
       seek(0);
       resume();
       return;
     }
+    
+    // If we have more tracks in queue
     if (queueIndex < queue.length - 1) {
       const ni = queueIndex + 1;
       setQueueIndex(ni);
       setCurrentTrack(queue[ni]);
       loadAndPlay(queue[ni]);
     } else {
-      // Always loop back — treat as 'all' repeat for infinite listen
-      setQueueIndex(0);
-      setCurrentTrack(queue[0]);
-      loadAndPlay(queue[0]);
+      // End of queue. If repeat is off, stop. If repeat is all, loop to 0.
+      if (repeatMode === 'off' && !forceSkip) {
+        pause();
+      } else {
+        setQueueIndex(0);
+        setCurrentTrack(queue[0]);
+        // If it's a 1-track queue, loadAndPlay handles optimization
+        loadAndPlay(queue[0]);
+      }
     }
   };
 

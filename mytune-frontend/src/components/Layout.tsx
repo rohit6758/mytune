@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import clsx from 'clsx';
 import Logo from './Logo';
 import GlobalPlayer from './GlobalPlayer';
+import PermissionsModal from './PermissionsModal';
 import { supabase } from '../lib/supabase';
 
 const NAV_ITEMS = [
@@ -22,6 +23,18 @@ export default function Layout() {
   const lastBackPress = useRef<number>(0);
   const [backToast, setBackToast] = useState(false);
   const [profile, setProfile] = useState<{ full_name?: string; username?: string; avatar_url?: string } | null>(null);
+  const [showPermissions, setShowPermissions] = useState(false);
+
+  useEffect(() => {
+    if (!localStorage.getItem('mytune_permissions_shown')) {
+      setShowPermissions(true);
+    }
+  }, []);
+
+  const dismissPermissions = () => {
+    localStorage.setItem('mytune_permissions_shown', 'true');
+    setShowPermissions(false);
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -57,8 +70,10 @@ export default function Layout() {
 
   return (
     <div className="w-full text-white overflow-hidden flex flex-col md:flex-row relative" style={{ height: '100dvh', background: '#0a0a0f' }}>
-
+      {showPermissions && <PermissionsModal onComplete={dismissPermissions} />}
+      
       {/* Ambient background orbs */}
+
       <div className="ambient-orb w-96 h-96 bg-[#F5E642]/8 top-[-10%] left-[-5%]" />
       <div className="ambient-orb w-80 h-80 bg-purple-900/20 bottom-[10%] right-[-5%]" style={{ animationDelay: '4s', animationDuration: '22s' }} />
 

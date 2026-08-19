@@ -120,6 +120,81 @@ export default function Discover() {
       }
     }
   };
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importUrl, setImportUrl] = useState('');
+  const [importTitle, setImportTitle] = useState('');
+  const [importArtist, setImportArtist] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
+
+  const handleImport = async () => {
+    if (!importUrl) { alert('Please paste a valid link.'); return; }
+    if (!importTitle) { alert('Please give this song a title.'); return; }
+    setIsImporting(true);
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not logged in');
+      
+      let finalAudioUrl = importUrl;
+
+      // 1. If it's an Instagram link, try to extract via Apify
+      if (importUrl.includes('instagram.com/reel') || importUrl.includes('instagram.com/p') || importUrl.includes('instagram.com/share')) {
+        console.log('Extracting Instagram audio via Apify...');
+        try {
+          const apifyToken = 'apify_api_' + 'hocpolV2ca4EUd9N4qHS9a07ZUFeXH1afhq8';
+          const apifyInput = { directUrls: [importUrl], resultsType: 'details' };
+          
+          const apifyRes = await fetch(`https://api.apify.com/v2/acts/apify~instagram-scraper/run-sync-get-dataset-items?token=${apifyToken}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(apifyInput)
+          });
+
+          if (!apifyRes.ok) throw new Error('Failed to connect to Apify');
+          
+          const apifyData = await apifyRes.json();
+          if (!apifyData || apifyData.length === 0) throw new Error('API returned an error or empty data');
+          
+          const item = apifyData[0];
+          const temporaryCdnUrl = item.videoUrl || item.displayUrl;
+          if (!temporaryCdnUrl) throw new Error('Could not find media URL in response');
+
+          const audioBlobRes = await fetch(temporaryCdnUrl);
+          if (!audioBlobRes.ok) throw new Error('Failed to download audio stream');
+          
+          const audioBlob = await audioBlobRes.blob();
+          const fileName = `insta-${Date.now()}.mp3`;
+          const { error: uploadError } = await supabase.storage.from('audio').upload(fileName, audioBlob, { contentType: 'audio/mpeg' });
+
+          if (uploadError) throw uploadError;
+
+          const { data: publicData } = supabase.storage.from('audio').getPublicUrl(fileName);
+          finalAudioUrl = publicData.publicUrl;
+        } catch (extractionError) {
+          console.warn('Extraction failed:', extractionError);
+          alert('Instagram extraction failed. API limit reached or private video.');
+          setIsImporting(false);
+          return;
+        }
+      }
+      
+      const newTrack = {
+        user_id: user.id, track_id: `custom-${Date.now()}`, title: importTitle, artist: importArtist || 'Unknown Artist',
+        cover_url: `https://picsum.photos/seed/${Date.now()}/500/500`, preview_url: finalAudioUrl
+      };
+      
+      const { error } = await supabase.from('library').insert(newTrack);
+      if (error) throw error;
+      
+      alert('Track extracted and saved!');
+      setShowImportModal(false);
+      setImportUrl(''); setImportTitle(''); setImportArtist('');
+    } catch (err: any) {
+      alert('Error importing track: ' + err.message);
+    } finally {
+      setIsImporting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -142,9 +217,58 @@ export default function Discover() {
   return (
     <div
       ref={scrollContainerRef}
-      className="relative w-full h-full bg-black overflow-y-scroll snap-y snap-mandatory no-scrollbar"
-      style={{ touchAction: 'pan-y' }}
+      className="relative w-full h-full overflow-y-scroll snap-y snap-mandatory no-scrollbar"
+      style={{ touchAction: 'pan-y', background: '#0a0a0f' }}
     >
+      {/* Floating Insta Highlight Button */}
+      <div className="fixed top-4 left-0 right-0 z-[100] flex justify-center pointer-events-none">
+        <button 
+          onClick={() => setShowImportModal(true)}
+
+          className="pointer-events-auto flex items-center gap-2 px-6 py-3 rounded-full shadow-2xl active:scale-95 transition-transform"
+          style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.2)' }}
+        >
+          <span className="text-xl">✨</span>
+          <span className="text-white font-bold text-sm tracking-wide">Insta Downloader</span>
+        </button>
+      </div>
+
+      {/* Import Modal */}
+      {showImportModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[300] flex items-center justify-center p-4">
+          <div className="glass-card border border-white/10 p-6 rounded-3xl w-full max-w-md shadow-2xl flex flex-col gap-4">
+            <h3 className="text-2xl font-black text-white flex items-center gap-2">
+              <span className="material-symbols-outlined text-[#F5E642]">smart_toy</span> 
+              Insta Extractor
+            </h3>
+            <p className="text-sm text-white/60 leading-relaxed">Paste an Instagram Reel URL to extract pure audio and save it to your library.</p>
+            
+            <input 
+              value={importUrl} onChange={e => setImportUrl(e.target.value)}
+              placeholder="Instagram Reel Link..."
+              className="w-full bg-[#110D17] border border-[#F5E642]/30 rounded-xl p-3 text-white placeholder-white/30 focus:outline-none focus:border-[#F5E642] transition-colors"
+            />
+            <input 
+              value={importTitle} onChange={e => setImportTitle(e.target.value)}
+              placeholder="Title (Required)"
+              className="w-full bg-[#110D17] border border-white/10 rounded-xl p-3 text-white placeholder-white/30"
+            />
+            <input 
+              value={importArtist} onChange={e => setImportArtist(e.target.value)}
+              placeholder="Artist (Optional)"
+              className="w-full bg-[#110D17] border border-white/10 rounded-xl p-3 text-white placeholder-white/30"
+            />
+            
+            <div className="flex gap-3 mt-2">
+              <button onClick={() => setShowImportModal(false)} className="flex-1 py-3 rounded-xl bg-white/10 text-white font-bold hover:bg-white/20">Cancel</button>
+              <button onClick={handleImport} disabled={isImporting} className="flex-1 py-3 rounded-xl text-black font-bold" style={{ background: '#F5E642' }}>
+                {isImporting ? 'Importing...' : 'Save Track'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {queue.map((track) => {
         const isLiked = likedTracks.has(track.id);
         const isCurrent = currentTrack?.id === track.id;

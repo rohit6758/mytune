@@ -1,14 +1,20 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { usePlayer, Track } from '../context/PlayerContext';
-import { searchYTSongs } from '../lib/ytmusic';
 
-const MOODS = ['Chill', 'Commute', 'Energize', 'Feel good', 'Focus', 'Gaming', 'Party', 'Romance', 'Sad', 'Sleep', 'Workout'];
-const GENRES = ['Pop', 'Hip-Hop', 'R&B', 'Rock', 'Electronic', 'Jazz', 'Classical', 'Country'];
+const CATEGORIES = [
+  { name: 'Pop', color: 'from-orange-500 to-red-500' },
+  { name: 'Rock', color: 'from-amber-600 to-orange-700' },
+  { name: 'Hip-Hop', color: 'from-orange-400 to-red-600' },
+  { name: 'Synthwave', color: 'from-red-500 to-orange-600' },
+  { name: 'Jazz', color: 'from-amber-700 to-orange-800' },
+  { name: 'Electronic', color: 'from-orange-500 to-red-700' },
+  { name: 'Indie', color: 'from-red-600 to-orange-500' },
+  { name: 'Classical', color: 'from-orange-600 to-amber-700' },
+];
 
 export default function Search() {
   const [query, setQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('Explore');
   const [searchResults, setSearchResults] = useState<Track[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -25,10 +31,26 @@ export default function Search() {
     const timeoutId = setTimeout(async () => {
       setIsSearching(true);
       try {
-        const results = await searchYTSongs(query);
-        setSearchResults(results);
+        const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&limit=30&media=music`);
+        const data = await res.json();
+        
+        if (data?.results?.length > 0) {
+          const results = data.results.map((t: any) => ({
+            id: String(t.trackId),
+            title: t.trackName,
+            artist: t.artistName,
+            cover_url: t.artworkUrl100?.replace('100x100bb', '600x600bb') || '',
+            preview_url: t.previewUrl || '',
+            duration: t.trackTimeMillis ? Math.floor(t.trackTimeMillis / 1000) : 0,
+          })).filter((t: any) => t.preview_url && t.cover_url);
+          
+          setSearchResults(results);
+        } else {
+          setSearchResults([]);
+        }
       } catch (e) {
         console.error("Search failed", e);
+        setSearchResults([]);
       } finally {
         setIsSearching(false);
       }
@@ -78,7 +100,7 @@ export default function Search() {
           </span>
           <input
             className="w-full bg-[#110f14] border border-transparent rounded-full py-3.5 pl-12 pr-4 text-sm text-white placeholder-white/35 transition-all duration-200 focus:border-[#F5E642] focus:outline-none focus:ring-2 focus:ring-[#F5E642]/25 shadow-lg"
-            placeholder="Search YouTube Music..."
+            placeholder="Search MyTune..."
             type="text"
             value={query}
             onChange={e => setQuery(e.target.value)}
@@ -131,63 +153,25 @@ export default function Search() {
           )}
         </section>
       ) : (
-        /* Default Browse View (Vivi Style) */
+        /* Original Browse View */
         <div className="flex flex-col gap-6">
-          {/* Tabs */}
-          <div className="flex gap-6 border-b border-white/10 pb-2">
-            {['Explore', 'Suggestions', 'Album'].map(tab => (
-              <button 
-                key={tab} 
-                onClick={() => setActiveTab(tab)}
-                className={`text-sm font-bold relative pb-2 transition-colors ${activeTab === tab ? 'text-[#8ab4f8]' : 'text-white/50'}`}
-              >
-                {tab}
-                {activeTab === tab && <div className="absolute bottom-[-2px] left-0 right-0 h-0.5 bg-[#8ab4f8] rounded-full" />}
-              </button>
-            ))}
-          </div>
-
-          {activeTab === 'Explore' && (
-            <>
-              {/* Moods & Moments */}
-              <section>
-                <h2 className="text-[#8ab4f8] text-lg font-bold mb-4 tracking-wide">Moods & moments</h2>
-                <div className="grid grid-cols-2 gap-3">
-                  {MOODS.map(mood => (
-                    <button 
-                      key={mood}
-                      onClick={() => setQuery(mood + ' music')}
-                      className="glass-card py-4 px-4 text-left rounded-xl hover:bg-white/10 transition-colors active:scale-95"
-                    >
-                      <span className="text-white text-sm font-bold">{mood}</span>
-                    </button>
-                  ))}
+          <section>
+            <h2 className="text-white text-2xl font-bold mb-4 tracking-wide">Browse All</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {CATEGORIES.map((category) => (
+                <div
+                  key={category.name}
+                  onClick={() => setQuery(category.name)}
+                  className={`relative aspect-[4/3] rounded-xl overflow-hidden cursor-pointer group bg-gradient-to-br ${category.color} hover:scale-[1.02] transition-transform duration-300 shadow-md flex flex-col justify-end p-4`}
+                >
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-300"></div>
+                  <h3 className="relative z-10 text-xl font-bold font-display tracking-wide drop-shadow-md text-white">
+                    {category.name}
+                  </h3>
                 </div>
-              </section>
-
-              {/* Genres */}
-              <section className="mt-4">
-                <h2 className="text-[#8ab4f8] text-lg font-bold mb-4 tracking-wide">Genres</h2>
-                <div className="grid grid-cols-2 gap-3">
-                  {GENRES.map(genre => (
-                    <button 
-                      key={genre}
-                      onClick={() => setQuery(genre + ' songs')}
-                      className="glass-card py-4 px-4 text-left rounded-xl hover:bg-white/10 transition-colors active:scale-95"
-                    >
-                      <span className="text-white text-sm font-bold">{genre}</span>
-                    </button>
-                  ))}
-                </div>
-              </section>
-            </>
-          )}
-          
-          {activeTab !== 'Explore' && (
-             <div className="flex flex-col items-center justify-center py-10 text-white/40 text-sm">
-                Nothing to show here yet.
-             </div>
-          )}
+              ))}
+            </div>
+          </section>
         </div>
       )}
     </div>

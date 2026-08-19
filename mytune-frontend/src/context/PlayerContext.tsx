@@ -1,7 +1,5 @@
 // @ts-nocheck
 import React, { createContext, useContext, useState, useRef, useEffect, ReactNode } from 'react';
-import ReactPlayer from 'react-player';
-import { searchYTSongs } from '../lib/ytmusic';
 
 export interface Track {
   id: string;
@@ -49,37 +47,40 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [repeatMode, setRepeatMode] = useState<'off' | 'all' | 'one'>('all'); 
   const [isShuffle, setIsShuffle] = useState(false);
 
-  const [currentUrl, setCurrentUrl] = useState('');
-  const playerRef = useRef<any>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Resolve media URL whenever currentTrack changes
   useEffect(() => {
-    if (!currentTrack) {
-      setCurrentUrl('');
-      return;
+    if (!audioRef.current) {
+      audioRef.current = new Audio();
+      audioRef.current.preload = 'metadata';
     }
-    let isMounted = true;
+    const audio = audioRef.current;
 
-    const resolveUrl = async () => {
-      if (currentTrack.id && currentTrack.id.length === 11 && !currentTrack.id.includes('-')) {
-        if (isMounted) setCurrentUrl(`https://www.youtube.com/watch?v=${currentTrack.id}`);
-      } else {
-        try {
-          const results = await searchYTSongs(`${currentTrack.title} ${currentTrack.artist}`);
-          if (results && results.length > 0 && isMounted) {
-            setCurrentUrl(`https://www.youtube.com/watch?v=${results[0].id}`);
-            return;
-          }
-        } catch (e) {
-          console.warn('Failed to resolve YT video for iTunes track', e);
-        }
-        if (isMounted) setCurrentUrl(currentTrack.preview_url || '');
-      }
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+    const handleTimeUpdate = () => setProgress(audio.currentTime);
+    const handleLoadedMetadata = () => setDuration(audio.duration);
+
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+
+    return () => {
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
     };
-    resolveUrl();
+  }, []);
 
-    return () => { isMounted = false; };
-  }, [currentTrack]);
+  useEffect(() => {
+    if (!audioRef.current) return;
+    const audio = audioRef.current;
+    const handleEnded = () => next(false);
+    audio.addEventListener('ended', handleEnded);
+    return () => audio.removeEventListener('ended', handleEnded);
+  }, [queue, queueIndex, repeatMode, isShuffle]);
 
   useEffect(() => {
     if (!currentTrack || !('mediaSession' in navigator)) return;
@@ -98,25 +99,29 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [currentTrack]);
 
   const loadAndPlay = (track: Track) => {
-    // If same track, restart
-    if (currentTrack?.id === track.id) {
-      seek(0);
+    if (!audioRef.current) return;
+    if (audioRef.current.src === track.preview_url || audioRef.current.src.endsWith(track.preview_url)) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(console.error);
       setIsPlaying(true);
       return;
     }
     setCurrentTrack(track);
+    audioRef.current.src = track.preview_url || '';
+    audioRef.current.play().catch(console.error);
     setIsPlaying(true);
   };
 
   const loadOnly = (track: Track) => {
-    if (currentTrack?.id !== track.id) {
-      setCurrentTrack(track);
-      setIsPlaying(false);
-    }
+    if (!audioRef.current) return;
+    setCurrentTrack(track);
+    audioRef.current.src = track.preview_url || '';
+    audioRef.current.load();
+    setIsPlaying(false);
   };
 
-  const pause = () => setIsPlaying(false);
-  const resume = () => { if (currentTrack) setIsPlaying(true); };
+  const pause = () => { audioRef.current?.pause(); };
+  const resume = () => { if (audioRef.current && currentTrack) audioRef.current.play().catch(console.error); };
   const toggle = () => { isPlaying ? pause() : resume(); };
 
   const loadQueue = (tracks: Track[], startIndex = 0) => {
@@ -212,8 +217,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   };
 
   const seek = (time: number) => {
-    if (playerRef.current) {
-      playerRef.current.seekTo(time, 'seconds');
+    if (audioRef.current) {
+      audioRef.current.currentTime = time;
       setProgress(time);
     }
   };
@@ -244,27 +249,6 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       pause, resume, toggle, next, prev, seek, toggleRepeatMode, toggleShuffle,
     }}>
       {children}
-      {currentUrl && (
-        // @ts-ignore
-        <ReactPlayer
-          ref={playerRef}
-          url={currentUrl}
-          playing={isPlaying}
-          onProgress={({ playedSeconds }: { playedSeconds: number }) => setProgress(playedSeconds)}
-          onDuration={(d: number) => setDuration(d)}
-          onEnded={() => next(false)}
-          onPause={() => setIsPlaying(false)}
-          onPlay={() => setIsPlaying(true)}
-          width="1px"
-          height="1px"
-          style={{ position: 'absolute', top: '-9999px', left: '-9999px', opacity: 0, pointerEvents: 'none' }}
-          config={{
-            youtube: {
-              playerVars: { autoplay: 1 }
-            }
-          }}
-        />
-      )}
     </PlayerContext.Provider>
   );
 }

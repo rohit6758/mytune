@@ -18,13 +18,16 @@
     "framer-motion": "^13.1.0",
     "instagram-url-direct": "^2.0.7",
     "lucide-react": "^1.31.0",
+    "play-dl": "^1.9.7",
     "playwright": "^1.62.1",
     "postcss": "^8.5.26",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "react-player": "^3.4.0",
     "react-router-dom": "^7.18.2",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^3.4.19",
+    "youtube-ext": "^1.1.25",
     "ytmusic-api": "^5.3.1"
   },
   "devDependencies": {

@@ -196,7 +196,7 @@ export default function GlobalPlayer() {
       {/* Mini Player — glass bar */}
       <div
         className={clsx(
-          "fixed bottom-[65px] left-0 right-0 z-[60] px-3 py-2.5 flex flex-col gap-0 transition-transform duration-300",
+          "fixed bottom-[65px] md:bottom-0 left-0 md:left-64 right-0 z-[60] px-3 py-2.5 flex flex-col gap-0 transition-transform duration-300",
           isExpanded ? "translate-y-full opacity-0 pointer-events-none" : "translate-y-0 opacity-100"
         )}
         style={{

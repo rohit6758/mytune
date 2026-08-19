@@ -497,19 +497,19 @@ export default function Library() {
       {/* Main 4 Grid - Smaller horizontal items */}
       <div className="grid grid-cols-2 gap-3">
         {/* Liked */}
-        <div onClick={() => { setSelectedPlaylist({ id: 'liked', name: 'Liked Songs', cover: null }); setPlaylistTracks(likedTracks); }} className="flex items-center gap-3 p-4 bg-[#1c1c20] rounded-2xl cursor-pointer active:scale-95 transition-transform border border-white/5">
+        <div onClick={() => alert('Coming soon!')} className="flex items-center gap-3 p-4 bg-[#1c1c20] rounded-2xl cursor-pointer active:scale-95 transition-transform border border-white/5">
           <span className="material-symbols-outlined text-2xl text-white/70">favorite</span>
           <p className="text-sm font-bold text-white">Liked</p>
         </div>
 
         {/* Downloaded */}
-        <div className="flex items-center gap-3 p-4 bg-[#1c1c20] rounded-2xl cursor-pointer active:scale-95 transition-transform border border-white/5">
+        <div onClick={() => alert('Coming soon!')} className="flex items-center gap-3 p-4 bg-[#1c1c20] rounded-2xl cursor-pointer active:scale-95 transition-transform border border-white/5">
           <span className="material-symbols-outlined text-2xl text-white/70">download_done</span>
           <p className="text-sm font-bold text-white truncate">Downloaded</p>
         </div>
 
         {/* My top 50 */}
-        <div className="flex items-center gap-3 p-4 bg-[#1c1c20] rounded-2xl cursor-pointer active:scale-95 transition-transform border border-white/5">
+        <div onClick={() => alert('Coming soon!')} className="flex items-center gap-3 p-4 bg-[#1c1c20] rounded-2xl cursor-pointer active:scale-95 transition-transform border border-white/5">
           <span className="material-symbols-outlined text-2xl text-white/70">trending_up</span>
           <p className="text-sm font-bold text-white truncate">Top 50</p>
         </div>

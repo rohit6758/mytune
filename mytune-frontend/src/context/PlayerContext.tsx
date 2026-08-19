@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useRef, useEffect, ReactNode } from 'react';
-import { getAudioStreamUrl, searchYTSongs } from '../lib/ytmusic';
+import ReactPlayer from 'react-player/lazy';
+import { searchYTSongs } from '../lib/ytmusic';
 
 export interface Track {
   id: string;
@@ -47,40 +48,37 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [repeatMode, setRepeatMode] = useState<'off' | 'all' | 'one'>('all'); 
   const [isShuffle, setIsShuffle] = useState(false);
 
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [currentUrl, setCurrentUrl] = useState('');
+  const playerRef = useRef<ReactPlayer>(null);
 
+  // Resolve media URL whenever currentTrack changes
   useEffect(() => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio();
-      audioRef.current.preload = 'metadata';
+    if (!currentTrack) {
+      setCurrentUrl('');
+      return;
     }
-    const audio = audioRef.current;
+    let isMounted = true;
 
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
-    const handleTimeUpdate = () => setProgress(audio.currentTime);
-    const handleLoadedMetadata = () => setDuration(audio.duration);
-
-    audio.addEventListener('play', handlePlay);
-    audio.addEventListener('pause', handlePause);
-    audio.addEventListener('timeupdate', handleTimeUpdate);
-    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
-
-    return () => {
-      audio.removeEventListener('play', handlePlay);
-      audio.removeEventListener('pause', handlePause);
-      audio.removeEventListener('timeupdate', handleTimeUpdate);
-      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+    const resolveUrl = async () => {
+      if (currentTrack.id && currentTrack.id.length === 11 && !currentTrack.id.includes('-')) {
+        if (isMounted) setCurrentUrl(`https://www.youtube.com/watch?v=${currentTrack.id}`);
+      } else {
+        try {
+          const results = await searchYTSongs(`${currentTrack.title} ${currentTrack.artist}`);
+          if (results && results.length > 0 && isMounted) {
+            setCurrentUrl(`https://www.youtube.com/watch?v=${results[0].id}`);
+            return;
+          }
+        } catch (e) {
+          console.warn('Failed to resolve YT video for iTunes track', e);
+        }
+        if (isMounted) setCurrentUrl(currentTrack.preview_url || '');
+      }
     };
-  }, []);
+    resolveUrl();
 
-  useEffect(() => {
-    if (!audioRef.current) return;
-    const audio = audioRef.current;
-    const handleEnded = () => next(false);
-    audio.addEventListener('ended', handleEnded);
-    return () => audio.removeEventListener('ended', handleEnded);
-  }, [queue, queueIndex, repeatMode, isShuffle]);
+    return () => { isMounted = false; };
+  }, [currentTrack]);
 
   useEffect(() => {
     if (!currentTrack || !('mediaSession' in navigator)) return;
@@ -98,71 +96,26 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     navigator.mediaSession.setActionHandler('nexttrack', () => next(true));
   }, [currentTrack]);
 
-  const fetchFullYTAudio = async (track: Track): Promise<string | null> => {
-    // If it's a YT ID (11 chars)
-    if (track.id && track.id.length === 11 && !track.id.includes('-')) {
-      return await getAudioStreamUrl(track.id);
-    }
-    // Otherwise it's an iTunes ID (numbers) or custom ID. Let's search YT for it!
-    try {
-      const results = await searchYTSongs(`${track.title} ${track.artist}`);
-      if (results && results.length > 0) {
-        return await getAudioStreamUrl(results[0].id);
-      }
-    } catch (e) {
-      console.warn('Failed to find YT stream for iTunes track', e);
-    }
-    return null;
-  };
-
-  const loadAndPlay = async (track: Track) => {
-    if (!audioRef.current) return;
-    
-    let url = track.preview_url;
-    // Always try to fetch full stream from YT first
-    const fullUrl = await fetchFullYTAudio(track);
-    if (fullUrl) {
-      url = fullUrl;
-      track.preview_url = fullUrl; // Cache it
-    }
-
-    if (!url) {
-      console.error("No audio URL found for track");
+  const loadAndPlay = (track: Track) => {
+    // If same track, restart
+    if (currentTrack?.id === track.id) {
+      seek(0);
+      setIsPlaying(true);
       return;
     }
-
-    // Optimization: If it's the exact same track looping, just seek to 0
-    if (audioRef.current.src === url || audioRef.current.src.endsWith(url)) {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play().catch(console.error);
-      return;
-    }
-
-    audioRef.current.src = url;
-    audioRef.current.play().catch(console.error);
+    setCurrentTrack(track);
+    setIsPlaying(true);
   };
 
-  const loadOnly = async (track: Track) => {
-    if (!audioRef.current) return;
-    
-    let url = track.preview_url;
-    // Do NOT aggressively search YT on preload, only if it's already a YT ID to save API calls
-    if (track.id && track.id.length === 11 && !track.id.includes('-')) {
-      const fullUrl = await fetchFullYTAudio(track);
-      if (fullUrl) {
-        url = fullUrl;
-        track.preview_url = fullUrl;
-      }
-    }
-    
-    if (url && audioRef.current.src !== url) {
-      audioRef.current.src = url;
-      audioRef.current.load();
+  const loadOnly = (track: Track) => {
+    if (currentTrack?.id !== track.id) {
+      setCurrentTrack(track);
+      setIsPlaying(false);
     }
   };
 
-  const pause = () => { audioRef.current?.pause(); };
-  const resume = () => { if (audioRef.current && currentTrack) audioRef.current.play().catch(console.error); };
+  const pause = () => setIsPlaying(false);
+  const resume = () => { if (currentTrack) setIsPlaying(true); };
   const toggle = () => { isPlaying ? pause() : resume(); };
 
   const loadQueue = (tracks: Track[], startIndex = 0) => {
@@ -170,8 +123,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     setOriginalQueue(tracks);
     setQueue(tracks);
     setQueueIndex(startIndex);
-    setCurrentTrack(tracks[startIndex]);
-    loadOnly(tracks[startIndex]); 
+    loadOnly(tracks[startIndex]);
   };
 
   const playQueue = (tracks: Track[], startIndex = 0) => {
@@ -183,12 +135,10 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       const newQueue = [current, ...remaining];
       setQueue(newQueue);
       setQueueIndex(0);
-      setCurrentTrack(current);
       loadAndPlay(current);
     } else {
       setQueue(tracks);
       setQueueIndex(startIndex);
-      setCurrentTrack(tracks[startIndex]);
       loadAndPlay(tracks[startIndex]);
     }
   };
@@ -197,20 +147,18 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     setOriginalQueue([track]);
     setQueue([track]);
     setQueueIndex(0);
-    setCurrentTrack(track);
     loadAndPlay(track);
   };
 
   const addToQueue = (track: Track) => {
     setOriginalQueue(prev => [...prev, track]);
     setQueue(prev => {
-      const next = [...prev, track];
+      const nextQ = [...prev, track];
       if (!currentTrack) {
         setQueueIndex(0);
-        setCurrentTrack(track);
         loadOnly(track);
       }
-      return next;
+      return nextQ;
     });
   };
 
@@ -229,27 +177,20 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   };
 
   const next = (forceSkip = true) => {
-    // If not forced (i.e. track ended naturally) and repeat is ONE, loop it
     if (!forceSkip && repeatMode === 'one') {
       seek(0);
       resume();
       return;
     }
-    
-    // If we have more tracks in queue
     if (queueIndex < queue.length - 1) {
       const ni = queueIndex + 1;
       setQueueIndex(ni);
-      setCurrentTrack(queue[ni]);
       loadAndPlay(queue[ni]);
     } else {
-      // End of queue. If repeat is off, stop. If repeat is all, loop to 0.
       if (repeatMode === 'off' && !forceSkip) {
         pause();
       } else {
         setQueueIndex(0);
-        setCurrentTrack(queue[0]);
-        // If it's a 1-track queue, loadAndPlay handles optimization
         loadAndPlay(queue[0]);
       }
     }
@@ -261,31 +202,27 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     } else if (queueIndex > 0) {
       const pi = queueIndex - 1;
       setQueueIndex(pi);
-      setCurrentTrack(queue[pi]);
       loadAndPlay(queue[pi]);
     } else {
       const last = queue.length - 1;
       setQueueIndex(last);
-      setCurrentTrack(queue[last]);
       loadAndPlay(queue[last]);
     }
   };
 
   const seek = (time: number) => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = time;
+    if (playerRef.current) {
+      playerRef.current.seekTo(time, 'seconds');
       setProgress(time);
     }
   };
 
-  const toggleRepeatMode = () => {
-    setRepeatMode(prev => prev === 'off' ? 'all' : prev === 'all' ? 'one' : 'off');
-  };
+  const toggleRepeatMode = () => setRepeatMode(prev => prev === 'off' ? 'all' : prev === 'all' ? 'one' : 'off');
 
   const toggleShuffle = () => {
     setIsShuffle(prev => {
-      const next = !prev;
-      if (next) {
+      const nextVal = !prev;
+      if (nextVal) {
         const remaining = originalQueue.filter(t => t.id !== currentTrack?.id).sort(() => Math.random() - 0.5);
         if (currentTrack) {
           setQueue([currentTrack, ...remaining]);
@@ -295,7 +232,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         setQueue(originalQueue);
         setQueueIndex(Math.max(0, originalQueue.findIndex(t => t.id === currentTrack?.id)));
       }
-      return next;
+      return nextVal;
     });
   };
 
@@ -306,6 +243,26 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       pause, resume, toggle, next, prev, seek, toggleRepeatMode, toggleShuffle,
     }}>
       {children}
+      {currentUrl && (
+        <ReactPlayer
+          ref={playerRef}
+          url={currentUrl}
+          playing={isPlaying}
+          onProgress={({ playedSeconds }) => setProgress(playedSeconds)}
+          onDuration={(d) => setDuration(d)}
+          onEnded={() => next(false)}
+          onPause={() => setIsPlaying(false)}
+          onPlay={() => setIsPlaying(true)}
+          width="0"
+          height="0"
+          style={{ display: 'none' }}
+          config={{
+            youtube: {
+              playerVars: { autoplay: 1 }
+            }
+          }}
+        />
+      )}
     </PlayerContext.Provider>
   );
 }

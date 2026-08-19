@@ -10,6 +10,20 @@ export default function GlobalPlayer() {
   const [pendingTrack, setPendingTrack] = useState<Track | null>(null);
   const [userPlaylists, setUserPlaylists] = useState<any[]>([]);
   const [toast, setToast] = useState<string | null>(null);
+  const [lyrics, setLyrics] = useState<string | null>(null);
+  const [loadingLyrics, setLoadingLyrics] = useState(false);
+
+  useEffect(() => {
+    if (!currentTrack) return;
+    setLyrics(null);
+    setLoadingLyrics(true);
+    const artist = currentTrack.artist.split(' feat')[0].split(' ft')[0].trim();
+    fetch(`https://api.lyrics.ovh/v1/${encodeURIComponent(artist)}/${encodeURIComponent(currentTrack.title)}`)
+      .then(res => res.json())
+      .then(data => setLyrics(data.lyrics || "♪ Lyrics not found for this track ♪"))
+      .catch(() => setLyrics("♪ Lyrics not found for this track ♪"))
+      .finally(() => setLoadingLyrics(false));
+  }, [currentTrack]);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -179,15 +193,21 @@ export default function GlobalPlayer() {
             <span className="material-symbols-outlined">menu</span>
           </div>
 
+
           {/* Lyrics Preview */}
-          <div className="mt-2 p-4 rounded-2xl glass-card relative overflow-hidden group">
-             <div className="absolute inset-0 bg-gradient-to-t from-[#701540] to-[#a02050] opacity-80" />
+          <div className="mt-2 p-4 rounded-2xl glass-card relative overflow-hidden group max-h-[300px] overflow-y-auto no-scrollbar">
+             <div className="absolute inset-0 bg-gradient-to-t from-[#701540] to-[#a02050] opacity-80 pointer-events-none" />
              <div className="relative z-10">
                <div className="flex justify-between items-center mb-2">
-                 <span className="text-white font-bold">Lyrics preview</span>
-                 <span className="material-symbols-outlined text-white/50 text-sm">open_in_full</span>
+                 <span className="text-white font-bold">Lyrics</span>
                </div>
-               <p className="text-white/70 text-lg font-medium">♪ (Instrumental or lyrics unavailable for YT) ♪</p>
+               {loadingLyrics ? (
+                 <p className="text-white/50 text-sm animate-pulse">Searching for lyrics...</p>
+               ) : (
+                 <p className="text-white/80 text-base font-medium whitespace-pre-line leading-relaxed pb-4">
+                   {lyrics}
+                 </p>
+               )}
              </div>
           </div>
         </div>

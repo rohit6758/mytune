@@ -255,9 +255,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
           onEnded={() => next(false)}
           onPause={() => setIsPlaying(false)}
           onPlay={() => setIsPlaying(true)}
-          width="0"
-          height="0"
-          style={{ display: 'none' }}
+          width="1px"
+          height="1px"
+          style={{ position: 'absolute', top: '-9999px', left: '-9999px', opacity: 0, pointerEvents: 'none' }}
           config={{
             youtube: {
               playerVars: { autoplay: 1 }

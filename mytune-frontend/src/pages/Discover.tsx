@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { usePlayer, Track } from '../context/PlayerContext';
-import { searchYTSongs } from '../lib/ytmusic';
 
 export default function Discover() {
   const { queue, currentTrack, loadQueue, playTrack, toggle, isPlaying, addToQueue, insertNext, loadOnly } = usePlayer();
@@ -26,22 +25,20 @@ export default function Discover() {
 
   const fetchTracks = async (term: string, action: 'replace' | 'append' | 'insertNext' = 'append') => {
     try {
-      let results = await searchYTSongs(term);
+      // Use iTunes API for ultra-fast, high-quality metadata and covers
+      const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&limit=30&media=music`);
+      const data = await res.json();
       
-      // Fallback to iTunes if YT Music proxy fails/blocked by CORS
-      if (!results || results.length === 0) {
-        console.log('YT Search failed or returned empty. Falling back to iTunes API.');
-        const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&limit=30&media=music`);
-        const data = await res.json();
-        if (data?.results?.length > 0) {
-          results = data.results.map((t: any) => ({
-            id: String(t.trackId), // iTunes ID
-            title: t.trackName,
-            artist: t.artistName,
-            cover_url: t.artworkUrl100?.replace('100x100bb', '600x600bb') || '',
-            preview_url: t.previewUrl || '',
-          })).filter((t: any) => t.preview_url && t.cover_url);
-        }
+      let results: Track[] = [];
+      if (data?.results?.length > 0) {
+        results = data.results.map((t: any) => ({
+          id: String(t.trackId), // iTunes ID
+          title: t.trackName,
+          artist: t.artistName,
+          cover_url: t.artworkUrl100?.replace('100x100bb', '600x600bb') || '',
+          preview_url: t.previewUrl || '',
+          duration: t.trackTimeMillis ? Math.floor(t.trackTimeMillis / 1000) : 0,
+        })).filter((t: any) => t.preview_url && t.cover_url);
       }
 
       if (results && results.length > 0) {

@@ -3,14 +3,14 @@ import { supabase } from '../lib/supabase';
 import { usePlayer, Track } from '../context/PlayerContext';
 
 const CATEGORIES = [
-  { name: 'Pop', color: 'from-orange-500 to-red-500' },
-  { name: 'Rock', color: 'from-amber-600 to-orange-700' },
-  { name: 'Hip-Hop', color: 'from-orange-400 to-red-600' },
-  { name: 'Synthwave', color: 'from-red-500 to-orange-600' },
-  { name: 'Jazz', color: 'from-amber-700 to-orange-800' },
-  { name: 'Electronic', color: 'from-orange-500 to-red-700' },
-  { name: 'Indie', color: 'from-red-600 to-orange-500' },
-  { name: 'Classical', color: 'from-orange-600 to-amber-700' },
+  { name: 'Pop', color: 'from-orange-500 to-red-500', img: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&h=300&fit=crop' },
+  { name: 'Rock', color: 'from-amber-600 to-orange-700', img: 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=300&h=300&fit=crop' },
+  { name: 'Hip-Hop', color: 'from-orange-400 to-red-600', img: 'https://images.unsplash.com/photo-1571266028243-3716f02d2d2e?w=300&h=300&fit=crop' },
+  { name: 'Synthwave', color: 'from-red-500 to-orange-600', img: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=300&h=300&fit=crop' },
+  { name: 'Jazz', color: 'from-amber-700 to-orange-800', img: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=300&h=300&fit=crop' },
+  { name: 'Electronic', color: 'from-orange-500 to-red-700', img: 'https://images.unsplash.com/photo-1574169208507-84376144848b?w=300&h=300&fit=crop' },
+  { name: 'Indie', color: 'from-red-600 to-orange-500', img: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=300&h=300&fit=crop' },
+  { name: 'Classical', color: 'from-orange-600 to-amber-700', img: 'https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=300&h=300&fit=crop' },
 ];
 
 export default function Search() {
@@ -162,12 +162,15 @@ export default function Search() {
                 <div
                   key={category.name}
                   onClick={() => setQuery(category.name)}
-                  className={`relative aspect-[4/3] rounded-xl overflow-hidden cursor-pointer group bg-gradient-to-br ${category.color} hover:scale-[1.02] transition-transform duration-300 shadow-md flex flex-col justify-end p-4`}
+                  className={`relative aspect-[4/3] rounded-xl overflow-hidden cursor-pointer group bg-gradient-to-br ${category.color} hover:scale-[1.02] transition-transform duration-300 shadow-md flex flex-col p-4`}
                 >
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-300"></div>
-                  <h3 className="relative z-10 text-xl font-bold font-display tracking-wide drop-shadow-md text-white">
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-300 z-10"></div>
+                  <h3 className="relative z-20 text-xl font-bold font-display tracking-wide drop-shadow-md text-white">
                     {category.name}
                   </h3>
+                  <div className="absolute -bottom-4 -right-4 w-24 h-24 rotate-[25deg] shadow-2xl z-0 transition-transform duration-300 group-hover:scale-110">
+                     <img src={category.img} className="w-full h-full object-cover rounded-md" alt="" />
+                  </div>
                 </div>
               ))}
             </div>

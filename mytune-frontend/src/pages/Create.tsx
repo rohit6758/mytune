@@ -239,10 +239,10 @@ export default function Create() {
       {/* Hero Section */}
       <section className="flex flex-col items-center justify-center text-center pt-6 pb-4">
         <h2 className="text-3xl sm:text-4xl font-black mb-4" style={{ background: 'linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.6) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-          Ignite Your Sound
+          Insta Downloader
         </h2>
         <p className="text-base text-white/55 max-w-sm mx-auto leading-relaxed">
-          Build the ultimate high-energy playlist or discover the raw tracks that fuel your momentum.
+          Extract songs directly from Instagram Reels and Posts to listen seamlessly in your playlists.
         </p>
       </section>
 

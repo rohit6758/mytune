@@ -8,7 +8,7 @@ import { supabase } from '../lib/supabase';
 const NAV_ITEMS = [
   { name: 'Home',    path: '/discover', icon: 'home'          },
   { name: 'Search',  path: '/search',   icon: 'search'        },
-  { name: 'Create',  path: '/create',   icon: 'add_circle'    },
+  { name: 'Insta DL',path: '/create',   icon: 'downloading'   },
   { name: 'Library', path: '/library',  icon: 'library_music' },
   { name: 'Profile', path: '/profile',  icon: 'person'        },
 ];

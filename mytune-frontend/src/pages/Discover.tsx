@@ -65,12 +65,15 @@ export default function Discover() {
       const index = queue.findIndex(t => t.id === currentTrack.id);
       if (index !== -1) {
         const slide = scrollContainerRef.current.children[index] as HTMLElement;
-        slide?.scrollIntoView({ behavior: 'smooth' });
+        const container = scrollContainerRef.current;
+        if (Math.abs(container.scrollTop - slide.offsetTop) > 10) {
+          slide?.scrollIntoView({ behavior: 'smooth' });
+        }
       }
     }
   }, [currentTrack]);
 
-  // IntersectionObserver — change track when user scrolls to a new card (but don't play automatically)
+  // IntersectionObserver — change track when user scrolls to a new card
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container || queue.length === 0) return;
@@ -80,14 +83,9 @@ export default function Discover() {
         if (entry.isIntersecting) {
           const trackId = entry.target.getAttribute('data-track-id');
           if (trackId && currentTrack?.id !== trackId) {
-            const track = queue.find(t => t.id === trackId);
-            // Only switch track — DON'T auto-play (user must tap play)
-            if (track) {
-              // Just update the "current" without playing — preload it
-              if (window._mytuneAudio) {
-                window._mytuneAudio.src = track.preview_url;
-                window._mytuneAudio.load();
-              }
+            const index = queue.findIndex(t => t.id === trackId);
+            if (index !== -1) {
+               playQueue(queue, index);
             }
           }
         }
@@ -177,10 +175,10 @@ export default function Discover() {
             </div>
 
             {/* Bottom info row */}
-            <div className="absolute bottom-0 left-0 right-0 px-4 pb-6 flex flex-row items-end justify-between gap-2">
+            <div className="absolute bottom-0 left-0 right-0 px-4 pb-[140px] md:pb-[90px] flex flex-row items-end justify-between gap-2 pointer-events-none">
               
               {/* Left: Track info + controls */}
-              <div className="flex-1 min-w-0 flex flex-col gap-2">
+              <div className="flex-1 min-w-0 flex flex-col gap-2 pointer-events-auto">
                 <h2 className="text-xl sm:text-2xl font-black text-white leading-tight" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.8)' }}>
                   {track.title}
                 </h2>
@@ -227,7 +225,7 @@ export default function Discover() {
               </div>
 
               {/* Right: Vertical action column */}
-              <div className="flex flex-col items-center gap-4 pb-1 flex-shrink-0">
+              <div className="flex flex-col items-center gap-4 pb-1 flex-shrink-0 pointer-events-auto">
                 {/* Like */}
                 <div className="flex flex-col items-center gap-0.5">
                   <button

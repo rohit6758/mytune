@@ -282,8 +282,10 @@ export default function Library() {
     playQueue(q, 0);
   };
 
-  const handlePlayTrack = (track: any) => {
-    playTrack({ id: track.track_id, title: track.title, artist: track.artist, cover_url: track.cover_url, preview_url: track.preview_url });
+  const handlePlayTrack = (startIndex: number) => {
+    if (!playlistTracks.length) return;
+    const q: Track[] = playlistTracks.map(t => ({ id: t.track_id, title: t.title, artist: t.artist, cover_url: t.cover_url, preview_url: t.preview_url }));
+    playQueue(q, startIndex);
   };
 
   const createPlaylist = async () => {
@@ -424,8 +426,8 @@ export default function Library() {
               return (
                 <div
                   key={track.id}
-                  onClick={() => handlePlayTrack(track)}
-                  className={`flex items-center gap-3 p-2.5 rounded-xl cursor-pointer transition-colors group ${isActive ? 'bg-[#FF9900]/10' : 'hover:bg-white/5'}`}
+                  onClick={() => handlePlayTrack(i)}
+                  className={`flex items-center gap-3 p-2.5 rounded-xl cursor-pointer transition-colors group ${isActive ? 'bg-[#F5E642]/10' : 'hover:bg-white/5'}`}
                 >
                   <span className="text-white/30 text-xs w-5 text-center font-mono flex-shrink-0">{i + 1}</span>
                   <div className="relative w-11 h-11 rounded-lg overflow-hidden flex-shrink-0">

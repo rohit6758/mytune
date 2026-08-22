@@ -118,11 +118,28 @@ export default function GlobalPlayer() {
           borderTop: '1px solid rgba(255,255,255,0.08)',
         }}
       >
-        {/* Yellow progress bar */}
-        <div className="w-full h-0.5 bg-white/10 rounded-full overflow-hidden mb-2.5">
-          <div
-            className="h-full rounded-full"
-            style={{ width: `${pct}%`, background: '#F5E642', transition: 'width 0.1s linear' }}
+        {/* Scrubbable Yellow progress bar */}
+        <div className="w-full relative h-4 flex items-center group -mt-2 mb-1 cursor-pointer">
+          {/* Background track */}
+          <div className="absolute left-0 right-0 h-1 bg-white/10 rounded-full pointer-events-none" />
+          {/* Fill track */}
+          <div 
+            className="absolute left-0 h-1 rounded-full bg-[#F5E642] pointer-events-none" 
+            style={{ width: `${pct}%` }} 
+          />
+          {/* Knob */}
+          <div 
+            className="absolute h-3 w-3 bg-[#F5E642] rounded-full pointer-events-none shadow-md scale-0 group-active:scale-100 md:group-hover:scale-100 transition-transform"
+            style={{ left: `calc(${pct}% - 6px)` }}
+          />
+          {/* Hidden range input for interaction */}
+          <input 
+            type="range"
+            min="0"
+            max={duration || 100}
+            value={progress || 0}
+            onChange={(e) => seek(Number(e.target.value))}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer m-0 z-10 touch-none"
           />
         </div>
 

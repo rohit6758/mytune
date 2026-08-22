@@ -13,7 +13,7 @@ const NAV_ITEMS = [
   { name: 'Profile', path: '/profile',  icon: 'person'        },
 ];
 
-const BRAND = '#F5E642'; // Banana yellow
+const BRAND = '#D2EA7C'; // Banana yellow
 
 export default function Layout() {
   const location = useLocation();
@@ -59,7 +59,7 @@ export default function Layout() {
     <div className="w-full text-white overflow-hidden flex flex-col md:flex-row relative" style={{ height: '100dvh', background: '#0a0a0f' }}>
 
       {/* Ambient background orbs */}
-      <div className="ambient-orb w-96 h-96 bg-[#F5E642]/8 top-[-10%] left-[-5%]" />
+      <div className="ambient-orb w-96 h-96 bg-[#D2EA7C]/8 top-[-10%] left-[-5%]" />
       <div className="ambient-orb w-80 h-80 bg-purple-900/20 bottom-[10%] right-[-5%]" style={{ animationDelay: '4s', animationDuration: '22s' }} />
 
       {/* Double-back toast */}
@@ -82,7 +82,7 @@ export default function Layout() {
                 className={({ isActive }) => clsx(
                   'flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-200',
                   isActive
-                    ? 'bg-[#F5E642]/15 text-[#F5E642]'
+                    ? 'bg-[#D2EA7C]/15 text-[#D2EA7C]'
                     : 'hover:bg-white/5 text-white/50 hover:text-white'
                 )}
               >
@@ -167,14 +167,14 @@ export default function Layout() {
               to={item.path}
               className={({ isActive }) => clsx(
                 'flex flex-col items-center justify-center gap-[3px] flex-1 py-1 transition-all duration-200 relative',
-                isActive ? 'text-[#F5E642]' : 'text-white/35 hover:text-white/70'
+                isActive ? 'text-[#D2EA7C]' : 'text-white/35 hover:text-white/70'
               )}
             >
               {({ isActive }) => (
                 <>
                   {/* Active pill indicator above icon */}
                   {isActive && (
-                    <span className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-full bg-[#F5E642]" />
+                    <span className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-full bg-[#D2EA7C]" />
                   )}
                   <span
                     className="material-symbols-outlined transition-all duration-200"

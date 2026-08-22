@@ -47,7 +47,7 @@ export default function Auth() {
       style={{ background: '#0a0a0f' }}
     >
       {/* Ambient orbs */}
-      <div className="absolute top-[-10%] left-[-5%] w-80 h-80 rounded-full blur-[100px] bg-[#F5E642]/8 pointer-events-none" />
+      <div className="absolute top-[-10%] left-[-5%] w-80 h-80 rounded-full blur-[100px] bg-[#D2EA7C]/8 pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-5%] w-96 h-96 rounded-full blur-[120px] bg-purple-900/15 pointer-events-none" />
 
       <div className="w-full max-w-sm z-10 flex flex-col items-center gap-8">
@@ -107,7 +107,7 @@ export default function Auth() {
             <button
               type="submit" disabled={loading}
               className="w-full mt-1 font-extrabold text-base py-3.5 rounded-full shadow-lg transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:pointer-events-none active:scale-95"
-              style={{ background: '#F5E642', color: '#0a0a0f', boxShadow: '0 4px 20px rgba(245,230,66,0.25)' }}
+              style={{ background: '#D2EA7C', color: '#0a0a0f', boxShadow: '0 4px 20px rgba(245,230,66,0.25)' }}
             >
               {loading ? 'Processing...' : isLogin ? 'Sign In' : 'Sign Up'}
             </button>

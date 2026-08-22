@@ -40,7 +40,7 @@ export default function Onboarding({ session, onComplete }: OnboardingProps) {
       style={{ background: '#0a0a0f' }}
     >
       {/* Ambient orbs */}
-      <div className="absolute top-[-15%] left-1/2 -translate-x-1/2 w-[120%] h-[50vh] rounded-full blur-[120px] bg-[#F5E642]/6 pointer-events-none" />
+      <div className="absolute top-[-15%] left-1/2 -translate-x-1/2 w-[120%] h-[50vh] rounded-full blur-[120px] bg-[#D2EA7C]/6 pointer-events-none" />
       <div className="absolute bottom-0 right-0 w-64 h-64 rounded-full blur-[80px] bg-purple-900/15 pointer-events-none" />
 
       <div className="w-full max-w-sm z-10 flex flex-col items-center gap-6">
@@ -91,7 +91,7 @@ export default function Onboarding({ session, onComplete }: OnboardingProps) {
                     className="px-3 py-1.5 rounded-full text-xs font-bold transition-all active:scale-95"
                     style={
                       selectedGenres.includes(g)
-                        ? { background: '#F5E642', color: '#0a0a0f', boxShadow: '0 0 12px rgba(245,230,66,0.3)' }
+                        ? { background: '#D2EA7C', color: '#0a0a0f', boxShadow: '0 0 12px rgba(245,230,66,0.3)' }
                         : { background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.6)' }
                     }
                   >
@@ -104,7 +104,7 @@ export default function Onboarding({ session, onComplete }: OnboardingProps) {
             <button
               type="submit" disabled={loading}
               className="w-full mt-1 font-extrabold text-base py-3.5 rounded-full transition-all hover:-translate-y-0.5 disabled:opacity-50 active:scale-95"
-              style={{ background: '#F5E642', color: '#0a0a0f', boxShadow: '0 4px 20px rgba(245,230,66,0.25)' }}
+              style={{ background: '#D2EA7C', color: '#0a0a0f', boxShadow: '0 4px 20px rgba(245,230,66,0.25)' }}
             >
               {loading ? 'Setting up...' : '🎧 Start Listening'}
             </button>

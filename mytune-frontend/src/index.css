@@ -7,7 +7,7 @@
 
 /* ── Global Design Tokens ─────────────────────────────────────── */
 :root {
-  --brand:      #F5E642;   /* Banana yellow — primary accent */
+  --brand:      #D2EA7C;   /* Banana yellow — primary accent */
   --brand-dim:  #c9bc1a;   /* Darker yellow for hover */
   --glass-bg:   rgba(255, 255, 255, 0.06);
   --glass-border: rgba(255, 255, 255, 0.12);
@@ -76,9 +76,9 @@
 }
 
 /* ── Brand utility ─────────────────────────────────────────────── */
-.brand-bg  { background: #F5E642; }
-.brand-text { color: #F5E642; }
-.brand-border { border-color: #F5E642; }
+.brand-bg  { background: #D2EA7C; }
+.brand-text { color: #D2EA7C; }
+.brand-border { border-color: #D2EA7C; }
 .brand-glow { box-shadow: 0 0 20px rgba(245, 230, 66, 0.35); }
 
 /* ── Inner scrollable areas ──────────────────────────────────── */

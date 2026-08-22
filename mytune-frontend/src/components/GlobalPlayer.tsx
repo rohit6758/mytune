@@ -59,7 +59,7 @@ export default function GlobalPlayer() {
     <>
       {/* Toast */}
       {toast && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[200] bg-[#F5E642] text-black font-bold text-sm px-5 py-2 rounded-full shadow-lg">
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[200] bg-[#D2EA7C] text-black font-bold text-sm px-5 py-2 rounded-full shadow-lg">
           {toast}
         </div>
       )}
@@ -93,7 +93,7 @@ export default function GlobalPlayer() {
                     onClick={() => addToPlaylist(pl.id)}
                     className="flex items-center gap-3 p-3 rounded-2xl glass-card text-left active:scale-95 transition-transform"
                   >
-                    <span className="material-symbols-outlined text-[#F5E642] text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>queue_music</span>
+                    <span className="material-symbols-outlined text-[#D2EA7C] text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>queue_music</span>
                     <span className="text-white font-semibold text-sm truncate">{pl.name}</span>
                   </button>
                 ))}
@@ -124,12 +124,12 @@ export default function GlobalPlayer() {
           <div className="absolute left-0 right-0 h-1 bg-white/10 rounded-full pointer-events-none" />
           {/* Fill track */}
           <div 
-            className="absolute left-0 h-1 rounded-full bg-[#F5E642] pointer-events-none" 
+            className="absolute left-0 h-1 rounded-full bg-[#D2EA7C] pointer-events-none" 
             style={{ width: `${pct}%` }} 
           />
           {/* Knob */}
           <div 
-            className="absolute h-3 w-3 bg-[#F5E642] rounded-full pointer-events-none shadow-md scale-0 group-active:scale-100 md:group-hover:scale-100 transition-transform"
+            className="absolute h-3 w-3 bg-[#D2EA7C] rounded-full pointer-events-none shadow-md scale-0 group-active:scale-100 md:group-hover:scale-100 transition-transform"
             style={{ left: `calc(${pct}% - 6px)` }}
           />
           {/* Hidden range input for interaction */}
@@ -154,7 +154,7 @@ export default function GlobalPlayer() {
           </div>
 
           <div className="flex items-center gap-1 flex-shrink-0">
-            <button onClick={toggleShuffle} className={`p-1 transition-colors ${isShuffle ? 'text-[#F5E642]' : 'text-white/40 active:text-white'}`}>
+            <button onClick={toggleShuffle} className={`p-1 transition-colors ${isShuffle ? 'text-[#D2EA7C]' : 'text-white/40 active:text-white'}`}>
               <span className="material-symbols-outlined text-[18px]">shuffle</span>
             </button>
             
@@ -165,7 +165,7 @@ export default function GlobalPlayer() {
             <button
               onClick={toggle}
               className="w-8 h-8 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-transform mx-0.5"
-              style={{ background: '#F5E642' }}
+              style={{ background: '#D2EA7C' }}
             >
               <span className="material-symbols-outlined text-black text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
                 {isPlaying ? 'pause' : 'play_arrow'}
@@ -176,7 +176,7 @@ export default function GlobalPlayer() {
               <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>skip_next</span>
             </button>
 
-            <button onClick={toggleRepeatMode} className={`p-1 transition-colors ${repeatMode !== 'off' ? 'text-[#F5E642]' : 'text-white/40 active:text-white'}`}>
+            <button onClick={toggleRepeatMode} className={`p-1 transition-colors ${repeatMode !== 'off' ? 'text-[#D2EA7C]' : 'text-white/40 active:text-white'}`}>
               <span className="material-symbols-outlined text-[18px]">
                 {repeatMode === 'one' ? 'repeat_one' : 'repeat'}
               </span>
@@ -184,7 +184,7 @@ export default function GlobalPlayer() {
             
             <button
               onClick={() => { setPendingTrack(currentTrack); loadPlaylists(); setShowPlaylistMenu(true); }}
-              className="p-1 pl-2 border-l border-white/10 ml-1 text-white/50 active:text-[#F5E642] transition-colors"
+              className="p-1 pl-2 border-l border-white/10 ml-1 text-white/50 active:text-[#D2EA7C] transition-colors"
             >
               <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 0" }}>playlist_add</span>
             </button>

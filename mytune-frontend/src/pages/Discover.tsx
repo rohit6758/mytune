@@ -122,7 +122,7 @@ export default function Discover() {
   if (loading) {
     return (
       <div className="w-full h-full flex items-center justify-center" style={{ background: '#0a0a0f' }}>
-        <div className="w-10 h-10 border-4 border-[#F5E642] border-t-transparent rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 border-[#D2EA7C] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -130,7 +130,7 @@ export default function Discover() {
   if (queue.length === 0) {
     return (
       <div className="w-full h-full flex flex-col items-center justify-center gap-4 text-white/50 p-8 text-center" style={{ background: '#0a0a0f' }}>
-        <span className="material-symbols-outlined text-5xl text-[#F5E642]">music_off</span>
+        <span className="material-symbols-outlined text-5xl text-[#D2EA7C]">music_off</span>
         <p>No tracks found. Try searching for something!</p>
       </div>
     );
@@ -192,7 +192,7 @@ export default function Discover() {
                     <button
                       onClick={() => toggle()}
                       className="w-12 h-12 rounded-full flex items-center justify-center active:scale-90 transition-transform"
-                      style={{ background: '#F5E642', boxShadow: '0 4px 20px rgba(245,230,66,0.35)' }}
+                      style={{ background: '#D2EA7C', boxShadow: '0 4px 20px rgba(245,230,66,0.35)' }}
                     >
                       <span className="material-symbols-outlined text-black text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>
                         {isPlaying ? 'pause' : 'play_arrow'}
@@ -216,7 +216,7 @@ export default function Discover() {
                       playQueue(queue, idx);
                     }}
                     className="self-start mt-1 flex items-center gap-2 px-4 py-2 rounded-full text-black text-sm font-bold active:scale-95 transition-transform"
-                    style={{ background: '#F5E642', boxShadow: '0 2px 12px rgba(245,230,66,0.3)' }}
+                    style={{ background: '#D2EA7C', boxShadow: '0 2px 12px rgba(245,230,66,0.3)' }}
                   >
                     <span className="material-symbols-outlined text-black text-base" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
                     Play
@@ -232,7 +232,7 @@ export default function Discover() {
                     onClick={() => handleLike(track)}
                     className="w-11 h-11 rounded-full flex items-center justify-center transition-all active:scale-90 shadow-lg"
                     style={{
-                      background: isLiked ? '#F5E642' : 'rgba(255,255,255,0.1)',
+                      background: isLiked ? '#D2EA7C' : 'rgba(255,255,255,0.1)',
                       backdropFilter: 'blur(12px)',
                       border: '1px solid rgba(255,255,255,0.12)',
                       boxShadow: isLiked ? '0 0 16px rgba(245,230,66,0.4)' : 'none',

@@ -4,7 +4,7 @@ import { usePlayer, Track } from '../context/PlayerContext';
 
 // ─── Preset gradient covers ────────────────────────────────────────────────
 const GRADIENT_PRESETS = [
-  { id: 'og',   label: 'MyTune',   css: 'linear-gradient(135deg, #FF9900 0%, #FF2020 100%)' },
+  { id: 'og',   label: 'MyTune',   css: 'linear-gradient(135deg, #D2EA7C 0%, #FF2020 100%)' },
   { id: 'void', label: 'Void',     css: 'linear-gradient(135deg, #0F0C29 0%, #302B63 50%, #24243e 100%)' },
   { id: 'sun',  label: 'Sunrise',  css: 'linear-gradient(135deg, #f83600 0%, #f9d423 100%)' },
   { id: 'ocean',label: 'Ocean',    css: 'linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%)' },
@@ -149,7 +149,7 @@ function CoverPickerModal({
               key={t.id}
               onClick={() => setTab(t.id)}
               className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-full text-sm font-bold transition-all ${
-                tab === t.id ? 'bg-[#FF9900] text-black shadow' : 'text-white/50 hover:text-white'
+                tab === t.id ? 'bg-[#D2EA7C] text-black shadow' : 'text-white/50 hover:text-white'
               }`}
             >
               <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>{t.icon}</span>
@@ -166,7 +166,7 @@ function CoverPickerModal({
                 key={preset.id}
                 onClick={() => setSelected(preset.id)}
                 className={`w-full aspect-square rounded-xl transition-all active:scale-95 ${
-                  selected === preset.id ? 'ring-2 ring-[#FF9900] ring-offset-2 ring-offset-[#111] scale-95' : ''
+                  selected === preset.id ? 'ring-2 ring-[#D2EA7C] ring-offset-2 ring-offset-[#111] scale-95' : ''
                 }`}
                 style={{ background: preset.css }}
                 title={preset.label}
@@ -183,7 +183,7 @@ function CoverPickerModal({
                 key={em}
                 onClick={() => setSelected(em)}
                 className={`w-full aspect-square text-3xl rounded-xl bg-[#1e1b24] flex items-center justify-center transition-all active:scale-95 ${
-                  selected === em ? 'ring-2 ring-[#FF9900] ring-offset-2 ring-offset-[#111] scale-95' : 'hover:bg-white/10'
+                  selected === em ? 'ring-2 ring-[#D2EA7C] ring-offset-2 ring-offset-[#111] scale-95' : 'hover:bg-white/10'
                 }`}
               >
                 {em}
@@ -199,10 +199,10 @@ function CoverPickerModal({
             <button
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
-              className="w-full py-4 rounded-2xl border-2 border-dashed border-white/20 text-white/60 font-semibold hover:border-[#FF9900]/60 hover:text-[#FF9900] transition-all flex flex-col items-center gap-2 active:scale-95"
+              className="w-full py-4 rounded-2xl border-2 border-dashed border-white/20 text-white/60 font-semibold hover:border-[#D2EA7C]/60 hover:text-[#D2EA7C] transition-all flex flex-col items-center gap-2 active:scale-95"
             >
               {uploading ? (
-                <div className="w-7 h-7 border-2 border-[#FF9900] border-t-transparent rounded-full animate-spin" />
+                <div className="w-7 h-7 border-2 border-[#D2EA7C] border-t-transparent rounded-full animate-spin" />
               ) : (
                 <span className="material-symbols-outlined text-4xl" style={{ fontVariationSettings: "'FILL' 0" }}>add_photo_alternate</span>
               )}
@@ -222,7 +222,7 @@ function CoverPickerModal({
           <button
             onClick={() => { onSave(selected); onClose(); }}
             className="flex-1 py-3 rounded-full font-bold text-sm text-black"
-            style={{ background: 'linear-gradient(135deg, #FF9900, #FF2020)' }}
+            style={{ background: 'linear-gradient(135deg, #D2EA7C, #FF2020)' }}
           >
             Save Cover
           </button>
@@ -333,7 +333,7 @@ export default function Library() {
   if (loading) {
     return (
       <div className="h-full flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-[#FF9900] border-t-transparent rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 border-[#D2EA7C] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -348,7 +348,7 @@ export default function Library() {
           style={{
             background: (() => {
               const c = selectedPlaylist.cover;
-              if (!c) return 'linear-gradient(135deg, #FF9900 0%, #FF2020 100%)';
+              if (!c) return 'linear-gradient(135deg, #D2EA7C 0%, #FF2020 100%)';
               if (c.length <= 4) return '#1e1b24';
               if (c.startsWith('http') || c.startsWith('blob') || c.startsWith('data')) return 'transparent';
               const p = GRADIENT_PRESETS.find(x => x.id === c);
@@ -395,7 +395,7 @@ export default function Library() {
                 <button
                   onClick={() => handlePlayQueue(playlistTracks)}
                   className="w-11 h-11 rounded-full text-black flex items-center justify-center shadow-lg active:scale-90 transition-transform"
-                  style={{ background: 'linear-gradient(135deg, #FF9900, #FF2020)' }}
+                  style={{ background: 'linear-gradient(135deg, #D2EA7C, #FF2020)' }}
                 >
                   <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
                 </button>
@@ -415,7 +415,7 @@ export default function Library() {
         {/* Track list */}
         <div className="px-4 flex flex-col gap-1">
           {loadingTracks ? (
-            <div className="flex justify-center py-10"><div className="w-8 h-8 border-4 border-[#FF9900] border-t-transparent rounded-full animate-spin" /></div>
+            <div className="flex justify-center py-10"><div className="w-8 h-8 border-4 border-[#D2EA7C] border-t-transparent rounded-full animate-spin" /></div>
           ) : playlistTracks.length === 0 ? (
             <div className="bg-[#1e1b24] border border-white/5 rounded-2xl p-6 text-center text-white/40 mt-4">
               No tracks yet — add songs from the Discover feed!
@@ -427,19 +427,19 @@ export default function Library() {
                 <div
                   key={track.id}
                   onClick={() => handlePlayTrack(i)}
-                  className={`flex items-center gap-3 p-2.5 rounded-xl cursor-pointer transition-colors group ${isActive ? 'bg-[#F5E642]/10' : 'hover:bg-white/5'}`}
+                  className={`flex items-center gap-3 p-2.5 rounded-xl cursor-pointer transition-colors group ${isActive ? 'bg-[#D2EA7C]/10' : 'hover:bg-white/5'}`}
                 >
                   <span className="text-white/30 text-xs w-5 text-center font-mono flex-shrink-0">{i + 1}</span>
                   <div className="relative w-11 h-11 rounded-lg overflow-hidden flex-shrink-0">
                     <img src={track.cover_url} className="w-full h-full object-cover" alt="" />
                     {isActive && (
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                        <span className="material-symbols-outlined text-[#FF9900] text-base" style={{ fontVariationSettings: "'FILL' 1" }}>graphic_eq</span>
+                        <span className="material-symbols-outlined text-[#D2EA7C] text-base" style={{ fontVariationSettings: "'FILL' 1" }}>graphic_eq</span>
                       </div>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-bold truncate ${isActive ? 'text-[#FF9900]' : 'text-white'}`}>{track.title}</p>
+                    <p className={`text-sm font-bold truncate ${isActive ? 'text-[#D2EA7C]' : 'text-white'}`}>{track.title}</p>
                     <p className="text-xs text-white/50 truncate">{track.artist}</p>
                   </div>
                   <button
@@ -487,7 +487,7 @@ export default function Library() {
           <h2 className="text-lg font-bold text-white">Playlists</h2>
           <button
             onClick={() => setIsCreating(!isCreating)}
-            className="flex items-center gap-1 text-sm text-[#FF9900] font-bold bg-[#FF9900]/10 px-3 py-1.5 rounded-full hover:bg-[#FF9900]/20 transition-colors"
+            className="flex items-center gap-1 text-sm text-[#D2EA7C] font-bold bg-[#D2EA7C]/10 px-3 py-1.5 rounded-full hover:bg-[#D2EA7C]/20 transition-colors"
           >
             <span className="material-symbols-outlined text-[18px]">add</span>
             New
@@ -513,7 +513,7 @@ export default function Library() {
                 value={newPlaylistName}
                 onChange={e => setNewPlaylistName(e.target.value)}
                 placeholder="Playlist name..."
-                className="flex-1 bg-transparent text-white outline-none placeholder-white/30 text-base font-semibold py-1 border-b border-white/10 focus:border-[#FF9900] transition-colors"
+                className="flex-1 bg-transparent text-white outline-none placeholder-white/30 text-base font-semibold py-1 border-b border-white/10 focus:border-[#D2EA7C] transition-colors"
                 autoFocus
                 onKeyDown={e => e.key === 'Enter' && createPlaylist()}
               />
@@ -525,7 +525,7 @@ export default function Library() {
                 onClick={createPlaylist}
                 disabled={!newPlaylistName.trim()}
                 className="flex-1 py-2.5 rounded-xl font-bold text-sm text-black disabled:opacity-40"
-                style={{ background: 'linear-gradient(135deg, #FF9900, #FF2020)' }}
+                style={{ background: 'linear-gradient(135deg, #D2EA7C, #FF2020)' }}
               >
                 Create
               </button>
@@ -540,11 +540,11 @@ export default function Library() {
             onClick={() => { setSelectedPlaylist({ id: 'liked', name: 'Liked Songs', cover: null }); setPlaylistTracks(likedTracks); }}
             className="cursor-pointer group"
           >
-            <div className="w-full aspect-square rounded-xl flex items-center justify-center mb-2 shadow-lg group-hover:scale-105 transition-transform border border-[#FF9900]/20 group-active:scale-95" style={{ background: 'linear-gradient(135deg, #FF9900 0%, #FF2020 100%)' }}>
+            <div className="w-full aspect-square rounded-xl flex items-center justify-center mb-2 shadow-lg group-hover:scale-105 transition-transform border border-[#D2EA7C]/20 group-active:scale-95" style={{ background: 'linear-gradient(135deg, #D2EA7C 0%, #FF2020 100%)' }}>
               <span className="material-symbols-outlined text-5xl text-white" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
             </div>
             <p className="text-sm font-bold text-white truncate">Liked Songs</p>
-            <p className="text-xs text-[#FF9900]">{likedTracks.length} songs</p>
+            <p className="text-xs text-[#D2EA7C]">{likedTracks.length} songs</p>
           </div>
 
           {/* User playlists */}

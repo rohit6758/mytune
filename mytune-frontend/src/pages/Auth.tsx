@@ -5,6 +5,7 @@ import Logo from '../components/Logo';
 export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -86,12 +87,21 @@ export default function Auth() {
             </div>
             <div>
               <label className="block text-[11px] font-bold text-white/50 uppercase tracking-widest mb-1.5 ml-1">Password</label>
-              <input
-                type="password" value={password} onChange={e => setPassword(e.target.value)}
-                className="w-full rounded-xl px-4 py-3 text-white placeholder-white/25 transition-all text-sm"
-                style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }}
-                placeholder="••••••••" required
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)}
+                  className="w-full rounded-xl pl-4 pr-12 py-3 text-white placeholder-white/25 transition-all text-sm"
+                  style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }}
+                  placeholder="••••••••" required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[20px]">{showPassword ? 'visibility_off' : 'visibility'}</span>
+                </button>
+              </div>
             </div>
 
             <button

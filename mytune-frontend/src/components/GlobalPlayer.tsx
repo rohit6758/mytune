@@ -6,7 +6,7 @@ import { supabase } from '../lib/supabase';
 declare global { interface Window { _mytuneAudio?: HTMLAudioElement; } }
 
 export default function GlobalPlayer() {
-  const { currentTrack, isPlaying, progress, duration, toggle, next, prev, seek } = usePlayer();
+  const { currentTrack, isPlaying, progress, duration, toggle, next, prev, seek, isShuffle, toggleShuffle, repeatMode, toggleRepeatMode } = usePlayer();
   const [showPlaylistMenu, setShowPlaylistMenu] = useState(false);
   const [pendingTrack, setPendingTrack] = useState<Track | null>(null);
   const [userPlaylists, setUserPlaylists] = useState<any[]>([]);
@@ -133,33 +133,43 @@ export default function GlobalPlayer() {
 
           <div className="flex flex-col min-w-0 flex-1">
             <span className="text-white font-bold text-sm leading-tight truncate">{currentTrack.title}</span>
-            <span className="text-white/40 text-xs truncate">{currentTrack.artist}</span>
+            <span className="text-white/40 text-[10px] truncate">{currentTrack.artist}</span>
           </div>
 
-          <div className="flex items-center gap-0.5 flex-shrink-0">
-            <button onClick={prev} className="p-2 text-white/50 active:text-white transition-colors">
-              <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>skip_previous</span>
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <button onClick={toggleShuffle} className={`p-1 transition-colors ${isShuffle ? 'text-[#F5E642]' : 'text-white/40 active:text-white'}`}>
+              <span className="material-symbols-outlined text-[18px]">shuffle</span>
+            </button>
+            
+            <button onClick={prev} className="p-1 text-white/60 active:text-white transition-colors">
+              <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>skip_previous</span>
             </button>
 
             <button
               onClick={toggle}
-              className="w-10 h-10 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-transform mx-0.5"
+              className="w-8 h-8 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-transform mx-0.5"
               style={{ background: '#F5E642' }}
             >
-              <span className="material-symbols-outlined text-black text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+              <span className="material-symbols-outlined text-black text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
                 {isPlaying ? 'pause' : 'play_arrow'}
               </span>
             </button>
 
-            <button onClick={() => next(true)} className="p-2 text-white/50 active:text-white transition-colors">
-              <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>skip_next</span>
+            <button onClick={() => next(true)} className="p-1 text-white/60 active:text-white transition-colors">
+              <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>skip_next</span>
             </button>
 
+            <button onClick={toggleRepeatMode} className={`p-1 transition-colors ${repeatMode !== 'off' ? 'text-[#F5E642]' : 'text-white/40 active:text-white'}`}>
+              <span className="material-symbols-outlined text-[18px]">
+                {repeatMode === 'one' ? 'repeat_one' : 'repeat'}
+              </span>
+            </button>
+            
             <button
               onClick={() => { setPendingTrack(currentTrack); loadPlaylists(); setShowPlaylistMenu(true); }}
-              className="p-2 text-white/50 active:text-[#F5E642] transition-colors"
+              className="p-1 pl-2 border-l border-white/10 ml-1 text-white/50 active:text-[#F5E642] transition-colors"
             >
-              <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 0" }}>playlist_add</span>
+              <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 0" }}>playlist_add</span>
             </button>
           </div>
         </div>

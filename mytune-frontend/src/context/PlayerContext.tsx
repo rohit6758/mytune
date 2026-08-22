@@ -46,41 +46,38 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Create audio element once
+  // Bind audio events
   useEffect(() => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio();
-      // Keep playing when screen locks / app goes to background
-      audioRef.current.preload = 'metadata';
-    }
     const audio = audioRef.current;
+    if (!audio) return;
 
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
     const handleTimeUpdate = () => setProgress(audio.currentTime);
     const handleLoadedMetadata = () => setDuration(audio.duration);
+    const handleEnded = () => {
+      if (repeatMode === 'one') {
+        audio.currentTime = 0;
+        audio.play().catch(console.error);
+      } else {
+        next();
+      }
+    };
 
     audio.addEventListener('play', handlePlay);
     audio.addEventListener('pause', handlePause);
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.addEventListener('ended', handleEnded);
 
     return () => {
       audio.removeEventListener('play', handlePlay);
       audio.removeEventListener('pause', handlePause);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.removeEventListener('ended', handleEnded);
     };
-  }, []);
-
-  // Bind "ended" separately so it always captures fresh state
-  useEffect(() => {
-    if (!audioRef.current) return;
-    const audio = audioRef.current;
-    const handleEnded = () => next(false);
-    audio.addEventListener('ended', handleEnded);
-    return () => audio.removeEventListener('ended', handleEnded);
-  }, [queue, queueIndex, repeatMode, isShuffle]);
+  }, [repeatMode, queueIndex, queue.length]);
 
   // MediaSession API — keeps controls on lock screen & notification shade
   useEffect(() => {
@@ -248,6 +245,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       playTrack, playQueue, loadQueue, addToQueue, insertNext,
       pause, resume, toggle, next, prev, seek, toggleRepeatMode, toggleShuffle,
     }}>
+      <audio ref={audioRef} playsInline preload="metadata" />
       {children}
     </PlayerContext.Provider>
   );

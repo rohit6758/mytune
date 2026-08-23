@@ -4,7 +4,7 @@ import { usePlayer, Track } from '../context/PlayerContext';
 
 // ─── Preset gradient covers ────────────────────────────────────────────────
 const GRADIENT_PRESETS = [
-  { id: 'og',   label: 'MyTune',   css: 'linear-gradient(135deg, #D2EA7C 0%, #FF2020 100%)' },
+  { id: 'og',   label: 'MyTune',   css: 'linear-gradient(135deg, #D2EA7C 0%, #78A723 100%)' },
   { id: 'void', label: 'Void',     css: 'linear-gradient(135deg, #0F0C29 0%, #302B63 50%, #24243e 100%)' },
   { id: 'sun',  label: 'Sunrise',  css: 'linear-gradient(135deg, #f83600 0%, #f9d423 100%)' },
   { id: 'ocean',label: 'Ocean',    css: 'linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%)' },
@@ -222,7 +222,7 @@ function CoverPickerModal({
           <button
             onClick={() => { onSave(selected); onClose(); }}
             className="flex-1 py-3 rounded-full font-bold text-sm text-black"
-            style={{ background: 'linear-gradient(135deg, #D2EA7C, #FF2020)' }}
+            style={{ background: 'linear-gradient(135deg, #D2EA7C 0%, #78A723 100%)' }}
           >
             Save Cover
           </button>
@@ -348,7 +348,7 @@ export default function Library() {
           style={{
             background: (() => {
               const c = selectedPlaylist.cover;
-              if (!c) return 'linear-gradient(135deg, #D2EA7C 0%, #FF2020 100%)';
+              if (!c) return 'linear-gradient(135deg, #D2EA7C 0%, #78A723 100%)';
               if (c.length <= 4) return '#1e1b24';
               if (c.startsWith('http') || c.startsWith('blob') || c.startsWith('data')) return 'transparent';
               const p = GRADIENT_PRESETS.find(x => x.id === c);
@@ -395,7 +395,7 @@ export default function Library() {
                 <button
                   onClick={() => handlePlayQueue(playlistTracks)}
                   className="w-11 h-11 rounded-full text-black flex items-center justify-center shadow-lg active:scale-90 transition-transform"
-                  style={{ background: 'linear-gradient(135deg, #D2EA7C, #FF2020)' }}
+                  style={{ background: 'linear-gradient(135deg, #D2EA7C 0%, #78A723 100%)' }}
                 >
                   <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
                 </button>
@@ -525,7 +525,7 @@ export default function Library() {
                 onClick={createPlaylist}
                 disabled={!newPlaylistName.trim()}
                 className="flex-1 py-2.5 rounded-xl font-bold text-sm text-black disabled:opacity-40"
-                style={{ background: 'linear-gradient(135deg, #D2EA7C, #FF2020)' }}
+                style={{ background: 'linear-gradient(135deg, #D2EA7C 0%, #78A723 100%)' }}
               >
                 Create
               </button>
@@ -540,7 +540,7 @@ export default function Library() {
             onClick={() => { setSelectedPlaylist({ id: 'liked', name: 'Liked Songs', cover: null }); setPlaylistTracks(likedTracks); }}
             className="cursor-pointer group"
           >
-            <div className="w-full aspect-square rounded-xl flex items-center justify-center mb-2 shadow-lg group-hover:scale-105 transition-transform border border-[#D2EA7C]/20 group-active:scale-95" style={{ background: 'linear-gradient(135deg, #D2EA7C 0%, #FF2020 100%)' }}>
+            <div className="w-full aspect-square rounded-xl flex items-center justify-center mb-2 shadow-lg group-hover:scale-105 transition-transform border border-[#D2EA7C]/20 group-active:scale-95" style={{ background: 'linear-gradient(135deg, #D2EA7C 0%, #78A723 100%)' }}>
               <span className="material-symbols-outlined text-5xl text-white" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
             </div>
             <p className="text-sm font-bold text-white truncate">Liked Songs</p>

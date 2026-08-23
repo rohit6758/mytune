@@ -99,28 +99,101 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     navigator.mediaSession.setActionHandler('nexttrack', () => actionRefs.current.next(true));
   }, [currentTrack]);
 
+  const fadeIntervalRef = useRef<any>(null);
+
+  const fadeOut = (audio: HTMLAudioElement, durationMs: number = 40): Promise<void> => {
+    return new Promise(resolve => {
+      if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
+      if (audio.paused || audio.volume <= 0.05) {
+        audio.volume = 0;
+        resolve();
+        return;
+      }
+      const step = 5;
+      const amount = audio.volume / (durationMs / step);
+      fadeIntervalRef.current = setInterval(() => {
+        let newVol = audio.volume - amount;
+        if (newVol <= 0.05) {
+          if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
+          audio.volume = 0;
+          resolve();
+        } else {
+          audio.volume = newVol;
+        }
+      }, step);
+    });
+  };
+
+  const fadeIn = (audio: HTMLAudioElement, targetVolume: number = 1, durationMs: number = 40): Promise<void> => {
+    return new Promise(resolve => {
+      if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
+      const step = 5;
+      const amount = targetVolume / (durationMs / step);
+      fadeIntervalRef.current = setInterval(() => {
+        let newVol = audio.volume + amount;
+        if (newVol >= targetVolume - 0.05) {
+          if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
+          audio.volume = targetVolume;
+          resolve();
+        } else {
+          audio.volume = newVol;
+        }
+      }, step);
+    });
+  };
+
   const explicitAudioCleanup = (audio: HTMLAudioElement) => {
     audio.pause();
     audio.removeAttribute('src');
     audio.load();
   };
 
-  const loadAndPlay = (track: Track) => {
+  const loadAndPlay = async (track: Track) => {
     if (!audioRef.current) return;
-    explicitAudioCleanup(audioRef.current);
-    audioRef.current.src = track.preview_url;
-    audioRef.current.play().catch(console.error);
+    const audio = audioRef.current;
+    
+    if (!audio.paused && audio.src) {
+      await fadeOut(audio);
+    }
+    
+    explicitAudioCleanup(audio);
+    audio.src = track.preview_url;
+    audio.volume = 0; // start muted for fade-in
+    
+    try {
+      await audio.play();
+      await fadeIn(audio);
+    } catch (err: any) {
+      if (err.name !== 'AbortError') console.error('Playback failed', err);
+    }
   };
 
   const loadOnly = (track: Track) => {
     if (!audioRef.current) return;
     explicitAudioCleanup(audioRef.current);
     audioRef.current.src = track.preview_url;
+    audioRef.current.volume = 1;
     audioRef.current.load(); // Preload but DO NOT play
   };
 
-  const pause = () => { audioRef.current?.pause(); };
-  const resume = () => { if (audioRef.current && currentTrack) audioRef.current.play().catch(console.error); };
+  const pause = async () => { 
+    if (audioRef.current) {
+      await fadeOut(audioRef.current);
+      audioRef.current.pause();
+    }
+  };
+  
+  const resume = async () => { 
+    if (audioRef.current && currentTrack) {
+      audioRef.current.volume = 0;
+      try {
+        await audioRef.current.play();
+        await fadeIn(audioRef.current);
+      } catch (err: any) {
+        if (err.name !== 'AbortError') console.error(err);
+      }
+    }
+  };
   const toggle = () => { isPlaying ? pause() : resume(); };
 
   // Load without auto-play — used when the feed loads tracks
@@ -222,10 +295,26 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const seek = (time: number) => {
+  const seek = async (time: number) => {
     if (audioRef.current) {
-      audioRef.current.currentTime = time;
+      const audio = audioRef.current;
+      const wasPlaying = !audio.paused;
+      
+      if (wasPlaying) {
+        await fadeOut(audio);
+      }
+      
+      audio.currentTime = time;
       setProgress(time);
+      
+      if (wasPlaying) {
+        try {
+          await audio.play();
+          await fadeIn(audio);
+        } catch (err: any) {
+          if (err.name !== 'AbortError') console.error(err);
+        }
+      }
     }
   };
 

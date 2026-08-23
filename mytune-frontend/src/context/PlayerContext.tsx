@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useRef, useEffect, useCallback, ReactNode } from 'react';
+import { supabase } from '../lib/supabase';
+import { getCachedAudioUrl } from '../lib/offlineCache';
 
 export interface Track {
   id: string;
@@ -157,7 +159,10 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     }
     
     explicitAudioCleanup(audio);
-    audio.src = track.preview_url;
+    
+    // Fetch offline URL from IndexedDB cache
+    const offlineUrl = await getCachedAudioUrl(track.id, track.preview_url);
+    audio.src = offlineUrl;
     audio.volume = 0; // start muted for fade-in
     
     try {
@@ -168,10 +173,13 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const loadOnly = (track: Track) => {
+  const loadOnly = async (track: Track) => {
     if (!audioRef.current) return;
     explicitAudioCleanup(audioRef.current);
-    audioRef.current.src = track.preview_url;
+    
+    // Fetch offline URL from IndexedDB cache
+    const offlineUrl = await getCachedAudioUrl(track.id, track.preview_url);
+    audioRef.current.src = offlineUrl;
     audioRef.current.volume = 1;
     audioRef.current.load(); // Preload but DO NOT play
   };

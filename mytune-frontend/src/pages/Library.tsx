@@ -254,20 +254,49 @@ export default function Library() {
 
   const fetchData = async () => {
     setLoading(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data: likedData } = await supabase.from('library').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
-      if (likedData) setLikedTracks(likedData);
-      const { data: playlistsData } = await supabase.from('playlists').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
-      if (playlistsData) setPlaylists(playlistsData);
+    
+    // Load from cache first for instant display
+    const cachedLiked = localStorage.getItem('mytune_liked_tracks');
+    const cachedPlaylists = localStorage.getItem('mytune_playlists');
+    if (cachedLiked) setLikedTracks(JSON.parse(cachedLiked));
+    if (cachedPlaylists) setPlaylists(JSON.parse(cachedPlaylists));
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: likedData } = await supabase.from('library').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
+        if (likedData) {
+          setLikedTracks(likedData);
+          localStorage.setItem('mytune_liked_tracks', JSON.stringify(likedData));
+        }
+        const { data: playlistsData } = await supabase.from('playlists').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
+        if (playlistsData) {
+          setPlaylists(playlistsData);
+          localStorage.setItem('mytune_playlists', JSON.stringify(playlistsData));
+        }
+      }
+    } catch (err) {
+      console.log('Offline: using cached library data');
     }
     setLoading(false);
   };
 
   const fetchPlaylistTracks = async (id: string) => {
     setLoadingTracks(true);
-    const { data } = await supabase.from('playlist_tracks').select('*').eq('playlist_id', id).order('created_at', { ascending: false });
-    if (data) setPlaylistTracks(data);
+    
+    const cacheKey = `mytune_playlist_${id}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) setPlaylistTracks(JSON.parse(cached));
+    
+    try {
+      const { data } = await supabase.from('playlist_tracks').select('*').eq('playlist_id', id).order('created_at', { ascending: false });
+      if (data) {
+        setPlaylistTracks(data);
+        localStorage.setItem(cacheKey, JSON.stringify(data));
+      }
+    } catch (err) {
+      console.log('Offline: using cached playlist tracks');
+    }
     setLoadingTracks(false);
   };
 

@@ -17,6 +17,7 @@
     "clsx": "^2.1.1",
     "framer-motion": "^13.1.0",
     "instagram-url-direct": "^2.0.7",
+    "localforage": "^1.10.0",
     "lucide-react": "^1.31.0",
     "play-dl": "^1.9.7",
     "playwright": "^1.62.1",

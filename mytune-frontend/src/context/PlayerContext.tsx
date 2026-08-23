@@ -79,6 +79,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     };
   }, [repeatMode, queueIndex, queue.length]);
 
+  // Refs for stable MediaSession callbacks
+  const actionRefs = useRef({ pause: () => {}, resume: () => {}, prev: () => {}, next: (f?: boolean) => {} });
+
   // MediaSession API — keeps controls on lock screen & notification shade
   useEffect(() => {
     if (!currentTrack || !('mediaSession' in navigator)) return;
@@ -90,20 +93,28 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         { src: currentTrack.cover_url, sizes: '192x192', type: 'image/jpeg' },
       ],
     });
-    navigator.mediaSession.setActionHandler('play', () => resume());
-    navigator.mediaSession.setActionHandler('pause', () => pause());
-    navigator.mediaSession.setActionHandler('previoustrack', () => prev());
-    navigator.mediaSession.setActionHandler('nexttrack', () => next(true));
+    navigator.mediaSession.setActionHandler('play', () => actionRefs.current.resume());
+    navigator.mediaSession.setActionHandler('pause', () => actionRefs.current.pause());
+    navigator.mediaSession.setActionHandler('previoustrack', () => actionRefs.current.prev());
+    navigator.mediaSession.setActionHandler('nexttrack', () => actionRefs.current.next(true));
   }, [currentTrack]);
+
+  const explicitAudioCleanup = (audio: HTMLAudioElement) => {
+    audio.pause();
+    audio.removeAttribute('src');
+    audio.load();
+  };
 
   const loadAndPlay = (track: Track) => {
     if (!audioRef.current) return;
+    explicitAudioCleanup(audioRef.current);
     audioRef.current.src = track.preview_url;
     audioRef.current.play().catch(console.error);
   };
 
   const loadOnly = (track: Track) => {
     if (!audioRef.current) return;
+    explicitAudioCleanup(audioRef.current);
     audioRef.current.src = track.preview_url;
     audioRef.current.load(); // Preload but DO NOT play
   };
@@ -221,6 +232,11 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const toggleRepeatMode = () => {
     setRepeatMode(prev => prev === 'off' ? 'all' : prev === 'all' ? 'one' : 'off');
   };
+
+  // Sync actionRefs on every render
+  useEffect(() => {
+    actionRefs.current = { pause, resume, prev, next };
+  });
 
   const toggleShuffle = () => {
     setIsShuffle(prev => {

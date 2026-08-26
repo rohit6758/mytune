@@ -137,10 +137,6 @@ export default function Profile({ session }: { session?: Session | null }) {
     <div className="inner-scroll h-full overflow-y-auto w-full max-w-3xl mx-auto flex flex-col bg-transparent">
       {/* Header section */}
       <div className="relative w-full pb-6 pt-16 flex flex-col items-center px-4">
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-           <div className="absolute top-[-50%] left-[-10%] w-[120%] h-[150%] bg-[#D2EA7C]/20 blur-[80px] rounded-full" />
-        </div>
-
         {/* Profile Avatar */}
         <div className="relative z-10 w-32 h-32 flex-shrink-0 aspect-square rounded-full p-[3px] mb-4 shadow-2xl" style={{ background: BRAND_GRAD }}>
           <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-[#16141a] bg-[#1a1a1a] flex items-center justify-center group">

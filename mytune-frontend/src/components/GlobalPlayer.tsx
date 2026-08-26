@@ -176,6 +176,26 @@ export default function GlobalPlayer() {
               <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>skip_next</span>
             </button>
 
+            <button
+              onClick={async () => {
+                try {
+                  const { getCachedAudioUrl } = await import('../lib/offlineCache');
+                  const offlineUrl = await getCachedAudioUrl(currentTrack.id, currentTrack.preview_url);
+                  const a = document.createElement('a');
+                  a.href = offlineUrl;
+                  a.download = `${currentTrack.title} - ${currentTrack.artist}.mp3`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                } catch (e) {
+                  alert('Download failed');
+                }
+              }}
+              className="p-1 border-r border-white/10 mr-1 pr-2 text-white/50 active:text-[#D2EA7C] transition-colors"
+            >
+              <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 0" }}>download</span>
+            </button>
+
             <button onClick={toggleRepeatMode} className={`p-1 transition-colors ${repeatMode !== 'off' ? 'text-[#D2EA7C]' : 'text-white/40 active:text-white'}`}>
               <span className="material-symbols-outlined text-[18px]">
                 {repeatMode === 'one' ? 'repeat_one' : 'repeat'}

@@ -260,6 +260,31 @@ export default function Discover() {
                   <span className="text-white/70 text-[10px] font-bold">Save</span>
                 </div>
 
+                {/* Download */}
+                <div className="flex flex-col items-center gap-0.5">
+                  <button
+                    onClick={async () => {
+                      try {
+                        const { getCachedAudioUrl } = await import('../lib/offlineCache');
+                        const offlineUrl = await getCachedAudioUrl(track.id, track.preview_url);
+                        const a = document.createElement('a');
+                        a.href = offlineUrl;
+                        a.download = `${track.title} - ${track.artist}.mp3`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                      } catch (e) {
+                        alert('Download failed');
+                      }
+                    }}
+                    className="w-11 h-11 rounded-full flex items-center justify-center active:scale-90 transition-transform"
+                    style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.12)' }}
+                  >
+                    <span className="material-symbols-outlined text-white text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>download</span>
+                  </button>
+                  <span className="text-white/70 text-[10px] font-bold">Download</span>
+                </div>
+
                 {/* Share */}
                 <div className="flex flex-col items-center gap-0.5">
                   <button

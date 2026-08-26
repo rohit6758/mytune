@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
 import { usePlayer } from '../context/PlayerContext';
 import { useNavigate } from 'react-router-dom';
@@ -17,8 +18,8 @@ export default function Create() {
   const { playTrack } = usePlayer();
 
   const handleImport = async () => {
-    if (!importUrl) { alert('Please paste a valid link.'); return; }
-    if (!importTitle) { alert('Please give this song a title.'); return; }
+    if (!importUrl) { toast('Please paste a valid link.'); return; }
+    if (!importTitle) { toast('Please give this song a title.'); return; }
     setIsImporting(true);
     
     try {
@@ -75,7 +76,7 @@ export default function Create() {
           finalAudioUrl = publicData.publicUrl;
         } catch (extractionError) {
           console.warn('Extraction failed:', extractionError);
-          alert('Instagram extraction failed. The API limit might be reached or the video is private. Please use the Local File Upload option instead.');
+          toast('Instagram extraction failed. The API limit might be reached or the video is private. Please use the Local File Upload option instead.');
           setIsImporting(false);
           return;
         }
@@ -134,7 +135,7 @@ export default function Create() {
         }
       }
       
-      alert('Track extracted and saved to "Insta Songs" playlist!');
+      toast('Track extracted and saved to "Insta Songs" playlist!');
       setShowImportModal(false);
       setImportUrl('');
       setImportTitle('');
@@ -221,7 +222,7 @@ export default function Create() {
         });
       }
 
-      alert('Local file uploaded and saved to "Local Uploads" playlist!');
+      toast('Local file uploaded and saved to "Local Uploads" playlist!');
     } catch (err: any) {
       alert('Error uploading file: ' + err.message);
     } finally {

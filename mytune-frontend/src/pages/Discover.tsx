@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
 import { usePlayer, Track } from '../context/PlayerContext';
 
@@ -274,7 +275,7 @@ export default function Discover() {
                         a.click();
                         document.body.removeChild(a);
                       } catch (e) {
-                        alert('Download failed');
+                        toast('Download failed');
                       }
                     }}
                     className="w-11 h-11 rounded-full flex items-center justify-center active:scale-90 transition-transform"

@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
 import type { Session } from '@supabase/supabase-js';
 
@@ -73,9 +74,10 @@ export default function Profile({ session }: { session?: Session | null }) {
       if (error) throw error;
       setProfile(editForm);
       setIsEditing(false);
+      toast.success('Profile saved!');
     } catch (err) {
       console.error('Error saving profile', err);
-      alert('Failed to save profile.');
+      toast.error('Failed to save profile.');
     } finally {
       setSaveLoading(false);
     }
@@ -98,7 +100,7 @@ export default function Profile({ session }: { session?: Session | null }) {
 
       if (uploadError) {
          if (uploadError.message.toLowerCase().includes('bucket') || uploadError.message.toLowerCase().includes('not found')) {
-            alert("Storage bucket not found! Please go to your Supabase Dashboard -> Storage, and create a public bucket named 'avatars'.");
+            toast.error("Storage bucket 'avatars' not found in Supabase.");
          } else {
             throw uploadError;
          }
@@ -117,10 +119,11 @@ export default function Profile({ session }: { session?: Session | null }) {
       await supabase.auth.updateUser({
         data: { avatar_url: publicUrl }
       });
+      toast.success('Avatar updated!');
 
     } catch (err: any) {
       console.error(err);
-      alert('Error uploading avatar: ' + err.message);
+      toast.error('Error uploading avatar: ' + err.message);
     } finally {
       setUploadingAvatar(false);
     }

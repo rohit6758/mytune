@@ -14,12 +14,24 @@ import Profile from './pages/Profile';
 import { PlayerProvider } from './context/PlayerContext';
 import Onboarding from './pages/Onboarding';
 
+import { Toaster } from 'react-hot-toast';
+import { Capacitor } from '@capacitor/core';
+import { StatusBar, Style } from '@capacitor/status-bar';
+import { SplashScreen } from '@capacitor/splash-screen';
+
 function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [hasProfile, setHasProfile] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Native Mobile Setup
+    if (Capacitor.isNativePlatform()) {
+      StatusBar.setStyle({ style: Style.Dark });
+      StatusBar.setBackgroundColor({ color: '#110d17' }).catch(() => {});
+      SplashScreen.hide().catch(() => {});
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session) checkProfile();
@@ -84,6 +96,7 @@ function App() {
 
   return (
     <PlayerProvider>
+      <Toaster toastOptions={{ style: { background: '#1e1b24', color: '#fff', borderRadius: '100px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '14px', fontWeight: 'bold' } }} position="top-center" />
       <Router>
         <Routes>
           <Route path="/" element={<Layout />}>

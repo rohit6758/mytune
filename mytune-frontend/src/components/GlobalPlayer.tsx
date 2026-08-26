@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import hotToast from 'react-hot-toast';
 import { usePlayer } from '../context/PlayerContext';
 import type { Track } from '../context/PlayerContext';
 import { supabase } from '../lib/supabase';
@@ -188,7 +189,7 @@ export default function GlobalPlayer() {
                   a.click();
                   document.body.removeChild(a);
                 } catch (e) {
-                  alert('Download failed');
+                  hotToast('Download failed');
                 }
               }}
               className="p-1 border-r border-white/10 mr-1 pr-2 text-white/50 active:text-[#D2EA7C] transition-colors"

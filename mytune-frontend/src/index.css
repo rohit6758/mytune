@@ -18,6 +18,14 @@
   * {
     -webkit-tap-highlight-color: transparent;
     box-sizing: border-box;
+    /* Kill the Chrome dictionary popup on long-press */
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  /* Only allow selection inside actual input fields */
+  input, textarea {
+    -webkit-user-select: text;
+    user-select: text;
   }
   html, body, #root {
     width: 100%;
@@ -124,3 +132,16 @@ input:focus, textarea:focus {
 
 /* ── Active press scale for buttons ─────────────────────────── */
 button:active { transform: scale(0.96); }
+
+/* ── Now Playing slide-up modal ──────────────────────────────── */
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+@keyframes slideDown {
+  from { transform: translateY(0);    opacity: 1; }
+  to   { transform: translateY(100%); opacity: 0; }
+}
+.now-playing-enter { animation: slideUp 0.38s cubic-bezier(0.32, 0.72, 0, 1) forwards; }
+.now-playing-exit  { animation: slideDown 0.3s ease-in forwards; }
+

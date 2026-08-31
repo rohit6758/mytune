@@ -8,6 +8,7 @@ export interface Track {
   artist: string;
   cover_url: string;
   preview_url: string;
+  lyrics?: string;
 }
 
 interface PlayerContextType {

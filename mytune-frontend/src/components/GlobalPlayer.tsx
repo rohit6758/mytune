@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import hotToast from 'react-hot-toast';
 import { usePlayer } from '../context/PlayerContext';
 import type { Track } from '../context/PlayerContext';
@@ -12,6 +12,8 @@ export default function GlobalPlayer() {
   const [pendingTrack, setPendingTrack] = useState<Track | null>(null);
   const [userPlaylists, setUserPlaylists] = useState<any[]>([]);
   const [toast, setToast] = useState<string | null>(null);
+  const [showNowPlaying, setShowNowPlaying] = useState(false);
+  const [closing, setClosing] = useState(false);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -51,6 +53,32 @@ export default function GlobalPlayer() {
     setPendingTrack(null);
   };
 
+  const handleDownload = async (track: Track) => {
+    try {
+      const { getCachedAudioUrl } = await import('../lib/offlineCache');
+      const offlineUrl = await getCachedAudioUrl(track.id, track.preview_url);
+      const a = document.createElement('a');
+      a.href = offlineUrl;
+      a.download = `${track.title} - ${track.artist}.mp3`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast('Downloading… ✓');
+    } catch (e) {
+      hotToast('Download failed');
+    }
+  };
+
+  const openNowPlaying = () => {
+    setClosing(false);
+    setShowNowPlaying(true);
+  };
+
+  const closeNowPlaying = () => {
+    setClosing(true);
+    setTimeout(() => { setShowNowPlaying(false); setClosing(false); }, 280);
+  };
+
   if (!currentTrack) return null;
 
   const pct = duration > 0 ? (progress / duration) * 100 : 0;
@@ -60,19 +88,19 @@ export default function GlobalPlayer() {
     <>
       {/* Toast */}
       {toast && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[200] bg-[#D2EA7C] text-black font-bold text-sm px-5 py-2 rounded-full shadow-lg">
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[300] bg-[#D2EA7C] text-black font-bold text-sm px-5 py-2 rounded-full shadow-lg">
           {toast}
         </div>
       )}
 
-      {/* Add to Playlist — glass bottom sheet */}
+      {/* Add to Playlist bottom sheet */}
       {showPlaylistMenu && (
-        <div className="fixed inset-0 z-[150] flex items-end" onClick={() => { setShowPlaylistMenu(false); setPendingTrack(null); }}>
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-md" />
+        <div className="fixed inset-0 z-[250] flex items-end" onClick={() => { setShowPlaylistMenu(false); setPendingTrack(null); }}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
           <div
             className="relative w-full rounded-t-3xl p-6 flex flex-col gap-4 z-10"
             style={{
-              background: 'rgba(16, 14, 24, 0.85)',
+              background: 'rgba(16, 14, 24, 0.92)',
               backdropFilter: 'blur(32px) saturate(180%)',
               WebkitBackdropFilter: 'blur(32px) saturate(180%)',
               border: '1px solid rgba(255,255,255,0.1)',
@@ -109,42 +137,170 @@ export default function GlobalPlayer() {
         </div>
       )}
 
-      {/* Mini Player — glass bar above bottom nav */}
+      {/* ── Full-Screen Now Playing Modal ───────────────────────── */}
+      {showNowPlaying && (
+        <div
+          className={`fixed inset-0 z-[200] flex flex-col ${closing ? 'now-playing-exit' : 'now-playing-enter'}`}
+          style={{
+            background: '#0a0a0f',
+          }}
+        >
+          {/* Ambient blurred album art background */}
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{
+              backgroundImage: `url(${currentTrack.cover_url})`,
+              filter: 'blur(60px) brightness(0.18) saturate(2)',
+              transform: 'scale(1.1)',
+            }}
+          />
+          {/* Dark overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/80" />
+
+          {/* Content */}
+          <div className="relative z-10 flex flex-col h-full px-6 pt-safe-top pb-safe-bottom" style={{ paddingTop: 'max(env(safe-area-inset-top), 20px)', paddingBottom: 'max(env(safe-area-inset-bottom), 24px)' }}>
+
+            {/* Top bar */}
+            <div className="flex items-center justify-between mb-6">
+              <button onClick={closeNowPlaying} className="w-10 h-10 flex items-center justify-center rounded-full" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                <span className="material-symbols-outlined text-white text-xl">keyboard_arrow_down</span>
+              </button>
+              <div className="flex flex-col items-center">
+                <span className="text-white/40 text-[10px] font-bold uppercase tracking-widest">Now Playing</span>
+              </div>
+              <button
+                onClick={() => { setPendingTrack(currentTrack); loadPlaylists(); setShowPlaylistMenu(true); }}
+                className="w-10 h-10 flex items-center justify-center rounded-full"
+                style={{ background: 'rgba(255,255,255,0.08)' }}
+              >
+                <span className="material-symbols-outlined text-white text-xl" style={{ fontVariationSettings: "'FILL' 0" }}>playlist_add</span>
+              </button>
+            </div>
+
+            {/* Album art */}
+            <div className="flex justify-center mb-8">
+              <div
+                className="w-64 h-64 sm:w-72 sm:h-72 rounded-3xl overflow-hidden shadow-2xl"
+                style={{ boxShadow: '0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08)' }}
+              >
+                <img
+                  src={currentTrack.cover_url}
+                  alt={currentTrack.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+
+            {/* Track info */}
+            <div className="flex items-start justify-between mb-6">
+              <div className="flex-1 min-w-0">
+                <h2 className="text-white text-2xl font-black leading-tight truncate">{currentTrack.title}</h2>
+                <p className="text-white/50 text-base font-semibold truncate mt-0.5">{currentTrack.artist}</p>
+              </div>
+              <button
+                onClick={() => handleDownload(currentTrack)}
+                className="w-10 h-10 flex items-center justify-center rounded-full flex-shrink-0 ml-3"
+                style={{ background: 'rgba(255,255,255,0.08)' }}
+              >
+                <span className="material-symbols-outlined text-white/70 text-xl" style={{ fontVariationSettings: "'FILL' 0" }}>download</span>
+              </button>
+            </div>
+
+            {/* Progress bar */}
+            <div className="mb-1">
+              <div className="w-full relative h-5 flex items-center group cursor-pointer">
+                <div className="absolute left-0 right-0 h-1 bg-white/15 rounded-full pointer-events-none" />
+                <div className="absolute left-0 h-1 rounded-full bg-[#D2EA7C] pointer-events-none" style={{ width: `${pct}%` }} />
+                <div
+                  className="absolute h-3.5 w-3.5 bg-white rounded-full pointer-events-none shadow-md"
+                  style={{ left: `calc(${pct}% - 7px)` }}
+                />
+                <input
+                  type="range"
+                  min="0"
+                  max={duration || 100}
+                  value={progress || 0}
+                  onChange={(e) => seek(Number(e.target.value))}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer m-0 z-10 touch-none"
+                />
+              </div>
+              <div className="flex justify-between text-white/40 text-xs font-semibold mt-1">
+                <span>{fmt(progress)}</span>
+                <span>{fmt(duration)}</span>
+              </div>
+            </div>
+
+            {/* Main controls */}
+            <div className="flex items-center justify-between mt-2 mb-6">
+              <button onClick={toggleShuffle} className={`p-2 transition-colors ${isShuffle ? 'text-[#D2EA7C]' : 'text-white/40'}`}>
+                <span className="material-symbols-outlined text-2xl">shuffle</span>
+              </button>
+
+              <button onClick={prev} className="p-2 text-white/80 active:text-white transition-colors">
+                <span className="material-symbols-outlined text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>skip_previous</span>
+              </button>
+
+              <button
+                onClick={toggle}
+                className="w-16 h-16 rounded-full flex items-center justify-center shadow-2xl active:scale-90 transition-transform"
+                style={{ background: '#D2EA7C', boxShadow: '0 8px 32px rgba(210,234,124,0.4)' }}
+              >
+                <span className="material-symbols-outlined text-black text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+                  {isPlaying ? 'pause' : 'play_arrow'}
+                </span>
+              </button>
+
+              <button onClick={() => next(true)} className="p-2 text-white/80 active:text-white transition-colors">
+                <span className="material-symbols-outlined text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>skip_next</span>
+              </button>
+
+              <button onClick={toggleRepeatMode} className={`p-2 transition-colors ${repeatMode !== 'off' ? 'text-[#D2EA7C]' : 'text-white/40'}`}>
+                <span className="material-symbols-outlined text-2xl">
+                  {repeatMode === 'one' ? 'repeat_one' : 'repeat'}
+                </span>
+              </button>
+            </div>
+
+            {/* Lyrics / Caption section */}
+            <div
+              className="flex-1 rounded-2xl overflow-hidden flex flex-col"
+              style={{
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                minHeight: 0,
+              }}
+            >
+              <div className="px-4 pt-3 pb-2 flex items-center gap-2 border-b border-white/5">
+                <span className="material-symbols-outlined text-[#D2EA7C] text-base" style={{ fontVariationSettings: "'FILL' 1" }}>lyrics</span>
+                <span className="text-white/70 text-xs font-bold uppercase tracking-widest">Lyrics Preview</span>
+              </div>
+              <div className="flex-1 overflow-y-auto inner-scroll px-4 py-3">
+                {currentTrack.lyrics ? (
+                  <p className="text-white/80 text-sm leading-7 font-medium whitespace-pre-wrap">{currentTrack.lyrics}</p>
+                ) : (
+                  <div className="h-full flex flex-col items-center justify-center gap-2 py-4">
+                    <span className="material-symbols-outlined text-white/10 text-5xl" style={{ fontVariationSettings: "'FILL' 1" }}>lyrics</span>
+                    <p className="text-white/25 text-sm font-semibold text-center">No lyrics available for this track</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Mini Player bar (always visible) ───────────────────── */}
       <div
-        className="fixed bottom-[65px] left-0 right-0 z-[60] px-3 py-2.5 flex flex-col gap-0"
+        className="fixed bottom-[65px] left-0 right-0 z-[60] flex flex-col gap-0 cursor-pointer"
         style={{
-          background: 'rgba(10, 10, 18, 0.8)',
+          background: 'rgba(10, 10, 18, 0.88)',
           backdropFilter: 'blur(30px) saturate(200%)',
           WebkitBackdropFilter: 'blur(30px) saturate(200%)',
           borderTop: '1px solid rgba(255,255,255,0.08)',
         }}
       >
-        {/* Scrubbable Yellow progress bar */}
-        <div className="w-full relative h-4 flex items-center group -mt-2 mb-1 cursor-pointer">
-          {/* Background track */}
-          <div className="absolute left-0 right-0 h-1 bg-white/10 rounded-full pointer-events-none" />
-          {/* Fill track */}
-          <div 
-            className="absolute left-0 h-1 rounded-full bg-[#D2EA7C] pointer-events-none" 
-            style={{ width: `${pct}%` }} 
-          />
-          {/* Knob */}
-          <div 
-            className="absolute h-3 w-3 bg-[#D2EA7C] rounded-full pointer-events-none shadow-md scale-0 group-active:scale-100 md:group-hover:scale-100 transition-transform"
-            style={{ left: `calc(${pct}% - 6px)` }}
-          />
-          {/* Hidden range input for interaction */}
-          <input 
-            type="range"
-            min="0"
-            max={duration || 100}
-            value={progress || 0}
-            onChange={(e) => seek(Number(e.target.value))}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer m-0 z-10 touch-none"
-          />
-        </div>
-
-        <div className="flex items-center gap-3">
+        {/* Tap zone (album art + title) → opens Now Playing */}
+        <div className="flex items-center gap-3 px-3 pt-2.5 pb-1.5" onClick={openNowPlaying}>
           <img src={currentTrack.cover_url} alt={currentTrack.title}
             className="w-10 h-10 rounded-xl object-cover flex-shrink-0 shadow-md"
             style={{ border: '1px solid rgba(255,255,255,0.1)' }} />
@@ -154,11 +310,8 @@ export default function GlobalPlayer() {
             <span className="text-white/40 text-[10px] truncate">{currentTrack.artist}</span>
           </div>
 
-          <div className="flex items-center gap-1 flex-shrink-0">
-            <button onClick={toggleShuffle} className={`p-1 transition-colors ${isShuffle ? 'text-[#D2EA7C]' : 'text-white/40 active:text-white'}`}>
-              <span className="material-symbols-outlined text-[18px]">shuffle</span>
-            </button>
-            
+          {/* Quick controls — these don't propagate to open modal */}
+          <div className="flex items-center gap-1 flex-shrink-0" onClick={e => e.stopPropagation()}>
             <button onClick={prev} className="p-1 text-white/60 active:text-white transition-colors">
               <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>skip_previous</span>
             </button>
@@ -176,40 +329,21 @@ export default function GlobalPlayer() {
             <button onClick={() => next(true)} className="p-1 text-white/60 active:text-white transition-colors">
               <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>skip_next</span>
             </button>
-
-            <button
-              onClick={async () => {
-                try {
-                  const { getCachedAudioUrl } = await import('../lib/offlineCache');
-                  const offlineUrl = await getCachedAudioUrl(currentTrack.id, currentTrack.preview_url);
-                  const a = document.createElement('a');
-                  a.href = offlineUrl;
-                  a.download = `${currentTrack.title} - ${currentTrack.artist}.mp3`;
-                  document.body.appendChild(a);
-                  a.click();
-                  document.body.removeChild(a);
-                } catch (e) {
-                  hotToast('Download failed');
-                }
-              }}
-              className="p-1 border-r border-white/10 mr-1 pr-2 text-white/50 active:text-[#D2EA7C] transition-colors"
-            >
-              <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 0" }}>download</span>
-            </button>
-
-            <button onClick={toggleRepeatMode} className={`p-1 transition-colors ${repeatMode !== 'off' ? 'text-[#D2EA7C]' : 'text-white/40 active:text-white'}`}>
-              <span className="material-symbols-outlined text-[18px]">
-                {repeatMode === 'one' ? 'repeat_one' : 'repeat'}
-              </span>
-            </button>
-            
-            <button
-              onClick={() => { setPendingTrack(currentTrack); loadPlaylists(); setShowPlaylistMenu(true); }}
-              className="p-1 pl-2 border-l border-white/10 ml-1 text-white/50 active:text-[#D2EA7C] transition-colors"
-            >
-              <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 0" }}>playlist_add</span>
-            </button>
           </div>
+        </div>
+
+        {/* Progress bar */}
+        <div className="w-full relative h-3 flex items-center cursor-pointer" onClick={e => e.stopPropagation()}>
+          <div className="absolute left-0 right-0 h-0.5 bg-white/10 rounded-full pointer-events-none" />
+          <div className="absolute left-0 h-0.5 rounded-full bg-[#D2EA7C] pointer-events-none" style={{ width: `${pct}%` }} />
+          <input
+            type="range"
+            min="0"
+            max={duration || 100}
+            value={progress || 0}
+            onChange={(e) => seek(Number(e.target.value))}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer m-0 z-10 touch-none"
+          />
         </div>
       </div>
     </>

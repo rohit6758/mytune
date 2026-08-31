@@ -61,23 +61,71 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const playPromiseRef = useRef<Promise<void> | null>(null);
   const pendingTrackRef = useRef<string | null>(null);
 
-  // ── Set up the single <audio> element + Web Audio Graph ─────────
+  // ── Set up the single <audio> element ───────────────────────────
   useEffect(() => {
     const audio = new Audio();
     audio.setAttribute('playsinline', '');
     audio.preload = 'metadata';
     audioRef.current = audio;
 
-    // Keep the mobile audio context alive: a short silent <audio> ping every 20s
-    const keepAlive = setInterval(() => {
-      if (!audio.paused) return; // don't ping while actually playing
-      const ping = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2Y2LWal4u/Rs2U1LW+v7/nQsGk0LXm07/bLq201MH6z7/bFpmI0L4a07/K8nFc1M5C07+2xkU42N5q37+OjgU07Oqe37taUcko8Pq2339aJXk0/Q7iz3dmAUE5CRrW12teFSExFS7m33N+BTkxJUrm529iBTVFOU7i417eBTlVUWLe018iBTlpYXbe10suBTV5cX7e006iBTV9fYbe117eBTWBhY7e22r+BTWFiZbe22riCTWNjaLe22reBTWRkare22r+CTWZlaLe227iCTWdnaLe22r+CTWhoaLe227iCTWlpaLe227iCTWppaLe227iCTWtrabe227iCTWxsabe227iCTW1tabe227iCTW5uabe227iCTW9vabe227iCTW9wabe227iCTXBwabe227iCTXFxabe227iCTXJyabe227iCTXNzabe227iCTXN0abe227iCTXR0abe227iCTXV1abe227iCTXZ2abe227iCTXd3abe227iCTXh4abe227iCTXl5abe227iCTXp6abe227iCTXt7abe227iCTXx8abe227iCTX19abe227iCTX5+abe227iCTX9/abe227iCTYCAAbe227iCTYGBAbe227iCTYKCAbe227iCTYPDAbe227iCTYSEAbe227iCTYVFAbe227iCTYaGAbe227iCTYeHAbe227iCTYiIAbe227iCTYmJAbe227iCTYqKAbe227iCTYuLAbe227iCTYyMAbe227iCTY2NAbe227iCTY6OAbe227iCTY+PAbe227iCTZCQAbe227iCTZGRAbe227iCTZKSAbe227iCTZOTAbe227iCTZSUAbe227iCTZWVAbe227iCTZaWAbe227iCTZeXAbe227iCTZiYAbe227iCTZmZAbe227iCTZqaAbe227iCTZubAbe227iCTZycAbe227iCTZ2dAbe227iCTZ6eAbe227iCTZ+fAbe227iCTaCgAbe227iCTaGhAbe227iCTaKiAbe227iCTaOjAbe227iCTaSkAbe227iCTaWlAbe227iCTaamAbe227iCTaenAbe227iCTaooAbe227iCTampAbe227iCTaqpAbe227iCTaurAbe227iCTassAbe227iCTattAbe227iCTauuAbe227iCTavvAbe227iCTawwAbe227iCTaxxAbe227iCTayyAbe227iCTazzAbe227iCTa0'); 
-      ping.volume = 0.001;
-      ping.play().catch(() => {});
-    }, 20000);
+    // ── Screen Wake Lock: prevents OS from suspending audio when screen locks ──
+    let wakeLock: WakeLockSentinel | null = null;
+    const acquireWakeLock = async () => {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLock = await (navigator as any).wakeLock.request('screen');
+        }
+      } catch {}
+    };
+    acquireWakeLock();
+
+    // Re-acquire wake lock when page becomes visible again
+    const reacquire = () => { if (document.visibilityState === 'visible') acquireWakeLock(); };
+    document.addEventListener('visibilitychange', reacquire);
+
+    // ── Web Audio silent oscillator: keeps audio context alive in background ──
+    // A gain of 0.00001 is completely inaudible but counts as "active audio"
+    let audioCtx: AudioContext | null = null;
+    let silentOscillator: OscillatorNode | null = null;
+
+    const startSilentAudio = () => {
+      try {
+        if (audioCtx) return; // already running
+        audioCtx = new AudioContext();
+        const gainNode = audioCtx.createGain();
+        gainNode.gain.value = 0.00001; // completely inaudible
+        silentOscillator = audioCtx.createOscillator();
+        silentOscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        silentOscillator.start();
+      } catch {}
+    };
+
+    // Start on first user interaction (required by browsers)
+    const onInteraction = () => {
+      startSilentAudio();
+      document.removeEventListener('touchstart', onInteraction);
+      document.removeEventListener('click', onInteraction);
+    };
+    document.addEventListener('touchstart', onInteraction, { passive: true });
+    document.addEventListener('click', onInteraction);
+
+    // Re-resume AudioContext when page comes back (iOS kills it on background)
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && audioCtx?.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
-      clearInterval(keepAlive);
+      wakeLock?.release().catch(() => {});
+      document.removeEventListener('visibilitychange', reacquire);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      document.removeEventListener('touchstart', onInteraction);
+      document.removeEventListener('click', onInteraction);
+      silentOscillator?.stop();
+      audioCtx?.close().catch(() => {});
       audio.pause();
     };
   }, []);

@@ -91,7 +91,7 @@ export default function Discover() {
           }
         }
       });
-    }, { threshold: 0.65, rootMargin: '0px' });
+    }, { threshold: 0.85, rootMargin: '0px' });
 
     Array.from(container.children).forEach(child => observer.observe(child));
     return () => observer.disconnect();

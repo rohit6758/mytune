@@ -7,7 +7,7 @@ import { supabase } from '../lib/supabase';
 declare global { interface Window { _mytuneAudio?: HTMLAudioElement; } }
 
 export default function GlobalPlayer() {
-  const { currentTrack, isPlaying, progress, duration, toggle, next, prev, seek, isShuffle, toggleShuffle, repeatMode, toggleRepeatMode } = usePlayer();
+  const { currentTrack, isPlaying, progress, duration, toggle, next, prev, seek, isShuffle, toggleShuffle, repeatMode, toggleRepeatMode, lyrics, lyricsLoading } = usePlayer();
   const [showPlaylistMenu, setShowPlaylistMenu] = useState(false);
   const [pendingTrack, setPendingTrack] = useState<Track | null>(null);
   const [userPlaylists, setUserPlaylists] = useState<any[]>([]);
@@ -272,15 +272,23 @@ export default function GlobalPlayer() {
             >
               <div className="px-4 pt-3 pb-2 flex items-center gap-2 border-b border-white/5">
                 <span className="material-symbols-outlined text-[#D2EA7C] text-base" style={{ fontVariationSettings: "'FILL' 1" }}>lyrics</span>
-                <span className="text-white/70 text-xs font-bold uppercase tracking-widest">Lyrics Preview</span>
+                <span className="text-white/70 text-xs font-bold uppercase tracking-widest">Lyrics</span>
+                {lyricsLoading && (
+                  <div className="w-3 h-3 border-2 border-[#D2EA7C] border-t-transparent rounded-full animate-spin ml-auto" />
+                )}
               </div>
               <div className="flex-1 overflow-y-auto inner-scroll px-4 py-3">
-                {currentTrack.lyrics ? (
-                  <p className="text-white/80 text-sm leading-7 font-medium whitespace-pre-wrap">{currentTrack.lyrics}</p>
+                {lyricsLoading ? (
+                  <div className="h-full flex flex-col items-center justify-center gap-2 py-4">
+                    <div className="w-6 h-6 border-2 border-[#D2EA7C] border-t-transparent rounded-full animate-spin" />
+                    <p className="text-white/30 text-xs font-semibold">Fetching lyrics…</p>
+                  </div>
+                ) : lyrics ? (
+                  <p className="text-white/85 text-sm leading-7 font-medium whitespace-pre-wrap">{lyrics}</p>
                 ) : (
                   <div className="h-full flex flex-col items-center justify-center gap-2 py-4">
                     <span className="material-symbols-outlined text-white/10 text-5xl" style={{ fontVariationSettings: "'FILL' 1" }}>lyrics</span>
-                    <p className="text-white/25 text-sm font-semibold text-center">No lyrics available for this track</p>
+                    <p className="text-white/25 text-sm font-semibold text-center">No lyrics found for this track</p>
                   </div>
                 )}
               </div>

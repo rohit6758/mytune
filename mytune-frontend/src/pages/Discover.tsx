@@ -267,7 +267,12 @@ export default function Discover() {
                     onClick={async () => {
                       try {
                         const { getCachedAudioUrl } = await import('../lib/offlineCache');
-                        const offlineUrl = await getCachedAudioUrl(track.id, track.preview_url);
+                        const offlineUrl = await getCachedAudioUrl({
+                          id: track.id,
+                          title: track.title,
+                          artist: track.artist,
+                          preview_url: track.preview_url,
+                        });
                         const a = document.createElement('a');
                         a.href = offlineUrl;
                         a.download = `${track.title} - ${track.artist}.mp3`;

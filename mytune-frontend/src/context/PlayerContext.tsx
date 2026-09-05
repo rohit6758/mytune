@@ -208,9 +208,23 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     // If a newer track was requested while we awaited, bail out
     if (pendingTrackRef.current !== track.id) return;
 
-    // Fetch offline/cached URL
-    const offlineUrl = await getCachedAudioUrl(track.id, track.preview_url);
+    // Fetch offline/cached URL (or the new Innertube URL)
+    const offlineUrl = await getCachedAudioUrl(track);
     if (pendingTrackRef.current !== track.id) return;
+    
+    // Trigger Native Foreground Service if running on Android/Capacitor
+    // Dynamic import to avoid top-level issues since we are patching
+    import('@capacitor/core').then(({ Capacitor }) => {
+        if (Capacitor.isNativePlatform()) {
+            import('../lib/BackgroundAudio').then(({ BackgroundAudio }) => {
+                BackgroundAudio.play({
+                    url: offlineUrl,
+                    title: track.title,
+                    artist: track.artist
+                }).catch(console.error);
+            });
+        }
+    });
 
     // Zero volume BEFORE src swap — eliminates the click/tick
     audio.volume = 0;
@@ -242,7 +256,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     const audio = audioRef.current;
     if (!audio) return;
     audio.pause();
-    const offlineUrl = await getCachedAudioUrl(track.id, track.preview_url);
+    const offlineUrl = await getCachedAudioUrl(track);
     audio.src = offlineUrl;
     audio.volume = 1;
   }, []);
@@ -337,7 +351,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     // Access queue from ref below
     setQueue(currentQueue => {
       setQueueIndex(currentIdx => {
-        const ni = currentIdx < currentQueue.length - 1 ? currentIdx + 1 : 0;
+        let ni;
+        if (repeatMode === 'off' && currentIdx >= currentQueue.length - 1) {
+            // End of queue and repeat is off: stop playback, don't loop to 0 (prevents trick songs)
+            setTimeout(() => pause(), 0);
+            return currentIdx;
+        } else {
+            ni = currentIdx < currentQueue.length - 1 ? currentIdx + 1 : 0;
+        }
         const track = currentQueue[ni];
         setCurrentTrack(track);
         loadAndPlay(track);
@@ -345,7 +366,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       });
       return currentQueue;
     });
-  }, [loadAndPlay]);
+  }, [loadAndPlay, repeatMode, pause]);
 
   useEffect(() => { nextRef.current = next; }, [next]);
 
